@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 
-sudo cp /etc/greetd/config.toml ./greetd/
-sudo cp /etc/issue ./issue
-sudo cp /usr/local/bin/start-greeter.sh ./start-greeter.sh
+sudo cp /etc/greetd/config.toml ./etc/greetd/config.toml
+sudo cp /etc/issue ./etc/issue
+sudo cp /usr/local/bin/start-greeter.sh ./usr/local/bin/start-greeter.sh
 
 cp ~/.zshrc ./.zshrc
 cp -r ~/.config/hypr/* ./hypr/
