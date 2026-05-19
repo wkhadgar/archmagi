@@ -1,0 +1,49 @@
+# NERV / MAGI BOOT SELECTOR
+# Drop in at /usr/share/grub/themes/nerv/ and run `magi grub`.
+# The static chrome (banner, footer, warning) is baked into background.png;
+# theme.txt only positions the dynamic boot_menu and progress_bar.
+# Regenerate background.png with the magick command in the repo's CLAUDE.md
+# if you tweak the colors/text.
+
+desktop-image:      "background.png"
+title-text:         ""
+message-color:      "#666666"
+message-bg-color:   "#0a0a0a"
+terminal-font:      "Unicode Regular 16"
+terminal-left:      "5%"
+terminal-top:       "5%"
+terminal-width:     "90%"
+terminal-height:    "90%"
+
+# ── Boot menu (centered, sized to leave room for chrome) ──
++ boot_menu {
+    top                  = 35%
+    left                 = 25%
+    width                = 50%
+    height               = 30%
+    item_color           = "#eeeeee"
+    item_font            = "Unicode Regular 16"
+    selected_item_color  = "#ffbf00"
+    selected_item_font   = "Unicode Regular 16"
+    item_height          = 28
+    item_padding         = 4
+    item_spacing         = 4
+    item_icon_space      = 0
+    icon_height          = 0
+    icon_width           = 0
+    scrollbar            = false
+}
+
+# ── Countdown ────────────────────────────────────────────
++ progress_bar {
+    id              = "__timeout__"
+    bottom          = 30
+    left            = 30%
+    width           = 40%
+    height          = 18
+    font            = "Unicode Regular 16"
+    text_color      = "#888888"
+    text            = "Booting in %d seconds..."
+    bar_style       = ""
+    highlight_style = ""
+}

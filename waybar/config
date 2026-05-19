@@ -17,7 +17,7 @@
   },
 
   "custom/updates" : {
-    "exec": "~/.config/waybar/scripts/check_updates.sh -j",
+    "exec": "~/.local/bin/magi check -j",
     "return-type": "json",
     "format": "{icon} {alt}",
     "format-icons": [
@@ -43,7 +43,7 @@
       "<span color='#b71c1c'>󰚰</span>"  // 20. Bordô (Situação Crítica)
     ],
     "interval": 3600,
-    "on-click": "kitty -e ~/.config/waybar/scripts/update_system.sh; ~/.config/hypr/scripts/refresh_waybar.sh",
+    "on-click": "kitty -e ~/.local/bin/magi update; ~/.local/bin/magi waybar",
     "hide-empty-text": true,
   },
 
@@ -168,24 +168,24 @@
   "custom/lock": {
     "format": "󰍁",
     "tooltip": false,
-    "on-click": "hyprlock"
+    "on-click": "~/.local/bin/magi lock"
   },
 
   "custom/reboot": {
     "format": "󰜉",
     "tooltip": false,
-    "on-click": "~/.config/waybar/scripts/confirm_action.sh 'REBOOT' && reboot"
+    "on-click": "~/.local/bin/magi reboot"
   },
 
   "custom/exit": {
     "format": "󰗼",
     "tooltip": false,
-    "on-click": "~/.config/waybar/scripts/confirm_action.sh 'EXIT' && hyprctl dispatch exit"
+    "on-click": "~/.local/bin/magi exit"
   },
 
   "custom/power": {
     "format": " ",
     "tooltip": false,
-    "on-click": "~/.config/waybar/scripts/confirm_action.sh 'SHUTDOWN' && shutdown now"
+    "on-click": "~/.local/bin/magi shutdown"
   },
 }

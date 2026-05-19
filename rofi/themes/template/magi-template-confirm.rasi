@@ -15,12 +15,12 @@ configuration {
 
 window {
     location:           north;
-    y-offset:           calc(50% - 176px);
+    y-offset:           calc(50% - 200px);
     border-radius:      0px;
     border:             1px;
     border-color:       @bg4;
-    width:              280;
-    height:             220;
+    width:              380;
+    height:             300;
     background-color:   @bg0;
 }
 
@@ -51,7 +51,7 @@ listview {
     margin:             8px 0 0;
     columns:            1;
     lines:              2;
-    fixed-height:       false;
+    fixed-height:       true;
     scrollbar:          false;
     spacing:            4px;
 }
