@@ -50,6 +50,9 @@ source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#660000"
 
+# path update
+export PATH="$HOME/.local/bin:$PATH"
+
 # aliases
 alias grep='grep --color=auto'
 alias cls=clear
@@ -61,6 +64,9 @@ alias mconf='west build -t menuconfig'
 bindkey "^[[H"  beginning-of-line
 bindkey "^[[F"  end-of-line
 bindkey "^[[3~" delete-char
+
+# direnv hook
+eval "$(direnv hook zsh)"
 
 # atuin — MUST BE LAST
 eval "$(atuin init zsh)"
