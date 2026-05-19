@@ -12,7 +12,7 @@ _magi_load() { source "$MAGI_LIB/$1.sh"; }
 
 cmd="${1:-help}"; shift || true
 case "$cmd" in
-    status|tailnet|update|confirm|restart|install|cheatsheet|tmux)
+    status|tailnet|update|confirm|restart|install|cheatsheet|tmux|profile)
         _magi_load "$cmd"; "cmd_$cmd" "$@" ;;
     lock|reboot|exit|shutdown)
         _magi_load power; "cmd_$cmd" "$@" ;;

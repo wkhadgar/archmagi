@@ -28,6 +28,7 @@
 #custom-htop,
 #cpu,
 #memory,
+#battery,
 #clock,
 #custom-power,
 #custom-lock,
@@ -145,4 +146,29 @@
 
 #bluetooth.connected {
     border-color: #ffbf00;
+}
+
+#battery {
+    border-color: @bar_border;
+    color: @bar_foreground;
+}
+
+#battery.charging {
+    border-color: #ffbf00;
+    color: #ffbf00;
+}
+
+#battery.warning {
+    border-color: #ff9800;
+    color: #ff9800;
+}
+
+#battery.critical {
+    border-color: @nerv_red;
+    color: @nerv_red;
+}
+
+#battery.full {
+    border-color: #ffbf00;
+    color: @bar_foreground;
 }

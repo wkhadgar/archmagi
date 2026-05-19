@@ -5,7 +5,7 @@
 
   "modules-left": ["custom/nerv", "mpris", ],
   "modules-center": ["hyprland/workspaces",],
-  "modules-right": ["tray", "custom/div", "wireplumber", "network", "bluetooth", "clock", "custom/updates", "group/group-power",],
+  "modules-right": ["tray", "custom/div", "wireplumber", "network", "bluetooth", "battery", "clock", "custom/updates", "group/group-power",],
 
   "custom/nerv": {
     "format": " NERV ",
@@ -113,6 +113,20 @@
     "on-click": "kitty pulsemixer",
     "max-volume": 100,
     "scroll-step": 5
+  },
+
+  "battery": {
+    "interval": 30,
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-full": "󰁹 {capacity}%",
+    "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+    "tooltip-format": "{timeTo} — {power:.1f}W",
+    "on-click": "~/.local/bin/magi profile",
   },
 
   "clock": {

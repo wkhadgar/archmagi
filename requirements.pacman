@@ -58,8 +58,10 @@ pavucontrol
 pipewire-alsa
 pipewire-libcamera
 pipewire-pulse
+power-profiles-daemon
 ppp
 pulsemixer
+python-gobject
 python-pywal
 python312
 qemu-system-arm

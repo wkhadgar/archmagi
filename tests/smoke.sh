@@ -53,6 +53,7 @@ declare -A expected=(
     [install]="cmd_install _install_boot _boot_grub _boot_limine"
     [cheatsheet]="cmd_cheatsheet"
     [tmux]="cmd_tmux _tmux_attach"
+    [profile]="cmd_profile _profile_pick _profile_center"
     [help]="cmd_help"
 )
 
