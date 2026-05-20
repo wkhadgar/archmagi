@@ -101,6 +101,11 @@ cmd_update() {
 cmd_confirm() {
     local msg="${1:?usage: magi confirm <MESSAGE>}"
 
+    if [[ -z "$WAYLAND_DISPLAY" && -z "$DISPLAY" ]]; then
+        echo "magi confirm: no display (WAYLAND_DISPLAY/DISPLAY unset) — refusing to invoke rofi" >&2
+        return 1
+    fi
+
     local self
     self=$(uname -n)
     self=${self%%.*}      # strip domain if FQDN (e.g. melchior-1.tailnet.foo)
@@ -142,9 +147,22 @@ cmd_lock() {
     pidof hyprlock >/dev/null || hyprlock
 }
 
-cmd_reboot()   { cmd_confirm REBOOT   && reboot; }
-cmd_exit()     { cmd_confirm EXIT     && hyprctl dispatch exit; }
-cmd_shutdown() { cmd_confirm SHUTDOWN && shutdown now; }
+# Graceful exit chain: hyprshutdown closes apps cleanly via Hyprland IPC; once
+# it returns, the optional system command runs. The whole chain is nohup'd
+# and disowned so it survives Hyprland tearing down its own session.
+_graceful_close() {
+    if ! command -v hyprshutdown >/dev/null; then
+        echo "hyprshutdown not installed — run: sudo pacman -S hyprshutdown" >&2
+        return 1
+    fi
+    local then_cmd="${1:-true}"
+    nohup bash -c "hyprshutdown && $then_cmd" >/dev/null 2>&1 &
+    disown
+}
+
+cmd_reboot()   { cmd_confirm REBOOT   && _graceful_close "systemctl reboot";   }
+cmd_exit()     { cmd_confirm EXIT     && _graceful_close; }
+cmd_shutdown() { cmd_confirm SHUTDOWN && _graceful_close "systemctl poweroff"; }
 
 cmd_waybar() {
     killall waybar 2>/dev/null
