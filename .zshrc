@@ -1,3 +1,6 @@
+# greeter
+[[ $SHLVL -eq 1 ]] && fastfetch
+
 # vcs
 autoload -Uz vcs_info
 zstyle ':vcs_info:git:*' enable git
