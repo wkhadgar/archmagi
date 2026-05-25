@@ -178,10 +178,22 @@ cmd_xdph() {
     setsid /usr/lib/xdg-desktop-portal >/dev/null 2>&1 < /dev/null &
 }
 
-cmd_grub() {
+cmd_boot() {
+    # Detect installed bootloader and dispatch. GRUB wins ties since it's more common.
+    if [[ -f /etc/default/grub ]] && command -v grub-mkconfig >/dev/null; then
+        _boot_grub
+    elif [[ -f /boot/limine.conf || -f /boot/limine.cfg || -f /etc/limine.conf ]]; then
+        _boot_limine
+    else
+        echo "no supported bootloader detected (need grub or limine)" >&2
+        return 1
+    fi
+}
+
+_boot_grub() {
     local theme=/usr/share/grub/themes/nerv/theme.txt
     local config=/etc/default/grub
-    [[ -f $theme ]] || { echo "theme missing at $theme — run import_dotfiles.sh first" >&2; exit 1; }
+    [[ -f $theme ]] || { echo "theme missing at $theme — run import_dotfiles.sh first" >&2; return 1; }
 
     if sudo grep -q '^GRUB_THEME=' "$config"; then
         sudo sed -i "s|^GRUB_THEME=.*|GRUB_THEME=\"$theme\"|" "$config"
@@ -199,7 +211,49 @@ cmd_grub() {
     fi
 
     sudo grub-mkconfig -o /boot/grub/grub.cfg
-    echo "MAGI BOOT theme installed — reboot to see it."
+    echo "MAGI BOOT theme installed (grub) — reboot to see it."
+}
+
+_boot_limine() {
+    local config
+    for candidate in /boot/limine.conf /boot/limine.cfg /etc/limine.conf; do
+        [[ -f "$candidate" ]] && { config="$candidate"; break; }
+    done
+    [[ -n "$config" ]] || {
+        echo "limine config not found" >&2; return 1
+    }
+
+    local src=/usr/share/nerv/boot-background.png
+    [[ -f "$src" ]] || {
+        echo "wallpaper missing at $src — run import_dotfiles.sh first" >&2; return 1
+    }
+
+    local staged=/boot/nerv-bg.png
+    sudo cp "$src" "$staged"
+
+    local block
+    block=$(cat <<EOF
+# >>> magi boot — NERV theme (do not edit between these markers)
+wallpaper: boot():/nerv-bg.png
+term_background: 0a0a0a
+term_foreground: eeeeee
+term_palette: 1a1919;cc0000;7bd88f;ffbf00;948ae3;fc618d;5ad4e6;f7f1ff
+term_background_brightness: 0.5
+interface_branding: MAGI SYSTEM // NERV HQ
+# <<< magi boot
+EOF
+)
+    local tmp
+    tmp=$(mktemp)
+    sudo sed '/^# >>> magi boot/,/^# <<< magi boot/d' "$config" \
+        | awk -v b="$block" '
+            !done && /^\// { print b; done = 1 }
+            { print }
+            END { if (!done) print b }
+        ' > "$tmp"
+    sudo cp "$tmp" "$config"
+    rm -f "$tmp"
+    echo "MAGI BOOT theme installed (limine: $config) — reboot to see it."
 }
 
 cmd_status() {

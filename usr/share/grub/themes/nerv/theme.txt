@@ -1,11 +1,12 @@
 # NERV / MAGI BOOT SELECTOR
-# Drop in at /usr/share/grub/themes/nerv/ and run `magi grub`.
-# The static chrome (banner, footer, warning) is baked into background.png;
-# theme.txt only positions the dynamic boot_menu and progress_bar.
-# Regenerate background.png with the magick command in the repo's CLAUDE.md
-# if you tweak the colors/text.
+# Drop in at /usr/share/grub/themes/nerv/ and run `magi boot`.
+# The static chrome (banner, footer, warning) is baked into the wallpaper at
+# /usr/share/nerv/boot-background.png; theme.txt only positions the dynamic
+# boot_menu and progress_bar. To regenerate the wallpaper (e.g. at a different
+# screen resolution, or after editing the chrome), run:
+#   /usr/share/nerv/regenerate-bg.sh [WIDTHxHEIGHT]
 
-desktop-image:      "background.png"
+desktop-image:      "/usr/share/nerv/boot-background.png"
 title-text:         ""
 message-color:      "#666666"
 message-bg-color:   "#0a0a0a"
