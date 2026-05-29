@@ -11,6 +11,7 @@ cp -r ./waybar/* ~/.config/waybar/
 cp -r ./rofi/* ~/.config/rofi/
 cp -r ./nvim/* ~/.config/nvim/
 cp -r ./kitty/* ~/.config/kitty/
+mkdir -p ~/.config/tmux && cp -r ./tmux/* ~/.config/tmux/
 cp -r ./fastfetch/* ~/.config/fastfetch/
 cp -r ./btop/* ~/.config/btop/
 cp -r ./swaync/* ~/.config/swaync/

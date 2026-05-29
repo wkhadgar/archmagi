@@ -66,6 +66,8 @@ alias mconf='west build -t menuconfig'
 # keybinds
 bindkey "^[[H"  beginning-of-line
 bindkey "^[[F"  end-of-line
+bindkey "^[[1~" beginning-of-line   # Home under tmux-256color
+bindkey "^[[4~" end-of-line         # End under tmux-256color
 bindkey "^[[3~" delete-char
 
 # direnv hook

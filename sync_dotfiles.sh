@@ -10,6 +10,7 @@ cp -r ~/.config/waybar/* ./waybar/
 cp -r ~/.config/rofi/* ./rofi/
 cp -r ~/.config/nvim/* ./nvim/
 cp -r ~/.config/kitty/* ./kitty/
+cp -r ~/.config/tmux/* ./tmux/
 cp -r ~/.config/fastfetch/* ./fastfetch/
 cp -r ~/.config/btop/* ./btop/
 cp -r ~/.config/swaync/* ./swaync/
