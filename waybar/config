@@ -17,7 +17,7 @@
   },
 
   "custom/updates" : {
-    "exec": "~/.local/bin/magi check -j",
+    "exec": "~/.local/bin/magi update check -j",
     "return-type": "json",
     "format": "{icon} {alt}",
     "format-icons": [
@@ -43,7 +43,7 @@
       "<span color='#b71c1c'>󰚰</span>"  // 20. Bordô (Situação Crítica)
     ],
     "interval": 3600,
-    "on-click": "kitty -e ~/.local/bin/magi update; ~/.local/bin/magi waybar",
+    "on-click": "kitty -e ~/.local/bin/magi update; ~/.local/bin/magi restart waybar",
     "hide-empty-text": true,
   },
 

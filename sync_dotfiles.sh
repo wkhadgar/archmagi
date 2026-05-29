@@ -15,4 +15,5 @@ cp -r ~/.config/fastfetch/* ./fastfetch/
 cp -r ~/.config/btop/* ./btop/
 cp -r ~/.config/swaync/* ./swaync/
 cp ~/.local/bin/magi ./bin/magi
+mkdir -p ./bin/magi.d && cp -r ~/.local/bin/magi.d/. ./bin/magi.d/
 cp ~/wallpapers/nerv-wallpaper.png ./wallpapers/
