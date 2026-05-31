@@ -5,7 +5,7 @@ cmd_help() {
 ${BOLD}${RED}MAGI SYSTEM${RESET} ${MUTED}// COMMAND INTERFACE${RESET}
 
   ${AMBER}fetch${RESET}                        overview (host, tailnet, updates, system, compute, power)
-  ${AMBER}hud${RESET}                          toggle floating live status panel (Super+F)
+  ${AMBER}hud${RESET}                          toggle floating live ${AMBER}fetch${RESET} panel (Super+F)
   ${AMBER}cheatsheet${RESET}                   rofi popup of all Hyprland keybindings
   ${AMBER}tmux${RESET} <${MUTED}sub${RESET}>                   tmux session control:
     ${AMBER}attach${RESET} [${MUTED}session${RESET}]            attach (or create) a session (default MAGI)
