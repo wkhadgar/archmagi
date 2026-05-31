@@ -18,7 +18,7 @@ _install_boot() {
 _boot_grub() {
     local theme=/usr/share/grub/themes/nerv/theme.txt
     local config=/etc/default/grub
-    [[ -f $theme ]] || { echo "theme missing at $theme — run import_dotfiles.sh first" >&2; return 1; }
+    [[ -f $theme ]] || { echo "theme missing at $theme — run archmagi install bootstrap first" >&2; return 1; }
 
     local changed=0
 
@@ -61,7 +61,7 @@ _boot_limine() {
     [[ -n "$config" ]] || { echo "limine config not found" >&2; return 1; }
 
     local src=/usr/share/nerv/boot-background.png
-    [[ -f "$src" ]] || { echo "wallpaper missing at $src — run import_dotfiles.sh first" >&2; return 1; }
+    [[ -f "$src" ]] || { echo "wallpaper missing at $src — run archmagi install bootstrap first" >&2; return 1; }
 
     local staged=/boot/nerv-bg.png
     sudo cp "$src" "$staged"

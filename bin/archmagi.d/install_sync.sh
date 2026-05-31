@@ -63,7 +63,7 @@ _install_sync_tree() {
     done < <(find "$live_root" -type f 2>/dev/null)
 }
 
-# Walk every live → repo pair sync_dotfiles.sh used to handle, prompting per file.
+# Walk every live → repo pair, prompting per drifted file.
 _install_sync() {
     local repo
     repo=$(_install_find_repo) || return 1

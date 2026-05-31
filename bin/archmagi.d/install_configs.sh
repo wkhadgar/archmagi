@@ -1,9 +1,8 @@
 # Generic config deployment for `archmagi install bootstrap`.
 
 # Copy every shipped config from the repo into its live destination.
-# Mirrors the body of the legacy import_dotfiles.sh, minus the host-specific
-# files (which the template phase writes). Cleans up any .tmpl files that
-# leaked into destinations.
+# Host-specific files are handled by the template phase instead.
+# Cleans up any .tmpl files that leaked into destinations.
 # @param 1 absolute path to the archmagi repo root
 _install_configs() {
     local repo=$1

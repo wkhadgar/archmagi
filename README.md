@@ -22,13 +22,12 @@ sudo pacman -S --needed - < requirements.pacman
 
 ## Install
 
-Each MAGI machine has its own branch (`melchior-1`, `casper-3`, `balthasar-2`) carrying host-specific tweaks (monitors, hostname, fastfetch footer, etc.). Check out the matching branch first, or stay on `main` for a fresh host.
+`archmagi install bootstrap` is the canonical deploy path. It detects host facts (laptop vs. desktop, GRUB vs. limine, attached monitors), prompts for hostname + profile role, persists them to `/etc/archmagi/profile`, then deploys generic configs, substitutes host-specific templates, installs packages, and applies the boot theme.
 
 ```bash
 git clone https://github.com/wkhadgar/dotfiles
 cd dotfiles
-git checkout <hostname>          # e.g. melchior-1 — or skip for main
-source ./import_dotfiles.sh
+./bin/archmagi install bootstrap
 chsh -s $(which zsh)
 ```
 
@@ -77,9 +76,11 @@ Bypass for a single commit with `git commit --no-verify`.
 
 ## Sync back (if anything changed)
 
+`archmagi install sync` walks the live → repo file map, shows a unified diff per drift, and prompts `[y/N/q]` per file. Templated files (`etc/hostname`, `etc/hosts`, `hypr/hyprlock.conf`, `hypr/hyprland/monit.conf`, and any `*.tmpl`) are skipped — those flow the other direction.
+
 ```bash
 cd dotfiles
-source ./sync_dotfiles.sh
+archmagi install sync
 
 git add .
 git commit -m "Your changes message"
