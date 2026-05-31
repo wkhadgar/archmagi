@@ -33,7 +33,7 @@ window {
 mainbox {
     padding:            12px;
     orientation:        vertical;
-    children:           [ message, listview, textbox-footer ];
+    children:           [ message, listview , textbox-footer];
 }
 
 message {
@@ -80,12 +80,17 @@ element selected normal {
     text-color:         @bg3;
 }
 
+element selected active {
+    background-color:   transparent;
+    border-color:       @bg4;
+    text-color:         @bg4;
+}
+
 element-text {
     horizontal-align:   0.5;
     text-color:         inherit;
     padding:            3px 0px;
     vertical-align:     0.5;
-    font:               "JetBrainsMono Nerd Font Mono 12";
 }
 
 textbox-footer {

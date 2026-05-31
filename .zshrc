@@ -1,5 +1,8 @@
+# path (needs to come before the greeter so archmagi resolves)
+export PATH="$HOME/.local/bin:$PATH"
+
 # greeter
-[[ $SHLVL -eq 1 ]] && fastfetch
+[[ $SHLVL -eq 1 ]] && archmagi fetch
 
 # vcs
 autoload -Uz vcs_info
@@ -52,9 +55,6 @@ source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zs
 source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#660000"
-
-# path update
-export PATH="$HOME/.local/bin:$PATH"
 
 # aliases
 alias grep='grep --color=auto'

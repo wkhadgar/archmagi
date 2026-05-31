@@ -1,24 +1,25 @@
 #!/usr/bin/bash
+# Resolve script dir so this works whether sourced or executed, from any cwd.
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 
-sudo cp -r ./etc/* /etc/
-sudo cp -r ./usr/* /usr/
+sudo cp -r "$HERE"/etc/* /etc/
+sudo cp -r "$HERE"/usr/* /usr/
 sudo chmod +x /usr/local/bin/start-greeter.sh
 
-mkdir -p ~/.config/{hypr,waybar,rofi,nvim,kitty,tmux,fastfetch,btop,swaync}
+mkdir -p ~/.config/{hypr,waybar,rofi,nvim,kitty,tmux,btop,swaync}
 
-cp ./.zshrc ~/.zshrc
-cp -r ./hypr/* ~/.config/hypr/
-cp -r ./waybar/* ~/.config/waybar/
-cp -r ./rofi/* ~/.config/rofi/
-cp -r ./nvim/* ~/.config/nvim/
-cp -r ./kitty/* ~/.config/kitty/
-cp -r ./tmux/* ~/.config/tmux/
-cp -r ./fastfetch/* ~/.config/fastfetch/
-cp -r ./btop/* ~/.config/btop/
-cp -r ./swaync/* ~/.config/swaync/
+cp "$HERE/.zshrc" ~/.zshrc
+cp -r "$HERE"/hypr/* ~/.config/hypr/
+cp -r "$HERE"/waybar/* ~/.config/waybar/
+cp -r "$HERE"/rofi/* ~/.config/rofi/
+cp -r "$HERE"/nvim/* ~/.config/nvim/
+cp -r "$HERE"/kitty/* ~/.config/kitty/
+cp -r "$HERE"/tmux/* ~/.config/tmux/
+cp -r "$HERE"/btop/* ~/.config/btop/
+cp -r "$HERE"/swaync/* ~/.config/swaync/
 
-mkdir -p ~/.local/bin/magi.d
-cp ./bin/magi ~/.local/bin/magi
-cp -r ./bin/magi.d/. ~/.local/bin/magi.d/
-mkdir -p ~/wallpapers && cp ./wallpapers/nerv-wallpaper.png ~/wallpapers/
+mkdir -p ~/.local/bin/archmagi.d
+cp "$HERE/bin/archmagi" ~/.local/bin/archmagi
+cp -r "$HERE"/bin/archmagi.d/. ~/.local/bin/archmagi.d/
+mkdir -p ~/wallpapers && cp "$HERE/wallpapers/nerv-wallpaper.png" ~/wallpapers/
 mkdir -p ~/images/screenshots

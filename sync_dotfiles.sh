@@ -1,19 +1,20 @@
 #!/usr/bin/bash
+# Resolve script dir so this works whether sourced or executed, from any cwd.
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 
-sudo cp /etc/greetd/config.toml ./etc/greetd/config.toml
-sudo cp /etc/issue ./etc/issue
-sudo cp /usr/local/bin/start-greeter.sh ./usr/local/bin/start-greeter.sh
+sudo cp /etc/greetd/config.toml "$HERE/etc/greetd/config.toml"
+sudo cp /etc/issue "$HERE/etc/issue"
+sudo cp /usr/local/bin/start-greeter.sh "$HERE/usr/local/bin/start-greeter.sh"
 
-cp ~/.zshrc ./.zshrc
-cp -r ~/.config/hypr/* ./hypr/
-cp -r ~/.config/waybar/* ./waybar/
-cp -r ~/.config/rofi/* ./rofi/
-cp -r ~/.config/nvim/* ./nvim/
-cp -r ~/.config/kitty/* ./kitty/
-cp -r ~/.config/tmux/* ./tmux/
-cp -r ~/.config/fastfetch/* ./fastfetch/
-cp -r ~/.config/btop/* ./btop/
-cp -r ~/.config/swaync/* ./swaync/
-cp ~/.local/bin/magi ./bin/magi
-mkdir -p ./bin/magi.d && cp -r ~/.local/bin/magi.d/. ./bin/magi.d/
-cp ~/wallpapers/nerv-wallpaper.png ./wallpapers/
+cp ~/.zshrc "$HERE/.zshrc"
+cp -r ~/.config/hypr/* "$HERE/hypr/"
+cp -r ~/.config/waybar/* "$HERE/waybar/"
+cp -r ~/.config/rofi/* "$HERE/rofi/"
+cp -r ~/.config/nvim/* "$HERE/nvim/"
+cp -r ~/.config/kitty/* "$HERE/kitty/"
+cp -r ~/.config/tmux/* "$HERE/tmux/"
+cp -r ~/.config/btop/* "$HERE/btop/"
+cp -r ~/.config/swaync/* "$HERE/swaync/"
+cp ~/.local/bin/archmagi "$HERE/bin/archmagi"
+mkdir -p "$HERE/bin/archmagi.d" && cp -r ~/.local/bin/archmagi.d/. "$HERE/bin/archmagi.d/"
+cp ~/wallpapers/nerv-wallpaper.png "$HERE/wallpapers/"

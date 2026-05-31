@@ -1,4 +1,4 @@
-# magi confirm — rofi 3-node consensus dialog. User vote alone gates the action;
+# archmagi confirm — rofi 3-node consensus dialog. User vote alone gates the action;
 # the other two MAGI always vote YES (theater). Do NOT randomize.
 
 cmd_confirm() {

@@ -1,4 +1,4 @@
-# magi tailnet — uppercased "<HOST> [STATE]" line for hyprlock cmd labels.
+# archmagi tailnet — uppercased "<HOST> [STATE]" line for hyprlock cmd labels.
 
 cmd_tailnet() {
     local host="${1:?usage: magi tailnet <hostname>}"

@@ -1,4 +1,4 @@
-# magi update — interactive paru -Syu (run) + waybar update count (check).
+# archmagi update — interactive paru -Syu (run) + waybar update count (check).
 # Subcommands: run (default), check [-j]
 
 cmd_update() {
@@ -95,6 +95,7 @@ _update_run() {
             paru -Syu --noconfirm || rc=$?
             echo
             if ((rc == 0)); then
+                rm -f "$(_pending_counts_cache)" 2>/dev/null
                 printf "  %s ${BOLD}SYNC COMPLETE${RESET} — ${GREEN}PATTERN GREEN${RESET}\n\n" "$bar"
                 notif="MAGI PROTOCOLS UPDATED"
             else

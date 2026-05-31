@@ -1,10 +1,10 @@
-# magi lock/reboot/exit/shutdown — power actions. The latter three each open
+# archmagi lock/reboot/exit/shutdown — power actions. The latter three each open
 # the consensus confirm dialog, then route through _graceful_close which calls
 # hyprshutdown (clean IPC-driven app close) followed by an optional systemctl
 # command. The chain is nohup'd + disowned so Hyprland tearing down doesn't
 # kill it before systemctl runs.
 
-source "$MAGI_LIB/confirm.sh"
+source "$ARCHMAGI_LIB/confirm.sh"
 
 cmd_lock() {
     pidof hyprlock >/dev/null || hyprlock

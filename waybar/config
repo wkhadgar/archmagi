@@ -17,7 +17,7 @@
   },
 
   "custom/updates" : {
-    "exec": "~/.local/bin/magi update check -j",
+    "exec": "~/.local/bin/archmagi update check -j",
     "return-type": "json",
     "format": "{icon} {alt}",
     "format-icons": [
@@ -43,7 +43,7 @@
       "<span color='#b71c1c'>󰚰</span>"  // 20. Bordô (Situação Crítica)
     ],
     "interval": 3600,
-    "on-click": "kitty -e ~/.local/bin/magi update; ~/.local/bin/magi restart waybar",
+    "on-click": "kitty -e ~/.local/bin/archmagi update; ~/.local/bin/archmagi restart waybar",
     "hide-empty-text": true,
   },
 
@@ -126,7 +126,7 @@
     "format-full": "󰁹 {capacity}%",
     "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
     "tooltip-format": "{timeTo} — {power:.1f}W",
-    "on-click": "~/.local/bin/magi profile",
+    "on-click": "~/.local/bin/archmagi profile",
   },
 
   "clock": {
@@ -182,24 +182,24 @@
   "custom/lock": {
     "format": "󰍁",
     "tooltip": false,
-    "on-click": "~/.local/bin/magi lock"
+    "on-click": "~/.local/bin/archmagi lock"
   },
 
   "custom/reboot": {
     "format": "󰜉",
     "tooltip": false,
-    "on-click": "~/.local/bin/magi reboot"
+    "on-click": "~/.local/bin/archmagi reboot"
   },
 
   "custom/exit": {
     "format": "󰗼",
     "tooltip": false,
-    "on-click": "~/.local/bin/magi exit"
+    "on-click": "~/.local/bin/archmagi exit"
   },
 
   "custom/power": {
     "format": " ",
     "tooltip": false,
-    "on-click": "~/.local/bin/magi shutdown"
+    "on-click": "~/.local/bin/archmagi shutdown"
   },
 }

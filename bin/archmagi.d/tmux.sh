@@ -1,4 +1,4 @@
-# magi tmux — tmux session control wrapper.
+# archmagi tmux — tmux session control wrapper.
 
 _tmux_attach() {
     local session="${1:-MAGI}"

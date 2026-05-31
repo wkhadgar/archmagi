@@ -1,0 +1,25 @@
+#!/bin/bash
+# archmagi — unified NERV/MAGI command interface (dispatcher).
+# Each command group lives in bin/archmagi.d/<group>.sh and is sourced lazily.
+# Shared palette + helpers come from bin/archmagi.d/lib.sh.
+
+ARCHMAGI_LIB="${ARCHMAGI_LIB:-$(dirname "$(readlink -f "$0")")/archmagi.d}"
+[[ -d $ARCHMAGI_LIB ]] || { echo "archmagi: lib dir not found at $ARCHMAGI_LIB" >&2; exit 1; }
+
+source "$ARCHMAGI_LIB/lib.sh"
+
+_archmagi_load() { source "$ARCHMAGI_LIB/$1.sh"; }
+
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+    fetch|tailnet|update|confirm|restart|install|cheatsheet|tmux|profile|hud)
+        _archmagi_load "$cmd"; "cmd_$cmd" "$@" ;;
+    lock|reboot|exit|shutdown)
+        _archmagi_load power; "cmd_$cmd" "$@" ;;
+    help|-h|--help)
+        _archmagi_load help; cmd_help ;;
+    *)
+        echo "archmagi: unknown command: $cmd" >&2
+        _archmagi_load help; cmd_help >&2
+        exit 1 ;;
+esac

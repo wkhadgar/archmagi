@@ -11,7 +11,7 @@ repo_root=$(git rev-parse --show-toplevel) || exit 0
 cd "$repo_root" || exit 0
 
 # Trigger only if magi (or the smoke test itself) is in this commit.
-if ! git diff --cached --name-only --diff-filter=ACMR | grep -qE '^(bin/magi(\.d/.*)?|tests/smoke\.sh)$'; then
+if ! git diff --cached --name-only --diff-filter=ACMR | grep -qE '^(bin/archmagi(\.d/.*)?|tests/smoke\.sh)$'; then
     exit 0
 fi
 

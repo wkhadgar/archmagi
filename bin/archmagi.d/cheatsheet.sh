@@ -1,4 +1,4 @@
-# magi cheatsheet — rofi popup of all `bind = ` lines from binds.conf, with
+# archmagi cheatsheet — rofi popup of all `bind = ` lines from binds.conf, with
 # variable substitution, ~/.local/bin/ stripping, key prettification, and
 # workspace-1..9 / shift-1..9 binds filtered out.
 
