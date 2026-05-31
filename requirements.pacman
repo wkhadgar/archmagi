@@ -44,7 +44,6 @@ mandoc
 neovim
 networkmanager
 nodejs
-noto-color-emoji-fontconfig
 noto-fonts
 noto-fonts-cjk
 npm
@@ -62,7 +61,6 @@ ppp
 pulsemixer
 python-gobject
 python-pywal
-python312
 qemu-system-arm
 rlwrap
 rofi
@@ -88,7 +86,6 @@ wireshark-cli
 xdg-desktop-portal-gtk
 xdg-desktop-portal-hyprland
 xorg-xkill
-xwaylandvideobridge
 yazi
 zip
 zsh

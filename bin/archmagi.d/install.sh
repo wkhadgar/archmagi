@@ -4,6 +4,7 @@ source "$ARCHMAGI_LIB/install_detect.sh"
 source "$ARCHMAGI_LIB/install_prompt.sh"
 source "$ARCHMAGI_LIB/install_template.sh"
 source "$ARCHMAGI_LIB/install_configs.sh"
+source "$ARCHMAGI_LIB/install_packages.sh"
 source "$ARCHMAGI_LIB/install_boot.sh"
 
 cmd_install() {
@@ -17,8 +18,9 @@ cmd_install() {
 }
 
 # Run the full bootstrap chain on a fresh host.
-# Order: detect -> prompt -> persist profile -> templates -> configs.
-# Packages and boot theme are wired in a later iteration.
+# Order: detect -> prompt -> persist -> configs -> templates -> packages -> boot.
+# Configs land before packages so a ctrl-C during pacman still leaves a working
+# dotfile install. Boot theme runs last because it needs grub/limine present.
 _install_bootstrap() {
     local bar="${RED}▌${RESET}" sep="${MUTED}//${RESET}"
 
@@ -46,22 +48,28 @@ _install_bootstrap() {
         printf 'hostname=%s\n' "$hostname"
         printf 'bootloader=%s\n' "$bootloader"
     } | sudo tee /etc/archmagi/profile >/dev/null
-
     printf "  %s wrote ${AMBER}/etc/archmagi/profile${RESET}\n" "$bar"
 
     _install_configs "$repo"
     printf "  %s deployed generic configs from ${AMBER}%s${RESET}\n" "$bar" "$repo"
 
     local hostname_upper=${hostname^^}
-    _install_substitute "$repo/etc/hostname.tmpl"           /etc/hostname                          HOSTNAME="$hostname"
-    _install_substitute "$repo/etc/hosts.tmpl"              /etc/hosts                             HOSTNAME="$hostname"
-    _install_substitute "$repo/hypr/hyprlock.conf.tmpl"     "$HOME/.config/hypr/hyprlock.conf"     HOSTNAME_UPPER="$hostname_upper"
+    _install_substitute "$repo/etc/hostname.tmpl"             /etc/hostname                            HOSTNAME="$hostname"
+    _install_substitute "$repo/etc/hosts.tmpl"                /etc/hosts                               HOSTNAME="$hostname"
+    _install_substitute "$repo/hypr/hyprlock.conf.tmpl"       "$HOME/.config/hypr/hyprlock.conf"       HOSTNAME_UPPER="$hostname_upper"
     _install_substitute "$repo/hypr/hyprland/monit.conf.tmpl" "$HOME/.config/hypr/hyprland/monit.conf"
-    printf "  %s wrote ${AMBER}hostname / hosts / hyprlock label / monit.conf${RESET} from templates\n" "$bar"
+    printf "  %s wrote host-specific files from templates\n" "$bar"
+
+    _install_packages "$repo" || {
+        echo "  $bar package install failed; bootstrap aborted." >&2
+        return 1
+    }
+    printf "  %s pacman -S --needed completed\n" "$bar"
+
+    _install_boot
 
     echo
-    printf "  %s ${BOLD}MAGI BOOTSTRAP${RESET} %s ${AMBER}configs + templates done${RESET}\n" "$bar" "$sep"
-    printf "  %s   ${MUTED}next: packages, boot theme — not yet wired${RESET}\n" "$bar"
+    printf "  %s ${BOLD}MAGI BOOTSTRAP COMPLETE${RESET} %s reboot to see NERV chrome\n" "$bar" "$sep"
 }
 
 _install_monitors() {
