@@ -6,6 +6,7 @@ source "$ARCHMAGI_LIB/install_template.sh"
 source "$ARCHMAGI_LIB/install_configs.sh"
 source "$ARCHMAGI_LIB/install_packages.sh"
 source "$ARCHMAGI_LIB/install_boot.sh"
+source "$ARCHMAGI_LIB/install_monitors.sh"
 source "$ARCHMAGI_LIB/install_sync.sh"
 
 cmd_install() {
@@ -75,7 +76,3 @@ _install_bootstrap() {
     printf "  %s ${BOLD}MAGI BOOTSTRAP COMPLETE${RESET} %s reboot to see NERV chrome\n" "$bar" "$sep"
 }
 
-_install_monitors() {
-    echo "archmagi install monitors: not yet implemented" >&2
-    return 1
-}
