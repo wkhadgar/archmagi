@@ -32,10 +32,12 @@ _install_bootstrap() {
     bootloader=$(_install_detect_bootloader)
 
     local profile hostname current_host
-    profile=$(_install_prompt_profile_role "$prof_hint") || return 1
+    _install_prompt_profile_role "$prof_hint" || return 1
+    profile=$PROMPT_PROFILE
 
     current_host=$(uname -n); current_host=${current_host%%.*}
-    hostname=$(_install_prompt_hostname "$current_host") || return 1
+    _install_prompt_hostname "$current_host" || return 1
+    hostname=$PROMPT_HOSTNAME
 
     _install_prompt_confirm "$profile" "$hostname" "$bootloader" || {
         echo "  $bar aborted by user." >&2
