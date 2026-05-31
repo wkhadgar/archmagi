@@ -1,6 +1,7 @@
 # archmagi cheatsheet — rofi popup of all `bind = ` lines from binds.conf, with
 # variable substitution, ~/.local/bin/ stripping, key prettification, and
-# workspace-1..9 / shift-1..9 binds filtered out.
+# workspace-1..9 / shift-1..9 binds filtered out. A trailing `# desc: ...`
+# comment on a bind line overrides the default action-derived description.
 
 cmd_cheatsheet() {
     local binds_file="$HOME/.config/hypr/hyprland/binds.conf"
@@ -20,6 +21,10 @@ cmd_cheatsheet() {
         }
         /^bind[[:space:]]*=/ {
             sub(/^bind[[:space:]]*=[[:space:]]*/, "")
+            desc_override = ""
+            if (match($0, /[[:space:]]+#[[:space:]]*desc:[[:space:]]*/)) {
+                desc_override = trim(substr($0, RSTART + RLENGTH))
+            }
             sub(/[[:space:]]*#.*$/, "")
             line = $0
             for (v in vars) {
@@ -51,7 +56,9 @@ cmd_cheatsheet() {
 
             combo = (mod == "") ? key : mod " + " key
 
-            if (action == "exec") {
+            if (desc_override != "") {
+                desc = desc_override
+            } else if (action == "exec") {
                 desc = args
             } else {
                 desc = action
