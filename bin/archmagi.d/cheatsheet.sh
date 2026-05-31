@@ -36,7 +36,12 @@ cmd_cheatsheet() {
 
             if ((action == "workspace" || action == "movetoworkspace") && key ~ /^[0-9]$/) next
 
-            if      (key == "slash")   key = "/"
+            if      (key == "slash" && mod ~ /SHIFT/) {
+                key = "?"
+                sub(/[[:space:]]*SHIFT[[:space:]]*/, " ", mod)
+                mod = trim(mod)
+            }
+            else if (key == "slash")   key = "/"
             else if (key == "left")    key = "←"
             else if (key == "right")   key = "→"
             else if (key == "up")      key = "↑"

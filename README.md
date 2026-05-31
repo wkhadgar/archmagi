@@ -37,7 +37,7 @@ After install, `archmagi` lives at `~/.local/bin/archmagi` (a thin dispatcher) w
 - `archmagi hud` — toggle a floating live `fetch` panel in a kitty popup (bound to `Super+F`)
 - `archmagi update [run|check [-j]]` — interactive `paru -Syu` wrapper (`run` is the default); `check` returns pending count from a stale-while-revalidate cache
 - `archmagi profile [target]` — power-profiles-daemon picker via rofi (laptop only), or set directly with `power-saver|balanced|performance`
-- `archmagi cheatsheet` — rofi popup of all Hyprland keybindings (also bound to `SUPER+/`)
+- `archmagi cheatsheet` — rofi popup of all Hyprland keybindings (also bound to `SUPER+?`)
 - `archmagi tmux <attach|list|switch|detach|kill>` — tmux session control (default session name `MAGI`); `switch` uses fzf to pick
 - `archmagi lock` / `reboot` / `exit` / `shutdown` — power actions, gated by the MAGI consensus dialog. The exit/reboot/shutdown trio chain through `hyprshutdown` (pulled in by `requirements.pacman`) so apps close cleanly before the system command fires.
 - `archmagi restart <waybar|xdph>` — kill + relaunch a desktop service
