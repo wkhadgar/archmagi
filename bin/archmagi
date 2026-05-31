@@ -8,18 +8,21 @@ ARCHMAGI_LIB="${ARCHMAGI_LIB:-$(dirname "$(readlink -f "$0")")/archmagi.d}"
 
 source "$ARCHMAGI_LIB/lib.sh"
 
-_archmagi_load() { source "$ARCHMAGI_LIB/$1.sh"; }
+# Note: `source` MUST happen at top scope, not inside a function. `declare -A`
+# inside a sourced file becomes function-local when invoked through a function
+# wrapper — the associative arrays in profile.sh would evaporate before the
+# subcommand runs. Inline the source here.
 
 cmd="${1:-help}"; shift || true
 case "$cmd" in
     fetch|tailnet|update|confirm|restart|install|cheatsheet|tmux|profile|hud)
-        _archmagi_load "$cmd"; "cmd_$cmd" "$@" ;;
+        source "$ARCHMAGI_LIB/$cmd.sh"; "cmd_$cmd" "$@" ;;
     lock|reboot|exit|shutdown)
-        _archmagi_load power; "cmd_$cmd" "$@" ;;
+        source "$ARCHMAGI_LIB/power.sh"; "cmd_$cmd" "$@" ;;
     help|-h|--help)
-        _archmagi_load help; cmd_help ;;
+        source "$ARCHMAGI_LIB/help.sh"; cmd_help ;;
     *)
         echo "archmagi: unknown command: $cmd" >&2
-        _archmagi_load help; cmd_help >&2
+        source "$ARCHMAGI_LIB/help.sh"; cmd_help >&2
         exit 1 ;;
 esac
