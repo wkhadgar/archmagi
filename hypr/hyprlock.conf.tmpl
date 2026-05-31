@@ -1,0 +1,269 @@
+animation = fade, 1, 4, linear
+
+# BACKGROUND
+background {
+  monitor =
+  path = screenshot
+  color = rgba(0a0a0aff)
+  blur_passes = 2
+}
+
+# ── CENTER: NERV LABEL ──────────────────────────────
+label {
+  monitor =
+  text = [ __HOSTNAME_UPPER__ ]
+  color = rgba(cc0000ff)
+  font_size = 16
+  font_family = JetBrains Mono
+  position = 0, 180
+  halign = center
+  valign = center
+}
+
+label {
+  monitor =
+  text = ⚠ AUTHORIZED PERSONNEL ONLY ⚠
+  color = rgba(666666cc)
+  font_size = 11
+  font_family = JetBrains Mono
+  position = 0, 155
+  halign = center
+  valign = center
+}
+
+# ── CENTER: CLOCK ───────────────────────────────────
+label {
+  monitor =
+  text = cmd[update:1000] echo "$(date +"%H:%M")"
+  color = rgba(ffbf00ff)
+  font_size = 96
+  font_family = JetBrains Mono Bold
+  position = 0, 40
+  halign = center
+  valign = center
+}
+
+# ── CENTER: DATE ────────────────────────────────────
+label {
+  monitor =
+  text = cmd[update:60000] echo "$(date +"%A // %d %B %Y" | tr '[:lower:]' '[:upper:]')"
+  color = rgba(cc0000cc)
+  font_size = 13
+  font_family = JetBrains Mono
+  position = 0, -70
+  halign = center
+  valign = center
+}
+
+# ── CENTER: INPUT FIELD ─────────────────────────────
+input-field {
+  monitor =
+  size = 300, 44
+  outline_thickness = 1
+  dots_size = 0.25
+  dots_spacing = 0.3
+  dots_center = true
+  outer_color = rgba(ffbf00ff)
+  inner_color = rgba(0a0a0aff)
+  font_color = rgba(ffbf00ff)
+  fade_on_empty = true
+  rounding = 0
+  check_color = rgba(ffbf00ff)
+  fail_color = rgba(cc0000ff)
+  placeholder_text = <span foreground="##444444">PASSWORD</span>
+  hide_input = false
+  position = 0, -140
+  halign = center
+  valign = center
+}
+
+label {
+  monitor =
+  text = press enter to unlock
+  color = rgba(666666cc)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = 0, -195
+  halign = center
+  valign = center
+}
+
+# ── TOP LEFT: MAGI NODE STATUS ──────────────────────
+label {
+  monitor =
+  text = MAGI SYSTEM // UNIT-01
+  color = rgba(666666cc)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = 48, -48
+  halign = left
+  valign = top
+}
+
+label {
+  monitor =
+  text = cmd[update:30000] ~/.local/bin/archmagi tailnet casper-3
+  color = rgba(bb0000aa)
+  font_size = 10
+  font_family = JetBrainsMono Nerd Font
+  position = 48, -68
+  halign = left
+  valign = top
+}
+
+label {
+  monitor =
+  text = cmd[update:30000] ~/.local/bin/archmagi tailnet balthasar-2
+  color = rgba(bb0000aa)
+  font_size = 10
+  font_family = JetBrainsMono Nerd Font
+  position = 48, -84
+  halign = left
+  valign = top
+}
+
+label {
+  monitor =
+  text = cmd[update:30000] ~/.local/bin/archmagi tailnet melchior-1
+  color = rgba(bb0000aa)
+  font_size = 10
+  font_family = JetBrainsMono Nerd Font
+  position = 48, -100
+  halign = left
+  valign = top
+}
+
+label {
+  monitor =
+  text = NERV HQ // GEO-FRONT
+  color = rgba(666666cc)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = 48, -124
+  halign = left
+  valign = top
+}
+
+label {
+  monitor =
+  text = TERMINAL ACCESS LOCKED
+  color = rgba(666666cc)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = 48, -140
+  halign = left
+  valign = top
+}
+
+# ── TOP RIGHT: THREAT LEVEL ─────────────────────────
+label {
+  monitor =
+  text = THREAT LEVEL
+  color = rgba(666666cc)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = -48, -48
+  halign = right
+  valign = top
+}
+
+label {
+  monitor =
+  text = PATTERN BLUE
+  color = rgba(cc0000cc)
+  font_size = 13
+  font_family = JetBrains Mono
+  position = -48, -66
+  halign = right
+  valign = top
+}
+
+label {
+  monitor =
+  text = SEELE LINK
+  color = rgba(666666cc)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = -48, -100
+  halign = right
+  valign = top
+}
+
+label {
+  monitor =
+  text = -- STANDBY --
+  color = rgba(555555bb)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = -48, -116
+  halign = right
+  valign = top
+}
+
+# ── BOTTOM LEFT: SYSTEM STATS ───────────────────────
+label {
+  monitor =
+  text = cmd[update:5000] echo "CPU  // $(grep 'cpu ' /proc/stat | awk '{u=$2+$4; t=$2+$4+$5; print int((u-pu)/(t-pt)*100)"%"}' pu=0 pt=0)"
+  color = rgba(ffbf00dd)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = 48, 100
+  halign = left
+  valign = bottom
+}
+
+label {
+  monitor =
+  text = cmd[update:5000] echo "MEM  // $(free -h | awk '/^Mem/{print $3"/"$2}')"
+  color = rgba(ffbf00dd)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = 48, 84
+  halign = left
+  valign = bottom
+}
+
+label {
+  monitor =
+  text = cmd[update:60000] echo "DISK // $(df -h / | awk 'NR==2{print $4" free"}')"
+  color = rgba(ffbf00dd)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = 48, 68
+  halign = left
+  valign = bottom
+}
+
+label {
+  monitor =
+  text = cmd[update:60000] echo "NET  // $(ip route get 1 | awk '{print $7;exit}' 2>/dev/null || echo 'offline')"
+  color = rgba(ffbf00dd)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = 48, 52
+  halign = left
+  valign = bottom
+}
+
+# ── BOTTOM RIGHT: GOD'S IN HIS HEAVEN ──────────────
+label {
+  monitor =
+  text = GOD'S IN HIS HEAVEN.
+  color = rgba(555555bb)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = -48, 68
+  halign = right
+  valign = bottom
+}
+
+label {
+  monitor =
+  text = ALL'S RIGHT WITH THE WORLD.
+  color = rgba(555555bb)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = -48, 52
+  halign = right
+  valign = bottom
+}
