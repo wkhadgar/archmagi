@@ -3,6 +3,7 @@
 source "$ARCHMAGI_LIB/install_detect.sh"
 source "$ARCHMAGI_LIB/install_prompt.sh"
 source "$ARCHMAGI_LIB/install_template.sh"
+source "$ARCHMAGI_LIB/install_configs.sh"
 source "$ARCHMAGI_LIB/install_boot.sh"
 
 cmd_install() {
@@ -15,11 +16,14 @@ cmd_install() {
     esac
 }
 
-# Phases 1-3 of bootstrap: detect host facts, prompt for the ones we can't
-# infer (hostname, role override), persist the result to /etc/archmagi/profile.
-# Phases 4-10 (templates / configs / packages / boot chain) are next.
+# Run the full bootstrap chain on a fresh host.
+# Order: detect -> prompt -> persist profile -> templates -> configs.
+# Packages and boot theme are wired in a later iteration.
 _install_bootstrap() {
     local bar="${RED}▌${RESET}" sep="${MUTED}//${RESET}"
+
+    local repo
+    repo=$(_install_find_repo) || return 1
 
     local prof_hint bootloader
     prof_hint=$(_install_detect_profile)
@@ -43,10 +47,21 @@ _install_bootstrap() {
         printf 'bootloader=%s\n' "$bootloader"
     } | sudo tee /etc/archmagi/profile >/dev/null
 
+    printf "  %s wrote ${AMBER}/etc/archmagi/profile${RESET}\n" "$bar"
+
+    _install_configs "$repo"
+    printf "  %s deployed generic configs from ${AMBER}%s${RESET}\n" "$bar" "$repo"
+
+    local hostname_upper=${hostname^^}
+    _install_substitute "$repo/etc/hostname.tmpl"           /etc/hostname                          HOSTNAME="$hostname"
+    _install_substitute "$repo/etc/hosts.tmpl"              /etc/hosts                             HOSTNAME="$hostname"
+    _install_substitute "$repo/hypr/hyprlock.conf.tmpl"     "$HOME/.config/hypr/hyprlock.conf"     HOSTNAME_UPPER="$hostname_upper"
+    _install_substitute "$repo/hypr/hyprland/monit.conf.tmpl" "$HOME/.config/hypr/hyprland/monit.conf"
+    printf "  %s wrote ${AMBER}hostname / hosts / hyprlock label / monit.conf${RESET} from templates\n" "$bar"
+
     echo
-    printf "  %s ${BOLD}MAGI BOOTSTRAP${RESET} %s ${AMBER}phase 1-3 complete${RESET}\n" "$bar" "$sep"
-    printf "  %s   wrote ${AMBER}/etc/archmagi/profile${RESET}\n" "$bar"
-    printf "  %s   ${MUTED}next: templates, configs, packages, boot — not yet wired${RESET}\n" "$bar"
+    printf "  %s ${BOLD}MAGI BOOTSTRAP${RESET} %s ${AMBER}configs + templates done${RESET}\n" "$bar" "$sep"
+    printf "  %s   ${MUTED}next: packages, boot theme — not yet wired${RESET}\n" "$bar"
 }
 
 _install_monitors() {

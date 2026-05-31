@@ -20,7 +20,7 @@ ${BOLD}${RED}MAGI SYSTEM${RESET} ${MUTED}// COMMAND INTERFACE${RESET}
   ${AMBER}reboot${RESET} | ${AMBER}exit${RESET} | ${AMBER}shutdown${RESET}     confirm + hyprshutdown-chained power action
   ${AMBER}restart${RESET} <${AMBER}waybar${RESET}|${AMBER}xdph${RESET}>        kill + relaunch a desktop service
   ${AMBER}install${RESET} <${MUTED}sub${RESET}>                tactical deployment:
-    ${AMBER}bootstrap${RESET}                  detect+prompt host profile, write /etc/archmagi/profile (more soon)
+    ${AMBER}bootstrap${RESET}                  detect+prompt host profile, deploy configs + templates (run from repo)
     ${AMBER}boot${RESET}                       install NERV bootloader theme (detects grub or limine)
     ${AMBER}monitors${RESET}                   regenerate monit.conf from hyprctl (not yet implemented)
     ${AMBER}sync${RESET}                       diff-based pull from live system to repo (not yet implemented)
