@@ -6,6 +6,7 @@ source "$ARCHMAGI_LIB/install_template.sh"
 source "$ARCHMAGI_LIB/install_configs.sh"
 source "$ARCHMAGI_LIB/install_packages.sh"
 source "$ARCHMAGI_LIB/install_boot.sh"
+source "$ARCHMAGI_LIB/install_sync.sh"
 
 cmd_install() {
     case "$1" in
@@ -76,10 +77,5 @@ _install_bootstrap() {
 
 _install_monitors() {
     echo "archmagi install monitors: not yet implemented" >&2
-    return 1
-}
-
-_install_sync() {
-    echo "archmagi install sync: not yet implemented" >&2
     return 1
 }

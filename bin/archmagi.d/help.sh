@@ -23,7 +23,7 @@ ${BOLD}${RED}MAGI SYSTEM${RESET} ${MUTED}// COMMAND INTERFACE${RESET}
     ${AMBER}bootstrap${RESET}                  full install: detect, prompt, configs, templates, packages, boot theme (run from repo)
     ${AMBER}boot${RESET}                       install NERV bootloader theme (detects grub or limine)
     ${AMBER}monitors${RESET}                   regenerate monit.conf from hyprctl (not yet implemented)
-    ${AMBER}sync${RESET}                       diff-based pull from live system to repo (not yet implemented)
+    ${AMBER}sync${RESET}                       diff-based pull from live system to repo (skips templated files)
   ${AMBER}profile${RESET} [${MUTED}target${RESET}]              switch power profile via rofi (or set directly: power-saver|balanced|performance)
   ${AMBER}help${RESET}                         this message
 EOF
