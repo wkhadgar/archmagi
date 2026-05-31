@@ -1,11 +1,14 @@
 # `archmagi install sync` — diff-based pull from live system back into the repo.
-# Skips files that bootstrap owns via templates (their .tmpl is the source).
+# Skips files that bootstrap owns via templates (their .tmpl is the source) and
+# gitignored, churn-prone artifacts like lazy.nvim's lock file.
 
-# Files owned by the bootstrap templating phase; never sync these from live.
+# Files that should never sync from live: templated outputs that flow only
+# outward, plus high-churn runtime artifacts that gitignore already covers.
 # @return 0 if the repo-relative path is excluded, 1 otherwise.
 _install_sync_excluded() {
     case "$1" in
         etc/hostname|etc/hosts|hypr/hyprlock.conf|hypr/hyprland/monit.conf) return 0 ;;
+        nvim/lazy-lock.json) return 0 ;;
         *.tmpl) return 0 ;;
     esac
     return 1
