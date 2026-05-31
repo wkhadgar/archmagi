@@ -34,7 +34,7 @@ chsh -s $(which zsh)
 After install, `archmagi` lives at `~/.local/bin/archmagi` (a thin dispatcher) with its command libraries under `~/.local/bin/archmagi.d/` (sourced on demand). Run `archmagi help` for the full list. Highlights:
 
 - `archmagi fetch` — NERV-themed system overview (host, tailnet, updates, system, compute, power); also the top-level shell greeter
-- `archmagi hud` — toggle a floating live `fetch` panel in a kitty popup (bound to `Super+H`)
+- `archmagi hud` — toggle a floating live `fetch` panel in a kitty popup (bound to `Super+F`)
 - `archmagi update [run|check [-j]]` — interactive `paru -Syu` wrapper (`run` is the default); `check` returns pending count from a stale-while-revalidate cache
 - `archmagi profile [target]` — power-profiles-daemon picker via rofi (laptop only), or set directly with `power-saver|balanced|performance`
 - `archmagi cheatsheet` — rofi popup of all Hyprland keybindings (also bound to `SUPER+/`)

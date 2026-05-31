@@ -224,16 +224,19 @@ cmd_fetch() {
 
     local out
     out=$({
-        local logo body i n_logo n_body empty
+        local logo body i n_logo n_body empty offset logo_idx
         mapfile -t logo < <(_status_logo_lines "$hostname")
         mapfile -t body < <(_status_body)
         n_logo=${#logo[@]}
         n_body=${#body[@]}
         printf -v empty '%*s' 38 ''
+        offset=$(( (n_body - n_logo) / 2 ))
+        (( offset < 0 )) && offset=0
         echo
         for ((i=0; i<n_body; i++)); do
-            if (( i < n_logo )); then
-                printf '%s%s\n' "${logo[i]}" "${body[i]}"
+            logo_idx=$(( i - offset ))
+            if (( logo_idx >= 0 && logo_idx < n_logo )); then
+                printf '%s%s\n' "${logo[logo_idx]}" "${body[i]}"
             else
                 printf '%s%s\n' "$empty" "${body[i]}"
             fi
