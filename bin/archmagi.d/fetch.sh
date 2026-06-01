@@ -116,18 +116,47 @@ _status_load_pct() {
 }
 
 _status_cpu_temp() {
-    local z raw
+    local h name input label raw
+
+    # AMD k10temp / Intel coretemp / zenpower / ARM cpu_thermal expose the CPU
+    # die temp under hwmon; thermal_zone often only lists peripherals (wifi,
+    # battery) so it can't be trusted as a fallback by index.
+    for h in /sys/class/hwmon/hwmon*; do
+        [[ -r "$h/name" ]] || continue
+        name=$(<"$h/name")
+        case "$name" in
+            k10temp|coretemp|zenpower|cpu_thermal) ;;
+            *) continue ;;
+        esac
+
+        # Prefer a labeled sensor (Tctl/Tdie on AMD, "Package id 0" on Intel)
+        # over a raw temp1_input which can be a per-core or per-CCD readout.
+        raw=
+        for input in "$h"/temp*_input; do
+            [[ -r "$input" ]] || continue
+            label=$(<"${input%_input}_label" 2>/dev/null) || label=""
+            case "$label" in
+                Tctl|Tdie|"Package id 0") raw=$(<"$input"); break ;;
+            esac
+        done
+        [[ -z "$raw" && -r "$h/temp1_input" ]] && raw=$(<"$h/temp1_input")
+
+        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))°C"; return; }
+    done
+
+    # ARM SBC / embedded fallback. Tighten the type match so wifi/battery
+    # zones don't get picked up.
+    local z type
     for z in /sys/class/thermal/thermal_zone*; do
         [[ -r "$z/type" && -r "$z/temp" ]] || continue
-        if grep -qiE 'x86_pkg_temp|coretemp|cpu' "$z/type"; then
-            raw=$(<"$z/temp")
-            echo "$((raw/1000))°C"
-            return
-        fi
+        type=$(<"$z/type")
+        case "$type" in
+            x86_pkg_temp|coretemp|k10temp|cpu_thermal|cpu-thermal) ;;
+            *) continue ;;
+        esac
+        raw=$(<"$z/temp")
+        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))°C"; return; }
     done
-    [[ -r /sys/class/thermal/thermal_zone0/temp ]] || return
-    raw=$(</sys/class/thermal/thermal_zone0/temp)
-    echo "$((raw/1000))°C"
 }
 
 _status_gpu() {
