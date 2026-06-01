@@ -2,6 +2,10 @@
 # Each field gatherer returns empty when its source is missing; cmd_fetch
 # skips empty rows so the same code runs across desktop/laptop/server.
 
+# Unmatched globs expand to nothing so for-loops over /sys/* don't iterate
+# once on the literal pattern when no device is present.
+shopt -s nullglob
+
 _status_row() {
     local bar="$1" sep="$2" label="$3" value="$4"
     local padded
@@ -172,11 +176,20 @@ _status_gpu() {
         | paste -sd' / '
 }
 
+# Joint nvidia-smi query: utilization,temperature as "U,T".
+# Cached per process so _status_gpu_pct + _status_gpu_temp share one fork.
+# Empty when nvidia-smi is missing or its query produced nothing.
+_NVIDIA_SMI_CACHE=""
+_status_nvidia_query() {
+    [[ -n "$_NVIDIA_SMI_CACHE" ]] && return 0
+    command -v nvidia-smi >/dev/null || return 1
+    _NVIDIA_SMI_CACHE=$(nvidia-smi --query-gpu=utilization.gpu,temperature.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
+    [[ -n "$_NVIDIA_SMI_CACHE" ]]
+}
+
 _status_gpu_pct() {
-    # NVIDIA via nvidia-smi.
-    if command -v nvidia-smi >/dev/null; then
-        local v
-        v=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' %')
+    if _status_nvidia_query; then
+        local v=${_NVIDIA_SMI_CACHE%%,*}
         [[ "$v" =~ ^[0-9]+$ ]] && { echo "$v"; return; }
     fi
     # AMD (amdgpu sysfs).
@@ -189,10 +202,8 @@ _status_gpu_pct() {
 }
 
 _status_gpu_temp() {
-    # NVIDIA via nvidia-smi.
-    if command -v nvidia-smi >/dev/null; then
-        local v
-        v=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
+    if _status_nvidia_query; then
+        local v=${_NVIDIA_SMI_CACHE##*,}
         [[ "$v" =~ ^[0-9]+$ ]] && { echo "${v}°C"; return; }
     fi
     # AMD hwmon under the card device.
