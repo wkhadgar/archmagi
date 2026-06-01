@@ -1,4 +1,7 @@
 # MAGI SYSTEM // NERV HQ TERMINAL
+
+[![PATTERN](https://github.com/wkhadgar/dotfiles/actions/workflows/pattern.yml/badge.svg)](https://github.com/wkhadgar/dotfiles/actions/workflows/pattern.yml)
+
 > GOD'S IN HIS HEAVEN. ALL'S RIGHT WITH THE WORLD.
 
 ---
@@ -55,21 +58,28 @@ archmagi install boot                 # auto-regens wallpaper if missing
 
 ## Testing
 
-Before deploying changes to `archmagi`, run the smoke test against the in-repo version:
+Two test scripts run against the in-repo `bin/archmagi`:
 
 ```bash
-tests/smoke.sh
+tests/smoke.sh   # 80 checks: syntax + function-defined + end-to-end safe commands
+tests/units.sh   # 29 checks: pure-helper assertions (substitution, meter color, sync excludes, etc.)
 ```
 
-It bash-syntax-checks every shipped script, sources each `archmagi.d/<group>.sh` to confirm the expected `cmd_*` functions are defined, and end-to-end-invokes the safe-to-call commands (`help`, `fetch`, `tailnet`, `update check`). Destructive commands (`reboot`, `restart waybar`, `install boot`, etc.) are only checked at the function-defined level; never invoked. `PATTERN GREEN` on full pass; `PATTERN RED` with details on failure.
+`smoke.sh` bash-syntax-checks every shipped script, sources each `archmagi.d/<group>.sh` to confirm the expected `cmd_*` functions are defined, and end-to-end-invokes the safe-to-call commands (`help`, `fetch`, `tailnet`, `update check`). Destructive commands (`reboot`, `restart waybar`, `install boot`, etc.) are only checked at the function-defined level; never invoked.
 
-To run it automatically before every commit that touches `bin/archmagi*` or the test itself, enable the tracked pre-commit hook **once per clone**:
+`units.sh` asserts behavior on algorithmic helpers with deterministic input/output: `_install_substitute`, `_install_sync_excluded`, `_status_meter_color`, `_monitors_clean_scale`, `_install_find_repo`, `_wallpaper_detect_resolution`, `_status_meter`, `_ppd_available`.
+
+Both report `PATTERN GREEN` on full pass; `PATTERN RED` with details on failure.
+
+To run them automatically before every commit that touches `bin/archmagi*` or the tests themselves, enable the tracked pre-commit hook **once per clone**:
 
 ```bash
 git config core.hooksPath .githooks
 ```
 
 Bypass for a single commit with `git commit --no-verify`.
+
+The CI workflow (`.github/workflows/pattern.yml`) runs both scripts on every push/PR that touches the gated paths.
 
 ---
 
