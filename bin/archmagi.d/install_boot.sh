@@ -41,7 +41,10 @@ _boot_grub() {
     fi
 
     if (( changed )); then
-        sudo grub-mkconfig -o /boot/grub/grub.cfg
+        sudo grub-mkconfig -o /boot/grub/grub.cfg || {
+            echo "grub-mkconfig failed; /etc/default/grub was updated but grub.cfg is stale" >&2
+            return 1
+        }
         echo "MAGI BOOT theme installed (grub); reboot to see it."
     else
         echo "MAGI BOOT theme already current (grub); skipping grub-mkconfig."
@@ -60,7 +63,7 @@ _boot_limine() {
 
     local src=/usr/share/nerv/boot-background.png
     local staged=/boot/nerv-bg.png
-    sudo cp "$src" "$staged"
+    sudo cp "$src" "$staged" || { echo "failed to stage wallpaper to $staged" >&2; return 1; }
 
     local block
     block=$(cat <<EOF
@@ -76,13 +79,18 @@ EOF
 )
     local tmp
     tmp=$(mktemp)
-    sudo sed '/^# >>> magi boot/,/^# <<< magi boot/d' "$config" \
-        | awk -v b="$block" '
-            !done && /^\// { print b; done = 1 }
-            { print }
-            END { if (!done) print b }
-        ' > "$tmp"
-    sudo cp "$tmp" "$config"
-    rm -f "$tmp"
+    trap 'rm -f "$tmp"' RETURN
+
+    # Subshell pipefail catches sed/awk failures before $tmp gets copied over $config.
+    ( set -o pipefail
+      sudo sed '/^# >>> magi boot/,/^# <<< magi boot/d' "$config" \
+          | awk -v b="$block" '
+              !done && /^\// { print b; done = 1 }
+              { print }
+              END { if (!done) print b }
+          ' > "$tmp"
+    ) || { echo "limine.conf rewrite failed; original left intact" >&2; return 1; }
+
+    sudo cp "$tmp" "$config" || { echo "failed to write $config" >&2; return 1; }
     echo "MAGI BOOT theme installed (limine: $config); reboot to see it."
 }

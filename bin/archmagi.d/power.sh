@@ -16,7 +16,16 @@ _graceful_close() {
         return 1
     fi
     local then_cmd="${1:-true}"
-    nohup bash -c "hyprshutdown && $then_cmd" >/dev/null 2>&1 &
+    # Backgrounded + nohup so the chain survives Hyprland tearing down before
+    # $then_cmd reaches systemctl. notify-send fires a critical desktop alert
+    # when hyprshutdown fails, since $then_cmd is gated on its success.
+    nohup bash -c "
+        if ! hyprshutdown; then
+            notify-send -u critical 'archmagi' 'hyprshutdown failed; system NOT rebooting/shutting down' 2>/dev/null
+            exit 1
+        fi
+        $then_cmd
+    " >/dev/null 2>&1 &
     disown
 }
 
