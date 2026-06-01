@@ -10,7 +10,7 @@ _status_row() {
 }
 
 _status_sep() {
-    printf "  %s %s---------------------------------%s\n" "$1" "$MUTED" "$RESET"
+    printf "  %s %s─────────────────────────────────%s\n" "$1" "$MUTED" "$RESET"
 }
 
 # 8 logo lines, each padded to 38 visible cells so the status column lines up.
@@ -23,7 +23,7 @@ _status_logo_lines() {
     printf '%s   ██║╚██╔╝██║██╔══██║██║   ██║██║    %s\n' "$BOLD$RED" "$RESET"
     printf '%s   ██║ ╚═╝ ██║██║  ██║╚██████╔╝██║    %s\n' "$BOLD$RED" "$RESET"
     printf '%s   ╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝    %s\n' "$BOLD$RED" "$RESET"
-    printf '%s   --------------------------------   %s\n' "$MUTED"    "$RESET"
+    printf '%s   ────────────────────────────────   %s\n' "$MUTED"    "$RESET"
     local node="          NODE: $n"
     local pad=$(( 38 - ${#node} ))
     (( pad < 0 )) && pad=0
@@ -147,7 +147,7 @@ _status_cpu_temp() {
         done
         [[ -z "$raw" && -r "$h/temp1_input" ]] && raw=$(<"$h/temp1_input")
 
-        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))C"; return; }
+        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))°C"; return; }
     done
 
     # ARM SBC / embedded fallback. Tighten the type match so wifi/battery
@@ -161,7 +161,7 @@ _status_cpu_temp() {
             *) continue ;;
         esac
         raw=$(<"$z/temp")
-        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))C"; return; }
+        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))°C"; return; }
     done
 }
 
@@ -193,14 +193,14 @@ _status_gpu_temp() {
     if command -v nvidia-smi >/dev/null; then
         local v
         v=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
-        [[ "$v" =~ ^[0-9]+$ ]] && { echo "${v}C"; return; }
+        [[ "$v" =~ ^[0-9]+$ ]] && { echo "${v}°C"; return; }
     fi
     # AMD hwmon under the card device.
     local f raw
     for f in /sys/class/drm/card*/device/hwmon/hwmon*/temp1_input; do
         [[ -r "$f" ]] || continue
         raw=$(<"$f")
-        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))C"; return; }
+        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))°C"; return; }
     done
 }
 
@@ -220,7 +220,6 @@ _status_tailscale() {
 }
 
 _status_protocol() {
-    command -v powerprofilesctl >/dev/null || return
     local p nerv=""
     p=$(powerprofilesctl get 2>/dev/null) || return
     [[ -z "$p" ]] && return
@@ -230,7 +229,7 @@ _status_protocol() {
         performance) nerv="SYNAPSE MAX" ;;
     esac
     if [[ -n "$nerv" ]]; then
-        printf '%s | %s%s%s' "${p^^}" "$AMBER" "$nerv" "$RESET"
+        printf '%s · %s%s%s' "${p^^}" "$AMBER" "$nerv" "$RESET"
     else
         echo "${p^^}"
     fi
@@ -247,8 +246,8 @@ _status_battery() {
     cap=$(<"$bat/capacity")
     [[ -r "$bat/status" ]] && status=$(<"$bat/status")
     case "$status" in
-        Charging)    arrow="${GREEN}^${RESET}" ;;
-        Discharging) arrow="${AMBER}v${RESET}" ;;
+        Charging)    arrow="${GREEN}↑${RESET}" ;;
+        Discharging) arrow="${AMBER}↓${RESET}" ;;
     esac
     [[ -r "$bat/power_now" ]] && pow_uw=$(<"$bat/power_now")
     local meter
@@ -267,7 +266,7 @@ _status_display() {
     hyprctl monitors 2>/dev/null | awk '
         function flush() {
             if (focused == "yes" && resolution != "") {
-                printf "%s | %s@%dHz x%s\n", name, resolution, refresh, scale
+                printf "%s · %s@%dHz x%s\n", name, resolution, refresh, scale
             }
         }
         /^Monitor / {
@@ -317,29 +316,19 @@ cmd_fetch() {
     printf '%s\n' "$out"
 }
 
-_status_body() {
-    local hostname
-    hostname=$(uname -n)
-    hostname=${hostname%%.*}
-    local bar="${RED}▌${RESET}"
-    local sep="${MUTED}//${RESET}"
-    local v
-
-    printf "  %s %s%sMAGI SYSTEM%s %s %s%s%s\n" \
-        "$bar" "$BOLD" "$RED" "$RESET" "$sep" "$AMBER" "${hostname^^}" "$RESET"
-    _status_sep "$bar"
-
-    # -- system --
+_status_body_system() {
+    local bar=$1 sep=$2 v
     v=$(_status_os);       [[ -n "$v" ]] && _status_row "$bar" "$sep" "OS"       "$v"
     v=$(_status_kernel);   [[ -n "$v" ]] && _status_row "$bar" "$sep" "KERNEL"   "$v"
     v=$(_status_hyprland); [[ -n "$v" ]] && _status_row "$bar" "$sep" "HYPRLAND" "$v"
     v=$(_status_shell);    [[ -n "$v" ]] && _status_row "$bar" "$sep" "SHELL"    "$v"
-    v=$(uptime -p | sed 's/^up //'); _status_row "$bar" "$sep" "UPTIME" "$v"
-    _status_sep "$bar"
+    v=$(uptime -p | sed 's/^up //')
+    _status_row "$bar" "$sep" "UPTIME" "$v"
+}
 
-    # -- network --
+_status_body_network() {
+    local bar=$1 sep=$2 v node state color
     printf "  %s %sTAILNET%s    %s\n" "$bar" "$RED" "$RESET" "$sep"
-    local node state color
     for node in "${MAGI_NODES[@]}"; do
         state=$(_tailnet_state "$node")
         case "$state" in
@@ -355,22 +344,24 @@ _status_body() {
     local pacman aur total updates
     read -r pacman aur < <(_pending_counts)
     total=$((pacman + aur))
-    if ((total > 0)); then
+    if (( total > 0 )); then
         updates="${AMBER}${total}${RESET} ${MUTED}(${pacman} pacman + ${aur} AUR)${RESET}"
     else
         updates="${MUTED}network up to date${RESET}"
     fi
     _status_row "$bar" "$sep" "UPDATES" "$updates"
-    _status_sep "$bar"
+}
 
-    # -- compute (bar meters + raw values) --
+_status_body_compute() {
+    local bar=$1 sep=$2
+
     local cpu_pct cpu_temp cpu_model cpu_line
     cpu_pct=$(_status_cpu_pct)
     cpu_temp=$(_status_cpu_temp)
     cpu_model=$(_status_cpu_model)
     cpu_line="$(_status_meter "${cpu_pct:-0}")"
     [[ -n "$cpu_model" ]] && cpu_line+="  $cpu_model"
-    [[ -n "$cpu_temp"  ]] && cpu_line+=" | $cpu_temp"
+    [[ -n "$cpu_temp"  ]] && cpu_line+=" · $cpu_temp"
     _status_row "$bar" "$sep" "CPU" "$cpu_line"
 
     local gpu_pct gpu_temp gpu_model gpu_line
@@ -380,38 +371,55 @@ _status_body() {
     if [[ -n "$gpu_pct" ]]; then
         gpu_line="$(_status_meter "$gpu_pct")"
         [[ -n "$gpu_model" ]] && gpu_line+="  $gpu_model"
-        [[ -n "$gpu_temp"  ]] && gpu_line+=" | $gpu_temp"
+        [[ -n "$gpu_temp"  ]] && gpu_line+=" · $gpu_temp"
         _status_row "$bar" "$sep" "GPU" "$gpu_line"
     elif [[ -n "$gpu_model" ]]; then
         gpu_line="$gpu_model"
-        [[ -n "$gpu_temp" ]] && gpu_line+=" | $gpu_temp"
+        [[ -n "$gpu_temp" ]] && gpu_line+=" · $gpu_temp"
         _status_row "$bar" "$sep" "GPU" "$gpu_line"
     fi
 
     local mem_pct mem_h
-    mem_pct=$(_status_mem_pct)
-    mem_h=$(_status_mem)
+    mem_pct=$(_status_mem_pct); mem_h=$(_status_mem)
     _status_row "$bar" "$sep" "MEM" "$(_status_meter "${mem_pct:-0}")  $mem_h"
 
     local disk_pct disk_h
-    disk_pct=$(_status_disk_pct)
-    disk_h=$(_status_disk)
+    disk_pct=$(_status_disk_pct); disk_h=$(_status_disk)
     _status_row "$bar" "$sep" "DISK" "$(_status_meter "${disk_pct:-0}")  $disk_h"
 
     local load_pct load_raw
-    load_pct=$(_status_load_pct)
-    load_raw=$(_status_load)
+    load_pct=$(_status_load_pct); load_raw=$(_status_load)
     _status_row "$bar" "$sep" "LOAD" "$(_status_meter "${load_pct:-0}")  $load_raw"
+}
 
-    # -- power (only if any field exists) --
-    local proto batt disp
+# Emits its own leading separator only if at least one field is present, so
+# server profiles (no PPD, no battery, no Hyprland) don't leave a trailing rule.
+_status_body_power() {
+    local bar=$1 sep=$2 proto batt disp
     proto=$(_status_protocol)
     batt=$(_status_battery)
     disp=$(_status_display)
-    if [[ -n "$proto" || -n "$batt" || -n "$disp" ]]; then
-        _status_sep "$bar"
-        [[ -n "$proto" ]] && _status_row "$bar" "$sep" "PROTOCOL" "$proto"
-        [[ -n "$batt"  ]] && _status_row "$bar" "$sep" "BATTERY"  "$batt"
-        [[ -n "$disp"  ]] && _status_row "$bar" "$sep" "DISPLAY"  "$disp"
-    fi
+    [[ -z "$proto" && -z "$batt" && -z "$disp" ]] && return
+    _status_sep "$bar"
+    [[ -n "$proto" ]] && _status_row "$bar" "$sep" "PROTOCOL" "$proto"
+    [[ -n "$batt"  ]] && _status_row "$bar" "$sep" "BATTERY"  "$batt"
+    [[ -n "$disp"  ]] && _status_row "$bar" "$sep" "DISPLAY"  "$disp"
+}
+
+_status_body() {
+    local hostname
+    hostname=$(uname -n)
+    hostname=${hostname%%.*}
+    local bar="${RED}▌${RESET}"
+    local sep="${MUTED}//${RESET}"
+
+    printf "  %s %s%sMAGI SYSTEM%s %s %s%s%s\n" \
+        "$bar" "$BOLD" "$RED" "$RESET" "$sep" "$AMBER" "${hostname^^}" "$RESET"
+    _status_sep    "$bar"
+    _status_body_system  "$bar" "$sep"
+    _status_sep    "$bar"
+    _status_body_network "$bar" "$sep"
+    _status_sep    "$bar"
+    _status_body_compute "$bar" "$sep"
+    _status_body_power   "$bar" "$sep"
 }

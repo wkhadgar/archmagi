@@ -23,7 +23,11 @@ _install_configs() {
     cp -r "$repo"/swaync/. ~/.config/swaync/
 
     mkdir -p ~/.local/bin/archmagi.d
-    cp "$repo/bin/archmagi" ~/.local/bin/archmagi
+    # `install` unlinks the destination first, so the running dispatcher
+    # keeps reading from its still-open inode while the path is repointed
+    # to a fresh one. Plain cp would truncate-and-rewrite in place, which
+    # corrupts an in-flight archmagi mid-execution.
+    install -m 755 "$repo/bin/archmagi" ~/.local/bin/archmagi
     cp -r "$repo"/bin/archmagi.d/. ~/.local/bin/archmagi.d/
 
     mkdir -p ~/wallpapers

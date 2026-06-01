@@ -95,5 +95,5 @@ cmd_profile() {
         return 1
     fi
 
-    printf "PROTOCOL SET > %s -> %s\n" "$current" "$target"
+    printf "PROTOCOL SET ▸ %s → %s\n" "$current" "$target"
 }

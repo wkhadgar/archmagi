@@ -11,6 +11,29 @@ RESET=$'\033[0m'
 
 MAGI_NODES=(casper-3 balthasar-2 melchior-1)
 
+# Persisted host facts from `archmagi install bootstrap`. Empty when the host
+# hasn't been bootstrapped yet.
+ARCHMAGI_PROFILE=""
+ARCHMAGI_HOSTNAME=""
+ARCHMAGI_BOOTLOADER=""
+if [[ -r /etc/archmagi/profile ]]; then
+    while IFS='=' read -r _k _v; do
+        case "$_k" in
+            profile)    ARCHMAGI_PROFILE="$_v"    ;;
+            hostname)   ARCHMAGI_HOSTNAME="$_v"   ;;
+            bootloader) ARCHMAGI_BOOTLOADER="$_v" ;;
+        esac
+    done < /etc/archmagi/profile
+    unset _k _v
+fi
+
+# True when power-profiles-daemon is installed AND its daemon is reachable
+# (the D-Bus call succeeds). Used to gate the profile UI surface so it appears
+# on any host running PPD, regardless of laptop/desktop profile.
+_ppd_available() {
+    command -v powerprofilesctl >/dev/null && powerprofilesctl get >/dev/null 2>&1
+}
+
 # UNKNOWN means the host isn't in `tailscale status` output at all (vs offline).
 _tailnet_state() {
     local host="$1"

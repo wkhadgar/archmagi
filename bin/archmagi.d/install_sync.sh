@@ -37,7 +37,7 @@ _install_sync_file() {
     else
         printf "\n  ${RED}▌${RESET} ${BOLD}new${RESET}    %s\n" "$repo_rel"
     fi
-    printf "  ${RED}▌${RESET} pull live -> repo? [y/N/q] "
+    printf "  ${RED}▌${RESET} pull live → repo? [y/N/q] "
     local ans; read -r ans
     case "$ans" in
         [yY]*)

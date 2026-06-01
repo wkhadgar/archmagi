@@ -26,7 +26,8 @@ ${BOLD}${RED}MAGI SYSTEM${RESET} ${MUTED}// COMMAND INTERFACE${RESET}
     ${AMBER}wallpaper${RESET} [${MUTED}WxH${RESET}]            render boot-background.png at given or auto-detected resolution
     ${AMBER}monitors${RESET}                   regenerate monit.conf from live hyprctl state
     ${AMBER}sync${RESET}                       diff-based pull from live system to repo (skips templated files)
-  ${AMBER}profile${RESET} [${MUTED}target${RESET}]              switch power profile via rofi (or set directly: power-saver|balanced|performance)
-  ${AMBER}help${RESET}                         this message
 EOF
+    _ppd_available && \
+        printf "  ${AMBER}profile${RESET} [${MUTED}target${RESET}]              switch power profile via rofi (or set directly: power-saver|balanced|performance)\n"
+    printf "  ${AMBER}help${RESET}                         this message\n"
 }

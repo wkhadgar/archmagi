@@ -27,13 +27,13 @@ BOLD=$'\033[1m'
 RESET=$'\033[0m'
 
 pass=0; fail=0
-pass() { printf "  ${GREEN}[+]${RESET} %s\n" "$1"; pass=$((pass+1)); }
-fail() { printf "  ${RED}[X]${RESET} %s\n" "$1"   >&2; fail=$((fail+1)); }
+pass() { printf "  ${GREEN}[✓]${RESET} %s\n" "$1"; pass=$((pass+1)); }
+fail() { printf "  ${RED}[✗]${RESET} %s\n" "$1"   >&2; fail=$((fail+1)); }
 
-# -- 1. syntax ----------------------------------------
+
 echo
 printf "  ${RED}▌${RESET} ${BOLD}MAGI SYSTEM${RESET} ${MUTED}// SMOKE TEST${RESET}\n"
-printf "  ${RED}▌${RESET} ${MUTED}---------------------------------${RESET}\n"
+printf "  ${RED}▌${RESET} ${MUTED}─────────────────────────────────${RESET}\n"
 
 for f in "$ARCHMAGI" "$LIB"/*.sh; do
     if bash -n "$f" 2>/dev/null; then pass "syntax: $f"
@@ -41,7 +41,7 @@ for f in "$ARCHMAGI" "$LIB"/*.sh; do
     fi
 done
 
-# -- 2. source-and-defined ----------------------------
+
 # group.sh -> expected function names (space-separated)
 declare -A expected=(
     [fetch]="cmd_fetch _status_body _status_logo_lines"
@@ -65,9 +65,9 @@ for group in "${!expected[@]}"; do
         source "$LIB/$group.sh"
         for fn in ${expected[$group]}; do
             if declare -F "$fn" >/dev/null; then
-                printf "  ${GREEN}[+]${RESET} %s.sh defines %s\n" "$group" "$fn"
+                printf "  ${GREEN}[✓]${RESET} %s.sh defines %s\n" "$group" "$fn"
             else
-                printf "  ${RED}[X]${RESET} %s.sh missing %s\n" "$group" "$fn" >&2
+                printf "  ${RED}[✗]${RESET} %s.sh missing %s\n" "$group" "$fn" >&2
                 exit 1
             fi
         done
@@ -77,7 +77,7 @@ for group in "${!expected[@]}"; do
     fi
 done
 
-# -- 3. end-to-end (safe stdout-only commands) --------
+
 
 # archmagi help: banner present
 if [[ "$($ARCHMAGI help 2>&1)" == *"MAGI SYSTEM"* ]]; then
@@ -87,23 +87,23 @@ fi
 
 # archmagi update check: numeric integer
 out=$($ARCHMAGI update check 2>&1)
-if [[ "$out" =~ ^[0-9]+$ ]]; then pass "update check -> numeric ($out)"
-else                              fail "update check -> '$out' (not numeric)"
+if [[ "$out" =~ ^[0-9]+$ ]]; then pass "update check → numeric ($out)"
+else                              fail "update check → '$out' (not numeric)"
 fi
 
 # archmagi update check -j: JSON keys present
 out=$($ARCHMAGI update check -j 2>&1)
 if [[ "$out" == *'"text":'* && "$out" == *'"alt":'* && "$out" == *'"tooltip":'* && "$out" == *'"class":'* && "$out" == *'"percentage":'* ]]; then
-    pass "update check -j -> JSON with all 5 keys"
+    pass "update check -j → JSON with all 5 keys"
 else
-    fail "update check -j -> '$out'"
+    fail "update check -j → '$out'"
 fi
 
 # archmagi tailnet: `HOST  [STATE]` for one of the three MAGI
 out=$($ARCHMAGI tailnet melchior-1 2>&1)
 if [[ "$out" =~ ^MELCHIOR-1[[:space:]]+\[(ONLINE|OFFLINE|UNKNOWN)\]$ ]]; then
-    pass "tailnet melchior-1 -> '$out'"
-else fail "tailnet melchior-1 -> '$out' (wrong format)"
+    pass "tailnet melchior-1 → '$out'"
+else fail "tailnet melchior-1 → '$out' (wrong format)"
 fi
 
 # archmagi fetch: banner + at least one expected line
@@ -133,7 +133,7 @@ if ! $ARCHMAGI install bogus-sub </dev/null >/dev/null 2>&1; then
 else fail "install bogus-sub should have failed"
 fi
 
-# -- summary ------------------------------------------
+
 total=$((pass + fail))
 echo
 if (( fail == 0 )); then
