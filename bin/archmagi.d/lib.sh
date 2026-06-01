@@ -35,10 +35,15 @@ _ppd_available() {
 }
 
 # UNKNOWN means the host isn't in `tailscale status` output at all (vs offline).
+# $_TAILNET_STATUS_CACHE holds the full `tailscale status` output for the
+# duration of this process; one fork per archmagi invocation regardless of
+# how many MAGI nodes are queried.
+_TAILNET_STATUS_CACHE=""
 _tailnet_state() {
     local host="$1"
+    [[ -z "$_TAILNET_STATUS_CACHE" ]] && _TAILNET_STATUS_CACHE=$(tailscale status 2>/dev/null)
     local line
-    line=$(tailscale status 2>/dev/null | awk -v h="$host" '$2 == h { print; exit }')
+    line=$(awk -v h="$host" '$2 == h { print; exit }' <<<"$_TAILNET_STATUS_CACHE")
     if   [[ -z "$line"      ]]; then echo UNKNOWN
     elif [[ "$line" == *offline* ]]; then echo OFFLINE
     else                                  echo ONLINE
@@ -53,16 +58,22 @@ _pending_counts_cache() {
 }
 
 # Synchronously fetch fresh counts and atomically replace the cache file.
+# Returns 0 on success, non-zero (with $tmp removed) if the write/move failed.
 _pending_counts_fetch() {
     local out=$1 p a tmp
     p=$(checkupdates 2>/dev/null | wc -l)
     a=$(paru -Qua 2>/dev/null | wc -l)
     tmp="$out.$$.tmp"
-    printf '%s %s\n' "$p" "$a" > "$tmp" && mv -f "$tmp" "$out"
+    if printf '%s %s\n' "$p" "$a" > "$tmp" 2>/dev/null && mv -f "$tmp" "$out" 2>/dev/null; then
+        return 0
+    fi
+    rm -f "$tmp" 2>/dev/null
+    return 1
 }
 
 # Stale-while-revalidate: callers always get an instant answer once the cache
-# exists. The first-ever call per host pays the full fetch cost.
+# exists. The first-ever call per host pays the full fetch cost. Output is
+# always "INT INT\n" — falls back to "0 0" when the fetch fails.
 _pending_counts() {
     local cache ttl=300 age
     cache=$(_pending_counts_cache)
@@ -74,6 +85,9 @@ _pending_counts() {
         fi
         return
     fi
-    _pending_counts_fetch "$cache"
-    cat "$cache" 2>/dev/null
+    if _pending_counts_fetch "$cache" && [[ -r "$cache" ]]; then
+        cat "$cache"
+    else
+        echo "0 0"
+    fi
 }

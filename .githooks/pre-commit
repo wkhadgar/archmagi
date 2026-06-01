@@ -10,12 +10,13 @@
 repo_root=$(git rev-parse --show-toplevel) || exit 0
 cd "$repo_root" || exit 0
 
-if ! git diff --cached --name-only --diff-filter=ACMR | grep -qE '^(bin/archmagi(\.d/.*)?|tests/(smoke|units)\.sh)$'; then
+if ! git diff --cached --name-only --diff-filter=ACMR | grep -qE '^(bin/archmagi(\.d/.*)?|tests/.+\.sh)$'; then
     exit 0
 fi
 
 echo "archmagi files staged: running tests..." >&2
-for t in tests/smoke.sh tests/units.sh; do
+for t in tests/*.sh; do
+    [[ "$t" == tests/lib.sh ]] && continue   # harness, not a runner
     if ! ./"$t" >&2; then
         echo                                                       >&2
         echo "$t failed: commit aborted."                          >&2

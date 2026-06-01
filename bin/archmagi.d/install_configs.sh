@@ -7,35 +7,36 @@
 _install_configs() {
     local repo=$1
 
-    sudo cp -r "$repo"/etc/. /etc/
-    sudo cp -r "$repo"/usr/. /usr/
-    sudo chmod +x /usr/local/bin/start-greeter.sh
+    sudo cp -r "$repo"/etc/. /etc/                       || return 1
+    sudo cp -r "$repo"/usr/. /usr/                       || return 1
+    sudo chmod +x /usr/local/bin/start-greeter.sh        || return 1
 
-    mkdir -p ~/.config/{hypr,waybar,rofi,nvim,kitty,tmux,btop,swaync}
-    cp "$repo/.zshrc" ~/.zshrc
-    cp -r "$repo"/hypr/. ~/.config/hypr/
-    cp -r "$repo"/waybar/. ~/.config/waybar/
-    cp -r "$repo"/rofi/. ~/.config/rofi/
-    cp -r "$repo"/nvim/. ~/.config/nvim/
-    cp -r "$repo"/kitty/. ~/.config/kitty/
-    cp -r "$repo"/tmux/. ~/.config/tmux/
-    cp -r "$repo"/btop/. ~/.config/btop/
-    cp -r "$repo"/swaync/. ~/.config/swaync/
+    mkdir -p ~/.config/{hypr,waybar,rofi,nvim,kitty,tmux,btop,swaync} || return 1
+    cp "$repo/.zshrc" ~/.zshrc                           || return 1
+    cp -r "$repo"/hypr/. ~/.config/hypr/                 || return 1
+    cp -r "$repo"/waybar/. ~/.config/waybar/             || return 1
+    cp -r "$repo"/rofi/. ~/.config/rofi/                 || return 1
+    cp -r "$repo"/nvim/. ~/.config/nvim/                 || return 1
+    cp -r "$repo"/kitty/. ~/.config/kitty/               || return 1
+    cp -r "$repo"/tmux/. ~/.config/tmux/                 || return 1
+    cp -r "$repo"/btop/. ~/.config/btop/                 || return 1
+    cp -r "$repo"/swaync/. ~/.config/swaync/             || return 1
 
-    mkdir -p ~/.local/bin/archmagi.d
+    mkdir -p ~/.local/bin/archmagi.d                     || return 1
     # `install` unlinks the destination first, so the running dispatcher
     # keeps reading from its still-open inode while the path is repointed
     # to a fresh one. Plain cp would truncate-and-rewrite in place, which
     # corrupts an in-flight archmagi mid-execution.
-    install -m 755 "$repo/bin/archmagi" ~/.local/bin/archmagi
-    cp -r "$repo"/bin/archmagi.d/. ~/.local/bin/archmagi.d/
+    install -m 755 "$repo/bin/archmagi" ~/.local/bin/archmagi || return 1
+    cp -r "$repo"/bin/archmagi.d/. ~/.local/bin/archmagi.d/   || return 1
 
-    mkdir -p ~/wallpapers
-    cp "$repo/wallpapers/nerv-wallpaper.png" ~/wallpapers/
-    mkdir -p ~/images/screenshots
+    mkdir -p ~/wallpapers                                || return 1
+    cp "$repo/wallpapers/nerv-wallpaper.png" ~/wallpapers/ || return 1
+    mkdir -p ~/images/screenshots                        || return 1
 
     sudo find /etc -name '*.tmpl' -delete 2>/dev/null
     find ~/.config -name '*.tmpl' -delete 2>/dev/null
+    return 0
 }
 
 # Locate the archmagi repo root by looking for a known template.

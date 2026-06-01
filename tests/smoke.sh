@@ -15,32 +15,18 @@
 set -u
 cd "$(dirname "$(readlink -f "$0")")/.."
 
+source tests/lib.sh
+
 ARCHMAGI=./bin/archmagi
 LIB=./bin/archmagi.d
 
-# Colors: mirror bin/archmagi.d/lib.sh so the report fits the aesthetic.
-RED=$'\033[38;2;204;0;0m'
-AMBER=$'\033[38;2;255;191;0m'
-GREEN=$'\033[38;2;123;216;143m'
-MUTED=$'\033[38;2;102;102;102m'
-BOLD=$'\033[1m'
-RESET=$'\033[0m'
-
-pass=0; fail=0
-pass() { printf "  ${GREEN}[✓]${RESET} %s\n" "$1"; pass=$((pass+1)); }
-fail() { printf "  ${RED}[✗]${RESET} %s\n" "$1"   >&2; fail=$((fail+1)); }
-
-
-echo
-printf "  ${RED}▌${RESET} ${BOLD}MAGI SYSTEM${RESET} ${MUTED}// SMOKE TEST${RESET}\n"
-printf "  ${RED}▌${RESET} ${MUTED}─────────────────────────────────${RESET}\n"
+test_banner "SMOKE TEST"
 
 for f in "$ARCHMAGI" "$LIB"/*.sh; do
     if bash -n "$f" 2>/dev/null; then pass "syntax: $f"
     else                              fail "syntax: $f"
     fi
 done
-
 
 # group.sh -> expected function names (space-separated)
 declare -A expected=(
@@ -50,7 +36,7 @@ declare -A expected=(
     [confirm]="cmd_confirm"
     [power]="cmd_lock cmd_reboot cmd_exit cmd_shutdown _graceful_close"
     [restart]="cmd_restart _restart_waybar _restart_xdph"
-    [install]="cmd_install _install_boot _install_bootstrap _install_redeploy _install_monitors _install_sync _install_sync_file _install_sync_tree _install_sync_excluded _install_detect_profile _install_detect_bootloader _install_prompt_hostname _install_prompt_profile_role _install_prompt_confirm _install_substitute _install_configs _install_find_repo _install_packages _install_wallpaper _wallpaper_detect_resolution _boot_grub _boot_limine _monitors_prompt_scale _monitors_clean_scale"
+    [install]="cmd_install _install_boot _install_bootstrap _install_redeploy _install_hostname_templates _install_monitors _install_sync _install_sync_file _install_sync_tree _install_sync_excluded _install_detect_profile _install_detect_bootloader _install_prompt_hostname _install_prompt_profile_role _install_prompt_confirm _install_substitute _install_configs _install_find_repo _install_packages _install_wallpaper _wallpaper_detect_resolution _boot_grub _boot_limine _monitors_prompt_scale _monitors_clean_scale"
     [cheatsheet]="cmd_cheatsheet"
     [tmux]="cmd_tmux _tmux_attach"
     [profile]="cmd_profile _profile_pick _profile_center"
@@ -76,8 +62,6 @@ for group in "${!expected[@]}"; do
     else                   fail=$((fail+1))
     fi
 done
-
-
 
 # archmagi help: banner present
 if [[ "$($ARCHMAGI help 2>&1)" == *"MAGI SYSTEM"* ]]; then
@@ -120,26 +104,11 @@ else fail "unknown top-level should have failed"
 fi
 
 # unknown subcommand: non-zero exit
-if ! $ARCHMAGI update bogus-sub </dev/null >/dev/null 2>&1; then
-    pass "unknown update subcommand exits non-zero"
-else fail "update bogus-sub should have failed"
-fi
-if ! $ARCHMAGI restart bogus-sub </dev/null >/dev/null 2>&1; then
-    pass "unknown restart subcommand exits non-zero"
-else fail "restart bogus-sub should have failed"
-fi
-if ! $ARCHMAGI install bogus-sub </dev/null >/dev/null 2>&1; then
-    pass "unknown install subcommand exits non-zero"
-else fail "install bogus-sub should have failed"
-fi
+for sub in update restart install; do
+    if ! $ARCHMAGI "$sub" bogus-sub </dev/null >/dev/null 2>&1; then
+        pass "unknown $sub subcommand exits non-zero"
+    else fail "$sub bogus-sub should have failed"
+    fi
+done
 
-
-total=$((pass + fail))
-echo
-if (( fail == 0 )); then
-    printf "  ${RED}▌${RESET} ${BOLD}PATTERN GREEN${RESET} ${MUTED}//${RESET} %d/%d passed\n\n" "$pass" "$total"
-    exit 0
-else
-    printf "  ${RED}▌${RESET} ${BOLD}${RED}PATTERN RED${RESET} ${MUTED}//${RESET} %d/%d passed, ${RED}%d failed${RESET}\n\n" "$pass" "$total" "$fail" >&2
-    exit 1
-fi
+test_summary

@@ -60,10 +60,7 @@ _install_bootstrap() {
     _install_configs "$repo"
     printf "  %s deployed generic configs from ${AMBER}%s${RESET}\n" "$bar" "$repo"
 
-    local hostname_upper=${hostname^^}
-    _install_substitute "$repo/etc/hostname.tmpl"             /etc/hostname                            HOSTNAME="$hostname"
-    _install_substitute "$repo/etc/hosts.tmpl"                /etc/hosts                               HOSTNAME="$hostname"
-    _install_substitute "$repo/hypr/hyprlock.conf.tmpl"       "$HOME/.config/hypr/hyprlock.conf"       HOSTNAME_UPPER="$hostname_upper"
+    _install_hostname_templates "$repo" "$hostname"
     _install_substitute "$repo/hypr/hyprland/monit.conf.tmpl" "$HOME/.config/hypr/hyprland/monit.conf"
     printf "  %s wrote host-specific files from templates\n" "$bar"
 
@@ -86,18 +83,24 @@ _install_bootstrap() {
 # Skips monit.conf.tmpl because the live monit.conf is owned by `install monitors`.
 _install_redeploy() {
     local bar="${RED}▌${RESET}"
-    local repo profile hostname bootloader
+    local repo
     repo=$(_install_find_repo) || return 1
-    [[ -r /etc/archmagi/profile ]] || {
-        echo "  $bar /etc/archmagi/profile missing; run 'archmagi install bootstrap' first" >&2
+    [[ -n "$ARCHMAGI_HOSTNAME" ]] || {
+        echo "  $bar /etc/archmagi/profile missing or invalid; run 'archmagi install bootstrap' first" >&2
         return 1
     }
-    source /etc/archmagi/profile
 
-    _install_configs "$repo"
-    local hostname_upper=${hostname^^}
+    _install_configs "$repo" || return 1
+    _install_hostname_templates "$repo" "$ARCHMAGI_HOSTNAME" || return 1
+    printf "  %s redeployed configs from ${AMBER}%s${RESET}\n" "$bar" "$repo"
+}
+
+# Render the three hostname-bound templates (hostname, hosts, hyprlock identity).
+# Shared by bootstrap and redeploy; monit.conf.tmpl is intentionally excluded
+# because the live monit.conf is owned by `archmagi install monitors`.
+_install_hostname_templates() {
+    local repo=$1 hostname=$2 hostname_upper=${2^^}
     _install_substitute "$repo/etc/hostname.tmpl"       /etc/hostname                      HOSTNAME="$hostname"
     _install_substitute "$repo/etc/hosts.tmpl"          /etc/hosts                         HOSTNAME="$hostname"
     _install_substitute "$repo/hypr/hyprlock.conf.tmpl" "$HOME/.config/hypr/hyprlock.conf" HOSTNAME_UPPER="$hostname_upper"
-    printf "  %s redeployed configs from ${AMBER}%s${RESET}\n" "$bar" "$repo"
 }
