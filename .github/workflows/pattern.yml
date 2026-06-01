@@ -1,0 +1,25 @@
+name: PATTERN
+
+on:
+  push:
+    paths:
+      - 'bin/archmagi'
+      - 'bin/archmagi.d/**'
+      - 'tests/**'
+      - '.github/workflows/pattern.yml'
+  pull_request:
+    paths:
+      - 'bin/archmagi'
+      - 'bin/archmagi.d/**'
+      - 'tests/**'
+      - '.github/workflows/pattern.yml'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: tests/smoke.sh
+        run: ./tests/smoke.sh
+      - name: tests/units.sh
+        run: ./tests/units.sh

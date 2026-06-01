@@ -1,8 +1,8 @@
 #!/bin/bash
 # .githooks/pre-commit
 #
-# Runs tests/smoke.sh when any magi-related file is staged. Other commits
-# pass through instantly. Enable with:
+# Runs tests/smoke.sh and tests/units.sh when any archmagi-related file is
+# staged. Other commits pass through instantly. Enable with:
 #     git config core.hooksPath .githooks
 #
 # Bypass for one commit with:  git commit --no-verify
@@ -10,17 +10,18 @@
 repo_root=$(git rev-parse --show-toplevel) || exit 0
 cd "$repo_root" || exit 0
 
-# Trigger only if magi (or the smoke test itself) is in this commit.
-if ! git diff --cached --name-only --diff-filter=ACMR | grep -qE '^(bin/magi(\.d/.*)?|tests/smoke\.sh)$'; then
+if ! git diff --cached --name-only --diff-filter=ACMR | grep -qE '^(bin/archmagi(\.d/.*)?|tests/(smoke|units)\.sh)$'; then
     exit 0
 fi
 
-echo "magi files staged — running smoke test…" >&2
-if ! ./tests/smoke.sh >&2; then
-    echo                                                          >&2
-    echo "magi smoke test failed — commit aborted."               >&2
-    echo "Fix the failure or skip with: git commit --no-verify."  >&2
-    exit 1
-fi
+echo "archmagi files staged: running tests..." >&2
+for t in tests/smoke.sh tests/units.sh; do
+    if ! ./"$t" >&2; then
+        echo                                                       >&2
+        echo "$t failed: commit aborted."                          >&2
+        echo "Fix the failure or skip with: git commit --no-verify." >&2
+        exit 1
+    fi
+done
 
 exit 0

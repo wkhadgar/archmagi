@@ -1,0 +1,106 @@
+* {
+    bg0:    #0d0d0dF2;
+    bg1:    #1a1a1a;
+    bg2:    #1f1f1f;
+    bg3:    #ffbf00;
+    bg4:    #cc0000;
+    fg0:    #eeeeee;
+    fg1:    #ffbf00;
+    fg2:    #666666;
+    fg3:    #444444;
+}
+
+* {
+    font:               "JetBrains Mono 12";
+    background-color:   transparent;
+    text-color:         @fg0;
+    margin:             0px;
+    padding:            0px;
+    spacing:            0px;
+}
+
+window {
+    location:           north;
+    y-offset:           calc(50% - 180px);
+    border-radius:      0px;
+    border:             1px;
+    border-color:       @bg4;
+    width:              480;
+    height:             320;
+    background-color:   @bg0;
+}
+
+mainbox {
+    padding:            12px;
+    orientation:        vertical;
+    children:           [ message, listview , textbox-footer];
+}
+
+message {
+    background-color:   @bg1;
+    border:             1px;
+    border-color:       @bg4;
+    border-radius:      0px;
+    padding:            0px;
+}
+
+textbox {
+    padding:            10px 16px;
+    horizontal-align:   0.5;
+    text-color:         @bg4;
+    font:               "JetBrains Mono Bold 12";
+    letter-spacing:     2;
+}
+
+listview {
+    background-color:   transparent;
+    margin:             8px 0 0;
+    columns:            1;
+    lines:              3;
+    fixed-height:       true;
+    scrollbar:          false;
+    spacing:            4px;
+}
+
+element {
+    padding:            7px 16px;
+    spacing:            8px;
+    border-radius:      0px;
+    border:             0px 0px 0px 2px;
+    border-color:       transparent;
+}
+
+element normal normal {
+    text-color:         @fg2;
+}
+
+element selected normal {
+    background-color:   transparent;
+    border-color:       @bg3;
+    text-color:         @bg3;
+}
+
+element selected active {
+    background-color:   transparent;
+    border-color:       @bg4;
+    text-color:         @bg4;
+}
+
+element-text {
+    horizontal-align:   0.5;
+    text-color:         inherit;
+    padding:            3px 0px;
+    vertical-align:     0.5;
+}
+
+textbox-footer {
+    expand:             false;
+    str:                "CASPER · BALTHASAR · MELCHIOR";
+    text-color:         @fg3;
+    font:               "JetBrains Mono 9";
+    horizontal-align:   0.5;
+    padding:            6px 0px 0px;
+    border:             1px 0px 0px 0px;
+    border-color:       @bg2;
+    background-color:   transparent;
+}

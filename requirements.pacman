@@ -13,7 +13,6 @@ discord
 docker
 doxygen
 efibootmgr
-fastfetch
 fd
 firefox
 fzf
@@ -25,6 +24,7 @@ grub
 gvfs
 hypridle
 hyprland
+imagemagick
 hyprland-protocols
 hyprlock
 hyprpaper
@@ -33,6 +33,7 @@ hyprshot
 hyprshutdown
 hyprwayland-scanner
 intel-ucode
+jq
 just
 kitty
 lazygit
@@ -45,7 +46,6 @@ mandoc
 neovim
 networkmanager
 nodejs
-noto-color-emoji-fontconfig
 noto-fonts
 noto-fonts-cjk
 npm
@@ -58,10 +58,11 @@ pavucontrol
 pipewire-alsa
 pipewire-libcamera
 pipewire-pulse
+power-profiles-daemon
 ppp
 pulsemixer
+python-gobject
 python-pywal
-python312
 qemu-system-arm
 rlwrap
 rofi
@@ -87,7 +88,6 @@ wireshark-cli
 xdg-desktop-portal-gtk
 xdg-desktop-portal-hyprland
 xorg-xkill
-xwaylandvideobridge
 yazi
 zip
 zsh

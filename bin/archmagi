@@ -1,0 +1,32 @@
+#!/bin/bash
+# archmagi: unified NERV/MAGI command interface (dispatcher).
+# Each command group lives in bin/archmagi.d/<group>.sh and is sourced on demand.
+# Shared palette + helpers come from bin/archmagi.d/lib.sh.
+
+ARCHMAGI_LIB="${ARCHMAGI_LIB:-$(dirname "$(readlink -f "$0")")/archmagi.d}"
+[[ -d $ARCHMAGI_LIB ]] || { echo "archmagi: lib dir not found at $ARCHMAGI_LIB" >&2; exit 1; }
+
+source "$ARCHMAGI_LIB/lib.sh"
+
+# `source` runs at top scope here: `declare -A` inside a sourced file is
+# function-local to its caller, so profile.sh's associative arrays would
+# disappear before the subcommand uses them.
+
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+    fetch|tailnet|update|confirm|restart|install|cheatsheet|tmux|hud)
+        source "$ARCHMAGI_LIB/$cmd.sh"; "cmd_$cmd" "$@" ;;
+    profile)
+        _ppd_available || {
+            echo "archmagi: profile requires power-profiles-daemon to be running" >&2; exit 1
+        }
+        source "$ARCHMAGI_LIB/profile.sh"; cmd_profile "$@" ;;
+    lock|reboot|exit|shutdown)
+        source "$ARCHMAGI_LIB/power.sh"; "cmd_$cmd" "$@" ;;
+    help|-h|--help)
+        source "$ARCHMAGI_LIB/help.sh"; cmd_help ;;
+    *)
+        echo "archmagi: unknown command: $cmd" >&2
+        source "$ARCHMAGI_LIB/help.sh"; cmd_help >&2
+        exit 1 ;;
+esac

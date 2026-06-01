@@ -5,7 +5,7 @@
 
   "modules-left": ["custom/nerv", "mpris", ],
   "modules-center": ["hyprland/workspaces",],
-  "modules-right": ["tray", "custom/div", "wireplumber", "network", "bluetooth", "clock", "custom/updates", "group/group-power",],
+  "modules-right": ["tray", "custom/div", "wireplumber", "network", "bluetooth", "battery", "clock", "custom/updates", "group/group-power",],
 
   "custom/nerv": {
     "format": " NERV ",
@@ -17,7 +17,7 @@
   },
 
   "custom/updates" : {
-    "exec": "~/.local/bin/magi update check -j",
+    "exec": "~/.local/bin/archmagi update check -j",
     "return-type": "json",
     "format": "{icon} {alt}",
     "format-icons": [
@@ -43,7 +43,7 @@
       "<span color='#b71c1c'>󰚰</span>"  // 20. Bordô (Situação Crítica)
     ],
     "interval": 3600,
-    "on-click": "kitty -e ~/.local/bin/magi update; ~/.local/bin/magi restart waybar",
+    "on-click": "kitty -e ~/.local/bin/archmagi update; ~/.local/bin/archmagi restart waybar",
     "hide-empty-text": true,
   },
 
@@ -62,19 +62,13 @@
     "window-rewrite-default": "",
     "window-rewrite": {
       "discord": " ",
-      "title<✳ (.*)>": "",
       "title<.*nvim.*>": "",
-      "chrome": "",
-      "(.*) — Mozilla Firefox":"󰈹",
+      "firefox":"󰈹",
       "title<.*github.*>": "",
       "kitty": "",
-      "clion": "󰬊󰬓󰬐󰬖󰬕",
-      "Microsoft Teams": "󰊻",
-      "Telegram": "",
-      "Dolphin": "",
-      "Chromium-browser": "󱖑",
+      "archmagi-hud": "󰣖",
+      "org\\.telegram\\.desktop": "",
       "Spotify": "",
-      "steam": "",
     },
   },
 
@@ -113,6 +107,20 @@
     "on-click": "kitty pulsemixer",
     "max-volume": 100,
     "scroll-step": 5
+  },
+
+  "battery": {
+    "interval": 30,
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-full": "󰁹 {capacity}%",
+    "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+    "tooltip-format": "{timeTo} — {power:.1f}W",
+    "on-click": "~/.local/bin/archmagi profile",
   },
 
   "clock": {
@@ -168,24 +176,24 @@
   "custom/lock": {
     "format": "󰍁",
     "tooltip": false,
-    "on-click": "~/.local/bin/magi lock"
+    "on-click": "~/.local/bin/archmagi lock"
   },
 
   "custom/reboot": {
     "format": "󰜉",
     "tooltip": false,
-    "on-click": "~/.local/bin/magi reboot"
+    "on-click": "~/.local/bin/archmagi reboot"
   },
 
   "custom/exit": {
     "format": "󰗼",
     "tooltip": false,
-    "on-click": "~/.local/bin/magi exit"
+    "on-click": "~/.local/bin/archmagi exit"
   },
 
   "custom/power": {
     "format": " ",
     "tooltip": false,
-    "on-click": "~/.local/bin/magi shutdown"
+    "on-click": "~/.local/bin/archmagi shutdown"
   },
 }
