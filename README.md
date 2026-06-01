@@ -33,17 +33,17 @@ chsh -s $(which zsh)
 
 After install, `archmagi` lives at `~/.local/bin/archmagi` (a thin dispatcher) with its command libraries under `~/.local/bin/archmagi.d/` (sourced on demand). Run `archmagi help` for the full list. Highlights:
 
-- `archmagi fetch` — NERV-themed system overview (host, tailnet, updates, system, compute, power); also the top-level shell greeter
-- `archmagi hud` — toggle a floating live `fetch` panel in a kitty popup (bound to `Super+F`)
-- `archmagi update [run|check [-j]]` — interactive `paru -Syu` wrapper (`run` is the default); `check` returns pending count from a stale-while-revalidate cache
-- `archmagi profile [target]` — power-profiles-daemon picker via rofi (laptop only), or set directly with `power-saver|balanced|performance`
-- `archmagi cheatsheet` — rofi popup of all Hyprland keybindings (also bound to `SUPER+?`)
-- `archmagi tmux <attach|list|switch|detach|kill>` — tmux session control (default session name `MAGI`); `switch` uses fzf to pick
-- `archmagi lock` / `reboot` / `exit` / `shutdown` — power actions, gated by the MAGI consensus dialog. The exit/reboot/shutdown trio chain through `hyprshutdown` (pulled in by `requirements.pacman`) so apps close cleanly before the system command fires.
-- `archmagi restart <waybar|xdph>` — kill + relaunch a desktop service
-- `archmagi install <bootstrap|boot|wallpaper|monitors|sync>` — bootstrap a fresh host, (re)apply the NERV bootloader theme, (re)render the boot wallpaper, regenerate `monit.conf` from live hyprctl state, or diff-based pull changes from the live system back into the repo
+- `archmagi fetch`: NERV-themed system overview (host, tailnet, updates, system, compute, power); also the top-level shell greeter
+- `archmagi hud`: toggle a floating live `fetch` panel in a kitty popup (bound to `Super+F`)
+- `archmagi update [run|check [-j]]`: interactive `paru -Syu` wrapper (`run` is the default); `check` returns pending count from a stale-while-revalidate cache
+- `archmagi profile [target]`: power-profiles-daemon picker via rofi (laptop only), or set directly with `power-saver|balanced|performance`
+- `archmagi cheatsheet`: rofi popup of all Hyprland keybindings (also bound to `SUPER+?`)
+- `archmagi tmux <attach|list|switch|detach|kill>`: tmux session control (default session name `MAGI`); `switch` uses fzf to pick
+- `archmagi lock` / `reboot` / `exit` / `shutdown`: power actions, gated by the MAGI consensus dialog. The exit/reboot/shutdown trio chain through `hyprshutdown` so apps close cleanly before the system command fires.
+- `archmagi restart <waybar|xdph>`: kill + relaunch a desktop service
+- `archmagi install <bootstrap|boot|wallpaper|monitors|sync>`: bootstrap a fresh host, (re)apply the NERV bootloader theme, (re)render the boot wallpaper, regenerate `monit.conf` from live hyprctl state, or diff-based pull changes from the live system back into the repo
 
-The boot wallpaper at `/usr/share/nerv/boot-background.png` is rendered by `_install_wallpaper` at bootstrap time at the host's auto-detected resolution (hyprctl when up, `/sys/class/drm/*/modes` pre-Hyprland, `1920x1080` fallback). It's read by both GRUB and limine. Re-render at any time:
+The boot wallpaper at `/usr/share/nerv/boot-background.png` is rendered at bootstrap from the host's auto-detected resolution (hyprctl when up, `/sys/class/drm/*/modes` otherwise, `1920x1080` fallback). It's read by both GRUB and limine. Re-render at any time:
 
 ```bash
 archmagi install wallpaper            # auto-detect
@@ -61,7 +61,7 @@ Before deploying changes to `archmagi`, run the smoke test against the in-repo v
 tests/smoke.sh
 ```
 
-It bash-syntax-checks every shipped script, sources each `archmagi.d/<group>.sh` to confirm the expected `cmd_*` functions are defined, and end-to-end-invokes the safe-to-call commands (`help`, `fetch`, `tailnet`, `update check`). Destructive commands (`reboot`, `restart waybar`, `install boot`, etc.) are only checked at the function-defined level — never actually invoked. `PATTERN GREEN` on full pass; `PATTERN RED` with details on failure.
+It bash-syntax-checks every shipped script, sources each `archmagi.d/<group>.sh` to confirm the expected `cmd_*` functions are defined, and end-to-end-invokes the safe-to-call commands (`help`, `fetch`, `tailnet`, `update check`). Destructive commands (`reboot`, `restart waybar`, `install boot`, etc.) are only checked at the function-defined level; never invoked. `PATTERN GREEN` on full pass; `PATTERN RED` with details on failure.
 
 To run it automatically before every commit that touches `bin/archmagi*` or the test itself, enable the tracked pre-commit hook **once per clone**:
 
@@ -75,7 +75,7 @@ Bypass for a single commit with `git commit --no-verify`.
 
 ## Sync back (if anything changed)
 
-`archmagi install sync` walks the live → repo file map, shows a unified diff per drift, and prompts `[y/N/q]` per file. Templated files (`etc/hostname`, `etc/hosts`, `hypr/hyprlock.conf`, `hypr/hyprland/monit.conf`, and any `*.tmpl`) are skipped — those flow the other direction.
+`archmagi install sync` walks the live -> repo file map, shows a unified diff per drift, and prompts `[y/N/q]` per file. Templated files (`etc/hostname`, `etc/hosts`, `hypr/hyprlock.conf`, `hypr/hyprland/monit.conf`, and any `*.tmpl`) are skipped; those flow the other direction.
 
 ```bash
 cd dotfiles
@@ -92,5 +92,5 @@ git push
 
 - Enable greetd: `sudo systemctl enable greetd`
 - Check monitor names with `hyprctl monitors | grep Monitor`, then update **both** `hypr/hyprland/monit.conf` (resolution/position/scale that Hyprland actually uses) and `hypr/hyprpaper.conf` (wallpaper bindings per monitor)
-- The boot wallpaper is rendered at bootstrap from the host's auto-detected resolution; override with `archmagi install wallpaper <WxH>` then `archmagi install boot` if the detected value was wrong
+- The boot wallpaper is rendered at bootstrap from the host's auto-detected resolution; override with `archmagi install wallpaper <WxH>` then `archmagi install boot` if the detected value is wrong
 - `atuin` must remain the last line of `.zshrc`

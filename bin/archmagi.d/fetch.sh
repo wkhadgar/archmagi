@@ -1,7 +1,6 @@
-# archmagi status — NERV-themed terminal overview.
+# archmagi fetch: NERV-themed terminal overview.
 # Each field gatherer returns empty when its source is missing; cmd_fetch
-# skips empty rows so the same code degrades gracefully across hosts
-# (desktop with no battery, server with no Hyprland, etc.).
+# skips empty rows so the same code runs across desktop/laptop/server.
 
 _status_row() {
     local bar="$1" sep="$2" label="$3" value="$4"
@@ -11,7 +10,7 @@ _status_row() {
 }
 
 _status_sep() {
-    printf "  %s %s─────────────────────────────────%s\n" "$1" "$MUTED" "$RESET"
+    printf "  %s %s---------------------------------%s\n" "$1" "$MUTED" "$RESET"
 }
 
 # 8 logo lines, each padded to 38 visible cells so the status column lines up.
@@ -24,7 +23,7 @@ _status_logo_lines() {
     printf '%s   ██║╚██╔╝██║██╔══██║██║   ██║██║    %s\n' "$BOLD$RED" "$RESET"
     printf '%s   ██║ ╚═╝ ██║██║  ██║╚██████╔╝██║    %s\n' "$BOLD$RED" "$RESET"
     printf '%s   ╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝    %s\n' "$BOLD$RED" "$RESET"
-    printf '%s   ────────────────────────────────   %s\n' "$MUTED"    "$RESET"
+    printf '%s   --------------------------------   %s\n' "$MUTED"    "$RESET"
     local node="          NODE: $n"
     local pad=$(( 38 - ${#node} ))
     (( pad < 0 )) && pad=0
@@ -63,7 +62,6 @@ _status_bar() {
     printf '%s%s%s%s%s' "$color" "$f" "$MUTED" "$e" "$RESET"
 }
 
-# Bar followed by the percent (also threshold-colored).
 _status_meter() {
     local pct=$1 mode=${2:-high_bad}
     local color
@@ -141,7 +139,7 @@ _status_cpu_temp() {
         done
         [[ -z "$raw" && -r "$h/temp1_input" ]] && raw=$(<"$h/temp1_input")
 
-        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))°C"; return; }
+        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))C"; return; }
     done
 
     # ARM SBC / embedded fallback. Tighten the type match so wifi/battery
@@ -155,7 +153,7 @@ _status_cpu_temp() {
             *) continue ;;
         esac
         raw=$(<"$z/temp")
-        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))°C"; return; }
+        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))C"; return; }
     done
 }
 
@@ -192,7 +190,7 @@ _status_protocol() {
         performance) nerv="SYNAPSE MAX" ;;
     esac
     if [[ -n "$nerv" ]]; then
-        printf '%s · %s%s%s' "${p^^}" "$AMBER" "$nerv" "$RESET"
+        printf '%s | %s%s%s' "${p^^}" "$AMBER" "$nerv" "$RESET"
     else
         echo "${p^^}"
     fi
@@ -205,8 +203,8 @@ _status_battery() {
     cap=$(<"$bat/capacity")
     [[ -r "$bat/status" ]] && status=$(<"$bat/status")
     case "$status" in
-        Charging)    arrow="${GREEN}↑${RESET}" ;;
-        Discharging) arrow="${AMBER}↓${RESET}" ;;
+        Charging)    arrow="${GREEN}^${RESET}" ;;
+        Discharging) arrow="${AMBER}v${RESET}" ;;
     esac
     [[ -r "$bat/power_now" ]] && pow_uw=$(<"$bat/power_now")
     local meter
@@ -225,7 +223,7 @@ _status_display() {
     hyprctl monitors 2>/dev/null | awk '
         function flush() {
             if (focused == "yes" && resolution != "") {
-                printf "%s · %s@%dHz x%s\n", name, resolution, refresh, scale
+                printf "%s | %s@%dHz x%s\n", name, resolution, refresh, scale
             }
         }
         /^Monitor / {
@@ -244,9 +242,9 @@ _status_display() {
 }
 
 cmd_fetch() {
-    # Frame is built in subshells then pasted into two columns: logo left,
-    # status right. Atomic flush so slow helpers (tailscale, lspci) don't
-    # cause mid-render blanks in the HUD watch-loop.
+    # Frame is built in a subshell then printed in one shot: two columns
+    # (logo left, status right). Atomic flush so the HUD watch-loop always
+    # sees a complete frame even when tailscale/lspci are slow.
     local hostname
     hostname=$(uname -n)
     hostname=${hostname%%.*}
@@ -287,7 +285,7 @@ _status_body() {
         "$bar" "$BOLD" "$RED" "$RESET" "$sep" "$AMBER" "${hostname^^}" "$RESET"
     _status_sep "$bar"
 
-    # ── system ──
+    # -- system --
     v=$(_status_os);       [[ -n "$v" ]] && _status_row "$bar" "$sep" "OS"       "$v"
     v=$(_status_kernel);   [[ -n "$v" ]] && _status_row "$bar" "$sep" "KERNEL"   "$v"
     v=$(_status_hyprland); [[ -n "$v" ]] && _status_row "$bar" "$sep" "HYPRLAND" "$v"
@@ -295,7 +293,7 @@ _status_body() {
     v=$(uptime -p | sed 's/^up //'); _status_row "$bar" "$sep" "UPTIME" "$v"
     _status_sep "$bar"
 
-    # ── network ──
+    # -- network --
     printf "  %s %sTAILNET%s    %s\n" "$bar" "$RED" "$RESET" "$sep"
     local node state color
     for node in "${MAGI_NODES[@]}"; do
@@ -321,14 +319,14 @@ _status_body() {
     _status_row "$bar" "$sep" "UPDATES" "$updates"
     _status_sep "$bar"
 
-    # ── compute (bar meters + raw values) ──
+    # -- compute (bar meters + raw values) --
     local cpu_pct cpu_temp cpu_model cpu_line
     cpu_pct=$(_status_cpu_pct)
     cpu_temp=$(_status_cpu_temp)
     cpu_model=$(_status_cpu_model)
     cpu_line="$(_status_meter "${cpu_pct:-0}")"
     [[ -n "$cpu_model" ]] && cpu_line+="  $cpu_model"
-    [[ -n "$cpu_temp"  ]] && cpu_line+=" · $cpu_temp"
+    [[ -n "$cpu_temp"  ]] && cpu_line+=" | $cpu_temp"
     _status_row "$bar" "$sep" "CPU" "$cpu_line"
 
     v=$(_status_gpu);  [[ -n "$v" ]] && _status_row "$bar" "$sep" "GPU"  "$v"
@@ -348,7 +346,7 @@ _status_body() {
     load_raw=$(_status_load)
     _status_row "$bar" "$sep" "LOAD" "$(_status_meter "${load_pct:-0}")  $load_raw"
 
-    # ── power (only if any field exists) ──
+    # -- power (only if any field exists) --
     local proto batt disp
     proto=$(_status_protocol)
     batt=$(_status_battery)

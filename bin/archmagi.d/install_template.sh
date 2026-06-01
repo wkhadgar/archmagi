@@ -1,8 +1,9 @@
 # Template substitution for `archmagi install bootstrap`.
 
 # Substitute __KEY__ placeholders in a template, write the result atomically.
-# Uses bash string substitution (no sed) so values with special chars survive
-# without escaping. Writes go through sudo when dest is under /etc, /usr, /boot.
+# Substitution uses bash string replacement so values with special characters
+# survive without escaping. Writes go through sudo when dest is under /etc,
+# /usr, or /boot.
 # @param 1 source template path
 # @param 2 destination path
 # @param 3+ KEY=value substitution pairs

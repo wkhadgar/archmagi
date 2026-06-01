@@ -1,4 +1,4 @@
-# archmagi — shared palette, constants, and cross-group helpers.
+# archmagi: shared palette, constants, and cross-group helpers.
 # Sourced unconditionally by bin/archmagi before any command-group library.
 
 RED=$'\033[38;2;204;0;0m'

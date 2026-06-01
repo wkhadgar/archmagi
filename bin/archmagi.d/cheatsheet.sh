@@ -1,4 +1,4 @@
-# archmagi cheatsheet — rofi popup of all `bind = ` lines from binds.conf, with
+# archmagi cheatsheet: rofi popup of all `bind = ` lines from binds.conf, with
 # variable substitution, ~/.local/bin/ stripping, key prettification, and
 # workspace-1..9 / shift-1..9 binds filtered out. A trailing `# desc: ...`
 # comment on a bind line overrides the default action-derived description.
@@ -47,10 +47,10 @@ cmd_cheatsheet() {
                 mod = trim(mod)
             }
             else if (key == "slash")   key = "/"
-            else if (key == "left")    key = "←"
-            else if (key == "right")   key = "→"
-            else if (key == "up")      key = "↑"
-            else if (key == "down")    key = "↓"
+            else if (key == "left")    key = "<-"
+            else if (key == "right")   key = "->"
+            else if (key == "up")      key = "^"
+            else if (key == "down")    key = "v"
             else if (key == "PRINT")   key = "PrtSc"
             else if (key == "SUPER_L") key = "Super"
 
@@ -67,7 +67,7 @@ cmd_cheatsheet() {
             sub("^" ENVIRON["HOME"] "/\\.local/bin/", "", desc)
             sub(/^~\/\.local\/bin\//, "", desc)
 
-            printf "%-25s →  %s\n", combo, desc
+            printf "%-25s ->  %s\n", combo, desc
         }
     ' "$binds_file" | rofi -dmenu -i -p "MAGI BINDS" \
         -config "$HOME/.config/rofi/config.rasi" \

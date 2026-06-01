@@ -1,9 +1,6 @@
 # Interactive TTY prompts used by `archmagi install bootstrap`.
-#
-# Prompts write their UI directly to stdout and store the chosen value in a
-# well-known global variable. The bootstrap reads the global. This avoids
-# wrapping prompts in $() — which silently swallows their output into a pipe
-# and leaves `read` blocking on input the user can't see.
+# Prompts write their UI to stdout; the chosen value is read from a
+# well-known global variable.
 
 # Pick a hostname from a MAGI_NODES picklist or enter a custom one.
 # @param 1 current hostname (used as the empty-input default; optional)

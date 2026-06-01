@@ -1,8 +1,8 @@
 # Generic config deployment for `archmagi install bootstrap`.
 
 # Copy every shipped config from the repo into its live destination.
-# Host-specific files are handled by the template phase instead.
-# Cleans up any .tmpl files that leaked into destinations.
+# Host-specific files are handled by the template phase.
+# Strips `.tmpl` files from live destinations so only rendered files remain.
 # @param 1 absolute path to the archmagi repo root
 _install_configs() {
     local repo=$1
@@ -41,6 +41,6 @@ _install_find_repo() {
         echo "$PWD"
         return 0
     fi
-    echo "templates not found — run from the archmagi repo (must contain etc/hostname.tmpl)" >&2
+    echo "templates not found; run from the archmagi repo (must contain etc/hostname.tmpl)" >&2
     return 1
 }

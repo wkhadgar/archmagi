@@ -1,4 +1,4 @@
-# archmagi restart <waybar|xdph> — kill + relaunch a desktop service detached.
+# archmagi restart <waybar|xdph>: kill + relaunch a desktop service detached.
 
 _restart_waybar() {
     killall waybar 2>/dev/null
@@ -18,6 +18,6 @@ cmd_restart() {
     case "$1" in
         waybar) shift; _restart_waybar "$@" ;;
         xdph)   shift; _restart_xdph   "$@" ;;
-        *)      echo "magi restart: subcommand 'waybar' or 'xdph'" >&2; return 1 ;;
+        *)      echo "archmagi restart: subcommand 'waybar' or 'xdph'" >&2; return 1 ;;
     esac
 }

@@ -1,4 +1,4 @@
-# archmagi install — bootstrap, boot theme, monitor refresh, sync back.
+# archmagi install: bootstrap, boot theme, monitor refresh, sync back.
 
 source "$ARCHMAGI_LIB/install_detect.sh"
 source "$ARCHMAGI_LIB/install_prompt.sh"
@@ -23,9 +23,8 @@ cmd_install() {
 
 # Run the full bootstrap chain on a fresh host.
 # Order: detect -> prompt -> persist -> configs -> templates -> packages -> wallpaper -> boot.
-# Configs land before packages so a ctrl-C during pacman still leaves a working
-# dotfile install. Wallpaper waits for packages (needs imagemagick) and the boot
-# theme runs last because it needs grub/limine present and the wallpaper rendered.
+# Configs land before packages so a ctrl-C during pacman still leaves a
+# working dotfile install; wallpaper waits for imagemagick from packages.
 _install_bootstrap() {
     local bar="${RED}▌${RESET}" sep="${MUTED}//${RESET}"
 

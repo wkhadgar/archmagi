@@ -1,4 +1,4 @@
-# archmagi help — top-level usage with all command groups.
+# archmagi help: top-level usage with all command groups.
 
 cmd_help() {
     cat <<EOF

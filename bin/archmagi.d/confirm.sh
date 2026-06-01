@@ -1,11 +1,11 @@
-# archmagi confirm — rofi 3-node consensus dialog. User vote alone gates the action;
+# archmagi confirm: rofi 3-node consensus dialog. User vote alone gates the action;
 # the other two MAGI always vote YES (theater). Do NOT randomize.
 
 cmd_confirm() {
-    local msg="${1:?usage: magi confirm <MESSAGE>}"
+    local msg="${1:?usage: archmagi confirm <MESSAGE>}"
 
     if [[ -z "$WAYLAND_DISPLAY" && -z "$DISPLAY" ]]; then
-        echo "magi confirm: no display (WAYLAND_DISPLAY/DISPLAY unset) — refusing to invoke rofi" >&2
+        echo "archmagi confirm: no display (WAYLAND_DISPLAY/DISPLAY unset); refusing to invoke rofi" >&2
         return 1
     fi
 
@@ -20,7 +20,7 @@ cmd_confirm() {
     done
 
     local line1 line2 line3 fmt
-    fmt='<span foreground="#666666" font="JetBrains Mono 11">%-12s ▸ </span><span foreground="%s" font="JetBrains Mono Bold 11">%-3s</span>'
+    fmt='<span foreground="#666666" font="JetBrains Mono 11">%-12s > </span><span foreground="%s" font="JetBrains Mono Bold 11">%-3s</span>'
     printf -v line1 "$fmt" "${others[0]}" "#ffbf00" "YES"
     printf -v line2 "$fmt" "${others[1]}" "#ffbf00" "YES"
     printf -v line3 "$fmt" "$self"        "#cc0000" "?"
@@ -33,8 +33,8 @@ $line1
 $line2
 $line3"
 
-    local deny=">>  ${self} ▸ NO  (ABORT)"
-    local acpt=">>  ${self} ▸ YES (PROCEED)"
+    local deny=">>  ${self} > NO  (ABORT)"
+    local acpt=">>  ${self} > YES (PROCEED)"
 
     local choice
     choice=$(printf '%s\n%s\n' "$deny" "$acpt" | rofi -sync -dmenu \

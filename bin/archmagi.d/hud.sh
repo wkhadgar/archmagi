@@ -1,4 +1,4 @@
-# archmagi hud — toggle a floating live status panel.
+# archmagi hud: toggle a floating live status panel.
 # Spawns a kitty window of class `archmagi-hud` running an `archmagi fetch` loop.
 # Hypr window rules (winwo.conf) pin it floating/centered/borderless.
 

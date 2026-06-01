@@ -1,17 +1,8 @@
-# Boot wallpaper generation for `archmagi install bootstrap` and `… install boot`.
-#
-# Renders the NERV MAGI BOOT background at the host's native resolution and
-# writes it to /usr/share/nerv/boot-background.png — read by both the GRUB
-# theme (positioned via /usr/share/grub/themes/nerv/theme.txt) and limine
-# (staged to /boot/nerv-bg.png by _boot_limine).
-#
-# Called from _install_bootstrap AFTER _install_packages (so imagemagick is
-# guaranteed) and BEFORE _install_boot. Also wired in to _install_boot as a
-# safety-net regen when the PNG is missing, and reachable standalone via
-# `archmagi install wallpaper [WxH]`.
+# Render /usr/share/nerv/boot-background.png: the shared boot wallpaper for
+# the NERV GRUB theme and limine.
 
-# Pick the largest connected monitor's resolution. Falls back through Hyprland
-# (when up), the kernel DRM modes (pre-Hyprland), and finally 1920x1080.
+# Pick the largest connected monitor's resolution.
+# Order: hyprctl (Hyprland up) -> /sys/class/drm/*/modes -> 1920x1080.
 # @return WxH on stdout
 _wallpaper_detect_resolution() {
     if command -v hyprctl >/dev/null; then
@@ -67,12 +58,12 @@ _install_wallpaper() {
     magick -size "$res" xc:'#0a0a0a' \
         -gravity north \
           -font "$jbm_bold" -fill '#cc0000' -pointsize 36 -annotate +0+80  'MAGI SYSTEM // NERV HQ' \
-          -font "$jbm"      -fill '#666666' -pointsize 18 -annotate +0+135 '─────────────────────────────' \
+          -font "$jbm"      -fill '#666666' -pointsize 18 -annotate +0+135 '-----------------------------' \
           -font "$jbm_bold" -fill '#ffbf00' -pointsize 22 -annotate +0+170 'BOOT SEQUENCE INITIATED' \
         -gravity south \
           -font "$jbm_bold" -fill '#cc0000' -pointsize 20 -annotate +0+170 '[PATTERN BLUE]      [STANDBY]' \
-          -font "$jbm"      -fill '#666666' -pointsize 16 -annotate +0+135 'CASPER  ·  BALTHASAR  ·  MELCHIOR' \
-          -font "$jbm_bold" -fill '#cc0000' -pointsize 16 -annotate +0+90  '⚠  AUTHORIZED PERSONNEL ONLY  ⚠' \
+          -font "$jbm"      -fill '#666666' -pointsize 16 -annotate +0+135 'CASPER  |  BALTHASAR  |  MELCHIOR' \
+          -font "$jbm_bold" -fill '#cc0000' -pointsize 16 -annotate +0+90  '!  AUTHORIZED PERSONNEL ONLY  !' \
         -alpha off -depth 8 -type TrueColor \
         "$tmp" || { rm -f "$tmp"; printf "  %s magick failed\n" "$bar" >&2; return 1; }
 

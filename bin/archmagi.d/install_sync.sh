@@ -1,10 +1,9 @@
-# `archmagi install sync` — diff-based pull from live system back into the repo.
+# `archmagi install sync`: diff-based pull from live system back into the repo.
 # Skips files that bootstrap owns via templates (their .tmpl is the source) and
 # gitignored, churn-prone artifacts like lazy.nvim's lock file.
 
-# Files that should never sync from live: templated outputs that flow only
-# outward, plus high-churn runtime artifacts that gitignore already covers.
-# @return 0 if the repo-relative path is excluded, 1 otherwise.
+# Skip templated outputs (one-way: repo -> live) and gitignored churn.
+# @return 0 if excluded, 1 otherwise.
 _install_sync_excluded() {
     case "$1" in
         etc/hostname|etc/hosts|hypr/hyprlock.conf|hypr/hyprland/monit.conf) return 0 ;;
@@ -38,7 +37,7 @@ _install_sync_file() {
     else
         printf "\n  ${RED}▌${RESET} ${BOLD}new${RESET}    %s\n" "$repo_rel"
     fi
-    printf "  ${RED}▌${RESET} pull live → repo? [y/N/q] "
+    printf "  ${RED}▌${RESET} pull live -> repo? [y/N/q] "
     local ans; read -r ans
     case "$ans" in
         [yY]*)
@@ -66,7 +65,7 @@ _install_sync_tree() {
     done < <(find "$live_root" -type f 2>/dev/null)
 }
 
-# Walk every live → repo pair, prompting per drifted file.
+# Walk every live -> repo pair, prompting per drifted file.
 _install_sync() {
     local repo
     repo=$(_install_find_repo) || return 1

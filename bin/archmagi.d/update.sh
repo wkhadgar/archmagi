@@ -1,11 +1,11 @@
-# archmagi update — interactive paru -Syu (run) + waybar update count (check).
+# archmagi update: interactive paru -Syu (run) + waybar update count (check).
 # Subcommands: run (default), check [-j]
 
 cmd_update() {
     case "${1:-run}" in
         run)   shift 2>/dev/null; _update_run "$@" ;;
         check) shift; _update_check "$@" ;;
-        *)     echo "magi update: subcommand 'run' or 'check'" >&2; return 1 ;;
+        *)     echo "archmagi update: subcommand 'run' or 'check'" >&2; return 1 ;;
     esac
 }
 
@@ -48,10 +48,10 @@ _update_run() {
 
     echo
     printf "  %s %s%sMAGI SYSTEM%s %s ${AMBER}PROTOCOL SYNC${RESET}\n" "$bar" "$BOLD" "$RED" "$RESET" "$sep"
-    printf "  %s ${MUTED}─────────────────────────────────${RESET}\n" "$bar"
+    printf "  %s ${MUTED}---------------------------------${RESET}\n" "$bar"
 
     if ((total == 0)); then
-        printf "  %s network up to date — ${GREEN}PATTERN GREEN${RESET}\n\n" "$bar"
+        printf "  %s network up to date: ${GREEN}PATTERN GREEN${RESET}\n\n" "$bar"
         notify-send "MAGI SYSTEM UPDATE STATUS" $'\nMAGI NETWORK IS UP TO DATE'
         return 0
     fi
@@ -96,7 +96,7 @@ _update_run() {
             echo
             if ((rc == 0)); then
                 rm -f "$(_pending_counts_cache)" 2>/dev/null
-                printf "  %s ${BOLD}SYNC COMPLETE${RESET} — ${GREEN}PATTERN GREEN${RESET}\n\n" "$bar"
+                printf "  %s ${BOLD}SYNC COMPLETE${RESET}: ${GREEN}PATTERN GREEN${RESET}\n\n" "$bar"
                 notif="MAGI PROTOCOLS UPDATED"
             else
                 printf "  %s ${BOLD}${RED}SYNC FAILED${RESET} (rc=$rc)\n\n" "$bar"

@@ -1,4 +1,4 @@
-# archmagi tmux — tmux session control wrapper.
+# archmagi tmux: tmux session control wrapper.
 
 _tmux_attach() {
     local session="${1:-MAGI}"
@@ -14,7 +14,7 @@ _tmux_attach() {
 
 cmd_tmux() {
     if ! command -v tmux >/dev/null 2>&1; then
-        echo "magi: tmux is not installed" >&2
+        echo "archmagi: tmux is not installed" >&2
         return 1
     fi
 
@@ -27,7 +27,7 @@ cmd_tmux() {
             tmux list-sessions 2>/dev/null || echo "no sessions"
             ;;
         switch|sw)
-            command -v fzf >/dev/null 2>&1 || { echo "magi: fzf is not installed" >&2; return 1; }
+            command -v fzf >/dev/null 2>&1 || { echo "archmagi: fzf is not installed" >&2; return 1; }
             local target
             target=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | fzf --prompt="MAGI session> ") || return 0
             [[ -z "$target" ]] && return 0
@@ -39,21 +39,21 @@ cmd_tmux() {
             ;;
         detach|d)
             if [[ -z "$TMUX" ]]; then
-                echo "magi: not inside a tmux session" >&2
+                echo "archmagi: not inside a tmux session" >&2
                 return 1
             fi
             tmux detach-client
             ;;
         kill|k)
-            local session="${1:?usage: magi tmux kill <session>}"
-            tmux has-session -t "$session" 2>/dev/null || { echo "magi: no such session: $session" >&2; return 1; }
+            local session="${1:?usage: archmagi tmux kill <session>}"
+            tmux has-session -t "$session" 2>/dev/null || { echo "archmagi: no such session: $session" >&2; return 1; }
             printf '%skill session %s? [y/N]%s ' "$AMBER" "$session" "$RESET"
             local ans; read -r ans
             [[ "$ans" == [yY]* ]] || { echo "aborted"; return 1; }
             tmux kill-session -t "$session"
             ;;
         *)
-            echo "magi: unknown tmux subcommand: $sub" >&2
+            echo "archmagi: unknown tmux subcommand: $sub" >&2
             return 1
             ;;
     esac

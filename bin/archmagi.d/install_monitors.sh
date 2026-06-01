@@ -1,4 +1,4 @@
-# `archmagi install monitors` — snapshot the live hyprctl monitor topology
+# `archmagi install monitors`: snapshot the live hyprctl monitor topology
 # into ~/.config/hypr/hyprland/monit.conf, prompting per monitor for its scale.
 # Re-run after attaching or removing displays.
 
@@ -8,7 +8,7 @@
 _install_monitors() {
     local bar="${RED}▌${RESET}"
 
-    command -v hyprctl >/dev/null || { echo "  $bar hyprctl not found — is Hyprland running?" >&2; return 1; }
+    command -v hyprctl >/dev/null || { echo "  $bar hyprctl not found; is Hyprland running?" >&2; return 1; }
     command -v jq      >/dev/null || { echo "  $bar jq not found (in requirements.pacman)"   >&2; return 1; }
 
     local json
@@ -87,7 +87,7 @@ _monitors_prompt_scale() {
             PROMPT_SCALE=$(_monitors_clean_scale "$input")
             return 0
         fi
-        printf "     ${RED}invalid${RESET} — try a number (e.g. 1, 1.25, 1.33, 1.5, 2)\n"
+        printf "     ${RED}invalid${RESET}; try a number (e.g. 1, 1.25, 1.33, 1.5, 2)\n"
     done
 }
 

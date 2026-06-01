@@ -1,4 +1,4 @@
-# archmagi lock/reboot/exit/shutdown — power actions. The latter three each open
+# archmagi lock/reboot/exit/shutdown: power actions. The latter three each open
 # the consensus confirm dialog, then route through _graceful_close which calls
 # hyprshutdown (clean IPC-driven app close) followed by an optional systemctl
 # command. The chain is nohup'd + disowned so Hyprland tearing down doesn't
@@ -12,7 +12,7 @@ cmd_lock() {
 
 _graceful_close() {
     if ! command -v hyprshutdown >/dev/null; then
-        echo "hyprshutdown not installed — run: sudo pacman -S hyprshutdown" >&2
+        echo "hyprshutdown not installed; run: sudo pacman -S hyprshutdown" >&2
         return 1
     fi
     local then_cmd="${1:-true}"
