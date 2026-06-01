@@ -62,8 +62,10 @@ Two test scripts run against the in-repo `bin/archmagi`:
 
 ```bash
 tests/smoke.sh   # 80 checks: syntax + function-defined + end-to-end safe commands
-tests/units.sh   # 29 checks: pure-helper assertions (substitution, meter color, sync excludes, etc.)
+tests/units.sh   # 28 checks: pure-helper assertions (substitution, meter color, sync excludes, etc.)
 ```
+
+Both scripts share `tests/lib.sh` (color palette, `pass`/`fail` counters, `assert_eq`/`_match`/`_zero`/`_nonzero`, `test_banner`/`test_summary`).
 
 `smoke.sh` bash-syntax-checks every shipped script, sources each `archmagi.d/<group>.sh` to confirm the expected `cmd_*` functions are defined, and end-to-end-invokes the safe-to-call commands (`help`, `fetch`, `tailnet`, `update check`). Destructive commands (`reboot`, `restart waybar`, `install boot`, etc.) are only checked at the function-defined level; never invoked.
 
