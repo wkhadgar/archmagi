@@ -5,14 +5,11 @@
 _install_boot() {
     [[ -f /usr/share/nerv/boot-background.png ]] || _install_wallpaper || return 1
 
-    if [[ -f /etc/default/grub ]] && command -v grub-mkconfig >/dev/null; then
-        _boot_grub
-    elif [[ -f /boot/limine.conf || -f /boot/limine.cfg || -f /etc/limine.conf ]]; then
-        _boot_limine
-    else
-        echo "no supported bootloader detected (need grub or limine)" >&2
-        return 1
-    fi
+    case $(_install_detect_bootloader) in
+        grub)   _boot_grub ;;
+        limine) _boot_limine ;;
+        *)      echo "no supported bootloader detected (need grub or limine)" >&2; return 1 ;;
+    esac
 }
 
 # Apply the NERV GRUB theme. Idempotent: only re-runs grub-mkconfig if a key
