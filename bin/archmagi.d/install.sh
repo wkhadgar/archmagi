@@ -83,16 +83,15 @@ _install_bootstrap() {
 # Skips monit.conf.tmpl because the live monit.conf is owned by `install monitors`.
 _install_redeploy() {
     local bar="${RED}▌${RESET}"
-    local repo profile hostname bootloader
+    local repo
     repo=$(_install_find_repo) || return 1
-    [[ -r /etc/archmagi/profile ]] || {
-        echo "  $bar /etc/archmagi/profile missing; run 'archmagi install bootstrap' first" >&2
+    [[ -n "$ARCHMAGI_HOSTNAME" ]] || {
+        echo "  $bar /etc/archmagi/profile missing or invalid; run 'archmagi install bootstrap' first" >&2
         return 1
     }
-    source /etc/archmagi/profile
 
-    _install_configs "$repo"
-    _install_hostname_templates "$repo" "$hostname"
+    _install_configs "$repo" || return 1
+    _install_hostname_templates "$repo" "$ARCHMAGI_HOSTNAME" || return 1
     printf "  %s redeployed configs from ${AMBER}%s${RESET}\n" "$bar" "$repo"
 }
 
