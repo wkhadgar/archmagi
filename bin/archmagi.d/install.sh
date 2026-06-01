@@ -5,6 +5,7 @@ source "$ARCHMAGI_LIB/install_prompt.sh"
 source "$ARCHMAGI_LIB/install_template.sh"
 source "$ARCHMAGI_LIB/install_configs.sh"
 source "$ARCHMAGI_LIB/install_packages.sh"
+source "$ARCHMAGI_LIB/install_wallpaper.sh"
 source "$ARCHMAGI_LIB/install_boot.sh"
 source "$ARCHMAGI_LIB/install_monitors.sh"
 source "$ARCHMAGI_LIB/install_sync.sh"
@@ -13,16 +14,18 @@ cmd_install() {
     case "$1" in
         bootstrap) shift; _install_bootstrap "$@" ;;
         boot)      shift; _install_boot      "$@" ;;
+        wallpaper) shift; _install_wallpaper "$@" ;;
         monitors)  shift; _install_monitors  "$@" ;;
         sync)      shift; _install_sync      "$@" ;;
-        *) echo "archmagi install: subcommand 'bootstrap', 'boot', 'monitors', or 'sync'" >&2; return 1 ;;
+        *) echo "archmagi install: subcommand 'bootstrap', 'boot', 'wallpaper', 'monitors', or 'sync'" >&2; return 1 ;;
     esac
 }
 
 # Run the full bootstrap chain on a fresh host.
-# Order: detect -> prompt -> persist -> configs -> templates -> packages -> boot.
+# Order: detect -> prompt -> persist -> configs -> templates -> packages -> wallpaper -> boot.
 # Configs land before packages so a ctrl-C during pacman still leaves a working
-# dotfile install. Boot theme runs last because it needs grub/limine present.
+# dotfile install. Wallpaper waits for packages (needs imagemagick) and the boot
+# theme runs last because it needs grub/limine present and the wallpaper rendered.
 _install_bootstrap() {
     local bar="${RED}▌${RESET}" sep="${MUTED}//${RESET}"
 
@@ -70,6 +73,7 @@ _install_bootstrap() {
     }
     printf "  %s pacman -S --needed completed\n" "$bar"
 
+    _install_wallpaper
     _install_boot
 
     echo

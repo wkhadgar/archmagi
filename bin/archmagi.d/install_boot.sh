@@ -2,7 +2,12 @@
 
 # Dispatch to the right bootloader-specific applier.
 # GRUB wins ties since it's more common. Bails out if neither is installed.
+# Ensures the PNG wallpaper exists first — auto-generates at the host's
+# native resolution if missing, so a standalone `install boot` works after
+# the committed PNG was removed from the repo.
 _install_boot() {
+    [[ -f /usr/share/nerv/boot-background.png ]] || _install_wallpaper || return 1
+
     if [[ -f /etc/default/grub ]] && command -v grub-mkconfig >/dev/null; then
         _boot_grub
     elif [[ -f /boot/limine.conf || -f /boot/limine.cfg || -f /etc/limine.conf ]]; then
@@ -61,7 +66,7 @@ _boot_limine() {
     [[ -n "$config" ]] || { echo "limine config not found" >&2; return 1; }
 
     local src=/usr/share/nerv/boot-background.png
-    [[ -f "$src" ]] || { echo "wallpaper missing at $src — run archmagi install bootstrap first" >&2; return 1; }
+    [[ -f "$src" ]] || _install_wallpaper || return 1
 
     local staged=/boot/nerv-bg.png
     sudo cp "$src" "$staged"

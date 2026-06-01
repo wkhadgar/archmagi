@@ -20,8 +20,9 @@ ${BOLD}${RED}MAGI SYSTEM${RESET} ${MUTED}// COMMAND INTERFACE${RESET}
   ${AMBER}reboot${RESET} | ${AMBER}exit${RESET} | ${AMBER}shutdown${RESET}     confirm + hyprshutdown-chained power action
   ${AMBER}restart${RESET} <${AMBER}waybar${RESET}|${AMBER}xdph${RESET}>        kill + relaunch a desktop service
   ${AMBER}install${RESET} <${MUTED}sub${RESET}>                tactical deployment:
-    ${AMBER}bootstrap${RESET}                  full install: detect, prompt, configs, templates, packages, boot theme (run from repo)
-    ${AMBER}boot${RESET}                       install NERV bootloader theme (detects grub or limine)
+    ${AMBER}bootstrap${RESET}                  full install: detect, prompt, configs, templates, packages, wallpaper, boot (run from repo)
+    ${AMBER}boot${RESET}                       install NERV bootloader theme (auto-regens wallpaper if missing)
+    ${AMBER}wallpaper${RESET} [${MUTED}WxH${RESET}]            render boot-background.png at given or auto-detected resolution
     ${AMBER}monitors${RESET}                   regenerate monit.conf from live hyprctl state
     ${AMBER}sync${RESET}                       diff-based pull from live system to repo (skips templated files)
   ${AMBER}profile${RESET} [${MUTED}target${RESET}]              switch power profile via rofi (or set directly: power-saver|balanced|performance)
