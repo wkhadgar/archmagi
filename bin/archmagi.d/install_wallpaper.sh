@@ -1,6 +1,10 @@
 # Render /usr/share/nerv/boot-background.png: the shared boot wallpaper for
 # the NERV GRUB theme and limine.
 
+# Unmatched globs expand to nothing so the DRM detection loop doesn't iterate
+# once on the literal pattern when no card is present.
+shopt -s nullglob
+
 # Pick the largest connected monitor's resolution.
 # Order: hyprctl (Hyprland up) -> /sys/class/drm/*/modes -> 1920x1080.
 # @return WxH on stdout
@@ -53,7 +57,8 @@ _install_wallpaper() {
     local jbm_bold=/usr/share/fonts/TTF/JetBrainsMonoNerdFont-Bold.ttf
     local dest=/usr/share/nerv/boot-background.png
     local tmp
-    tmp=$(mktemp --suffix=.png)
+    tmp=$(mktemp --suffix=.png) || return 1
+    trap 'rm -f "$tmp"' RETURN
 
     magick -size "$res" xc:'#0a0a0a' \
         -gravity north \
@@ -65,9 +70,9 @@ _install_wallpaper() {
           -font "$jbm"      -fill '#666666' -pointsize 16 -annotate +0+135 'CASPER  ·  BALTHASAR  ·  MELCHIOR' \
           -font "$jbm_bold" -fill '#cc0000' -pointsize 16 -annotate +0+90  '⚠  AUTHORIZED PERSONNEL ONLY  ⚠' \
         -alpha off -depth 8 -type TrueColor \
-        "$tmp" || { rm -f "$tmp"; printf "  %s magick failed\n" "$bar" >&2; return 1; }
+        "$tmp" || { printf "  %s magick failed\n" "$bar" >&2; return 1; }
 
-    sudo mkdir -p "$(dirname "$dest")"
-    sudo mv -f "$tmp" "$dest"
+    sudo mkdir -p "$(dirname "$dest")"        || return 1
+    sudo mv -f "$tmp" "$dest"                 || { printf "  %s failed to install %s\n" "$bar" "$dest" >&2; return 1; }
     printf "  %s wrote ${AMBER}%s${RESET} at ${AMBER}%s${RESET}\n" "$bar" "$dest" "$res"
 }
