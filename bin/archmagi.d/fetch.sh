@@ -114,10 +114,6 @@ _status_mem_pct() {
     free | awk '/^Mem/{printf "%d", $3*100/$2}'
 }
 
-_status_disk_pct() {
-    df / | awk 'NR==2{printf "%d", $3*100/$2}'
-}
-
 _status_load_pct() {
     local load1 ncpu
     load1=$(awk '{print $1}' /proc/loadavg)
@@ -217,9 +213,41 @@ _status_gpu_temp() {
 
 _status_mem() { free -h | awk '/^Mem/{print $3" / "$2}'; }
 
-_status_disk() { df -h / | awk 'NR==2{print $4" free of "$2}'; }
-
 _status_load() { awk '{print $1", "$2", "$3}' /proc/loadavg; }
+
+# One DISK row per real, on-disk filesystem (ext4/btrfs/xfs/f2fs/ntfs/exfat).
+# Skips virtual mounts and the ESP (vfat). Appends the mountpoint suffix only
+# when more than one row is rendered, so single-disk hosts stay clean.
+_status_body_disks() {
+    local bar=$1 sep=$2
+    command -v findmnt >/dev/null || {
+        # Fallback: root mount only via df.
+        local pct size avail
+        pct=$(df / | awk 'NR==2{printf "%d", $3*100/$2}')
+        read -r size avail < <(df -h / | awk 'NR==2{print $2" "$4}')
+        _status_row "$bar" "$sep" "DISK" "$(_status_meter "${pct:-0}")  $avail free of $size"
+        return
+    }
+
+    local -a rows=()
+    local target size avail pct
+    while read -r target size avail pct; do
+        pct=${pct%\%}
+        [[ "$pct" =~ ^[0-9]+$ ]] || continue
+        rows+=("$target|$size|$avail|$pct")
+    done < <(findmnt -l --real -t ext4,btrfs,xfs,f2fs,ext3,ext2,ntfs,exfat \
+                     --output=TARGET,SIZE,AVAIL,USE% --noheadings 2>/dev/null)
+
+    (( ${#rows[@]} == 0 )) && return
+
+    local row value multi=$(( ${#rows[@]} > 1 ))
+    for row in "${rows[@]}"; do
+        IFS='|' read -r target size avail pct <<<"$row"
+        value="$(_status_meter "$pct")  $avail free of $size"
+        (( multi )) && value+=" · $target"
+        _status_row "$bar" "$sep" "DISK" "$value"
+    done
+}
 
 _status_lan() {
     ip route get 1 2>/dev/null | awk '{print $7; exit}'
@@ -394,9 +422,7 @@ _status_body_compute() {
     mem_pct=$(_status_mem_pct); mem_h=$(_status_mem)
     _status_row "$bar" "$sep" "MEM" "$(_status_meter "${mem_pct:-0}")  $mem_h"
 
-    local disk_pct disk_h
-    disk_pct=$(_status_disk_pct); disk_h=$(_status_disk)
-    _status_row "$bar" "$sep" "DISK" "$(_status_meter "${disk_pct:-0}")  $disk_h"
+    _status_body_disks "$bar" "$sep"
 
     local load_pct load_raw
     load_pct=$(_status_load_pct); load_raw=$(_status_load)
