@@ -95,7 +95,15 @@ _status_cpu_model() {
 }
 
 _status_cpu_pct() {
-    grep 'cpu ' /proc/stat | awk '{u=$2+$4; t=$2+$4+$5; print int((u-pu)/(t-pt)*100)}' pu=0 pt=0
+    # Instantaneous: two /proc/stat samples 100ms apart, percent of the delta.
+    local _ user1 _nice1 sys1 idle1 user2 _nice2 sys2 idle2 u1 t1 u2 t2 du dt
+    read -r _ user1 _nice1 sys1 idle1 _ < /proc/stat
+    sleep 0.1
+    read -r _ user2 _nice2 sys2 idle2 _ < /proc/stat
+    u1=$((user1 + sys1)); t1=$((u1 + idle1))
+    u2=$((user2 + sys2)); t2=$((u2 + idle2))
+    du=$((u2 - u1)); dt=$((t2 - t1))
+    (( dt > 0 )) && echo $(( du * 100 / dt )) || echo 0
 }
 
 _status_mem_pct() {
@@ -164,6 +172,38 @@ _status_gpu() {
         | paste -sd' / '
 }
 
+_status_gpu_pct() {
+    # NVIDIA via nvidia-smi.
+    if command -v nvidia-smi >/dev/null; then
+        local v
+        v=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' %')
+        [[ "$v" =~ ^[0-9]+$ ]] && { echo "$v"; return; }
+    fi
+    # AMD (amdgpu sysfs).
+    local f v
+    for f in /sys/class/drm/card*/device/gpu_busy_percent; do
+        [[ -r "$f" ]] || continue
+        v=$(<"$f")
+        [[ "$v" =~ ^[0-9]+$ ]] && { echo "$v"; return; }
+    done
+}
+
+_status_gpu_temp() {
+    # NVIDIA via nvidia-smi.
+    if command -v nvidia-smi >/dev/null; then
+        local v
+        v=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
+        [[ "$v" =~ ^[0-9]+$ ]] && { echo "${v}C"; return; }
+    fi
+    # AMD hwmon under the card device.
+    local f raw
+    for f in /sys/class/drm/card*/device/hwmon/hwmon*/temp1_input; do
+        [[ -r "$f" ]] || continue
+        raw=$(<"$f")
+        [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))C"; return; }
+    done
+}
+
 _status_mem() { free -h | awk '/^Mem/{print $3" / "$2}'; }
 
 _status_disk() { df -h / | awk 'NR==2{print $4" free of "$2}'; }
@@ -197,7 +237,11 @@ _status_protocol() {
 }
 
 _status_battery() {
-    local bat=/sys/class/power_supply/BAT0
+    # First BAT* device with a readable capacity. Handles BAT0, BAT1, dual batteries.
+    local bat
+    for bat in /sys/class/power_supply/BAT*; do
+        [[ -r "$bat/capacity" ]] && break
+    done
     [[ -r "$bat/capacity" ]] || return
     local cap status pow_uw arrow=""
     cap=$(<"$bat/capacity")
@@ -329,7 +373,20 @@ _status_body() {
     [[ -n "$cpu_temp"  ]] && cpu_line+=" | $cpu_temp"
     _status_row "$bar" "$sep" "CPU" "$cpu_line"
 
-    v=$(_status_gpu);  [[ -n "$v" ]] && _status_row "$bar" "$sep" "GPU"  "$v"
+    local gpu_pct gpu_temp gpu_model gpu_line
+    gpu_pct=$(_status_gpu_pct)
+    gpu_temp=$(_status_gpu_temp)
+    gpu_model=$(_status_gpu)
+    if [[ -n "$gpu_pct" ]]; then
+        gpu_line="$(_status_meter "$gpu_pct")"
+        [[ -n "$gpu_model" ]] && gpu_line+="  $gpu_model"
+        [[ -n "$gpu_temp"  ]] && gpu_line+=" | $gpu_temp"
+        _status_row "$bar" "$sep" "GPU" "$gpu_line"
+    elif [[ -n "$gpu_model" ]]; then
+        gpu_line="$gpu_model"
+        [[ -n "$gpu_temp" ]] && gpu_line+=" | $gpu_temp"
+        _status_row "$bar" "$sep" "GPU" "$gpu_line"
+    fi
 
     local mem_pct mem_h
     mem_pct=$(_status_mem_pct)

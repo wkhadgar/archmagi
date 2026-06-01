@@ -62,8 +62,6 @@ _boot_limine() {
     [[ -n "$config" ]] || { echo "limine config not found" >&2; return 1; }
 
     local src=/usr/share/nerv/boot-background.png
-    [[ -f "$src" ]] || _install_wallpaper || return 1
-
     local staged=/boot/nerv-bg.png
     sudo cp "$src" "$staged"
 
