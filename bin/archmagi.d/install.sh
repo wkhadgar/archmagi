@@ -13,11 +13,12 @@ source "$ARCHMAGI_LIB/install_sync.sh"
 cmd_install() {
     case "$1" in
         bootstrap) shift; _install_bootstrap "$@" ;;
+        redeploy)  shift; _install_redeploy  "$@" ;;
         boot)      shift; _install_boot      "$@" ;;
         wallpaper) shift; _install_wallpaper "$@" ;;
         monitors)  shift; _install_monitors  "$@" ;;
         sync)      shift; _install_sync      "$@" ;;
-        *) echo "archmagi install: subcommand 'bootstrap', 'boot', 'wallpaper', 'monitors', or 'sync'" >&2; return 1 ;;
+        *) echo "archmagi install: subcommand 'bootstrap', 'redeploy', 'boot', 'wallpaper', 'monitors', or 'sync'" >&2; return 1 ;;
     esac
 }
 
@@ -79,3 +80,24 @@ _install_bootstrap() {
     printf "  %s ${BOLD}MAGI BOOTSTRAP COMPLETE${RESET} %s reboot to see NERV chrome\n" "$bar" "$sep"
 }
 
+# Re-deploy configs + re-render hostname-bound templates from the persisted
+# /etc/archmagi/profile. No prompts, no packages, no boot theme. The post-pull
+# path for an already-bootstrapped host.
+# Skips monit.conf.tmpl because the live monit.conf is owned by `install monitors`.
+_install_redeploy() {
+    local bar="${RED}▌${RESET}"
+    local repo profile hostname bootloader
+    repo=$(_install_find_repo) || return 1
+    [[ -r /etc/archmagi/profile ]] || {
+        echo "  $bar /etc/archmagi/profile missing; run 'archmagi install bootstrap' first" >&2
+        return 1
+    }
+    source /etc/archmagi/profile
+
+    _install_configs "$repo"
+    local hostname_upper=${hostname^^}
+    _install_substitute "$repo/etc/hostname.tmpl"       /etc/hostname                      HOSTNAME="$hostname"
+    _install_substitute "$repo/etc/hosts.tmpl"          /etc/hosts                         HOSTNAME="$hostname"
+    _install_substitute "$repo/hypr/hyprlock.conf.tmpl" "$HOME/.config/hypr/hyprlock.conf" HOSTNAME_UPPER="$hostname_upper"
+    printf "  %s redeployed configs from ${AMBER}%s${RESET}\n" "$bar" "$repo"
+}

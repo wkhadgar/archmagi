@@ -41,7 +41,7 @@ After install, `archmagi` lives at `~/.local/bin/archmagi` (a thin dispatcher) w
 - `archmagi tmux <attach|list|switch|detach|kill>`: tmux session control (default session name `MAGI`); `switch` uses fzf to pick
 - `archmagi lock` / `reboot` / `exit` / `shutdown`: power actions, gated by the MAGI consensus dialog. The exit/reboot/shutdown trio chain through `hyprshutdown` so apps close cleanly before the system command fires.
 - `archmagi restart <waybar|xdph>`: kill + relaunch a desktop service
-- `archmagi install <bootstrap|boot|wallpaper|monitors|sync>`: bootstrap a fresh host, (re)apply the NERV bootloader theme, (re)render the boot wallpaper, regenerate `monit.conf` from live hyprctl state, or diff-based pull changes from the live system back into the repo
+- `archmagi install <bootstrap|redeploy|boot|wallpaper|monitors|sync>`: bootstrap a fresh host, re-apply configs + templates after a pull, (re)apply the NERV bootloader theme, (re)render the boot wallpaper, regenerate `monit.conf` from live hyprctl state, or diff-based pull changes from the live system back into the repo
 
 The boot wallpaper at `/usr/share/nerv/boot-background.png` is rendered at bootstrap from the host's auto-detected resolution (hyprctl when up, `/sys/class/drm/*/modes` otherwise, `1920x1080` fallback). It's read by both GRUB and limine. Re-render at any time:
 

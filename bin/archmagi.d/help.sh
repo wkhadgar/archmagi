@@ -21,6 +21,7 @@ ${BOLD}${RED}MAGI SYSTEM${RESET} ${MUTED}// COMMAND INTERFACE${RESET}
   ${AMBER}restart${RESET} <${AMBER}waybar${RESET}|${AMBER}xdph${RESET}>        kill + relaunch a desktop service
   ${AMBER}install${RESET} <${MUTED}sub${RESET}>                tactical deployment:
     ${AMBER}bootstrap${RESET}                  full install: detect, prompt, configs, templates, packages, wallpaper, boot (run from repo)
+    ${AMBER}redeploy${RESET}                   re-apply configs + hostname templates from /etc/archmagi/profile (post-pull)
     ${AMBER}boot${RESET}                       install NERV bootloader theme (auto-regens wallpaper if missing)
     ${AMBER}wallpaper${RESET} [${MUTED}WxH${RESET}]            render boot-background.png at given or auto-detected resolution
     ${AMBER}monitors${RESET}                   regenerate monit.conf from live hyprctl state
