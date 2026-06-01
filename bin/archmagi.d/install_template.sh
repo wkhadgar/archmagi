@@ -27,12 +27,8 @@ _install_substitute() {
     # Always write a terminating newline (matters for /etc/hostname, /etc/hosts).
     printf '%s\n' "$content" > "$tmp" || return 1
 
-    local dest_dir=${dest%/*}
-    if [[ "$dest" == /etc/* || "$dest" == /usr/* || "$dest" == /boot/* ]]; then
-        sudo mkdir -p "$dest_dir" || return 1
-        sudo mv -f "$tmp" "$dest" || { echo "failed to install $dest" >&2; return 1; }
-    else
-        mkdir -p "$dest_dir" || return 1
-        mv -f "$tmp" "$dest" || { echo "failed to install $dest" >&2; return 1; }
-    fi
+    local dest_dir=${dest%/*} prefix=""
+    [[ "$dest" == /etc/* || "$dest" == /usr/* || "$dest" == /boot/* ]] && prefix=sudo
+    $prefix mkdir -p "$dest_dir" || return 1
+    $prefix mv -f "$tmp" "$dest" || { echo "failed to install $dest" >&2; return 1; }
 }
