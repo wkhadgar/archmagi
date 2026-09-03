@@ -58,32 +58,46 @@ local function strip_localbin(s)
     return s
 end
 
--- Map a captured dispatcher record to a `hyprctl dispatch` argument string
--- (the raw form Hyprland expects, e.g. "exec kitty", "movefocus l", "workspace 5").
--- Returns "" if the dispatcher is unrecognised (row still displays; firing it
--- becomes a no-op).
+-- Lua-quote a string value for embedding in a dispatch expression
+-- (escapes backslashes and double quotes; other chars are passed through
+-- unchanged so `$USER` etc. survive to the shell that runs exec_cmd).
+local function q(s)
+    return '"' .. tostring(s):gsub('\\', '\\\\'):gsub('"', '\\"') .. '"'
+end
+
+-- Render a workspace selector as either a Lua number or quoted string, so
+-- both `focus({workspace=5})` and `focus({workspace="e+1"})` come out right.
+local function wsval(v)
+    if type(v) == "number" then return tostring(v) end
+    return q(v)
+end
+
+-- Map a captured dispatcher record to a Lua expression string that
+-- `hyprctl dispatch` will evaluate (Hyprland 0.56+ wraps the arg as
+-- `return hl.dispatch(<arg>)`). Returns "" if the dispatcher is
+-- unrecognised (row still displays; firing it becomes a silent no-op).
 local function to_dispatch(d)
     if type(d) ~= "table" or not d.__dispatcher then return "" end
     local name = d.__dispatcher:gsub("^dsp%.", "")
     local a1   = d.args[1]
 
-    if name == "exec_cmd" then                          return "exec " .. tostring(a1 or "") end
-    if name == "window.close" then                      return "killactive" end
-    if name == "window.pseudo" then                     return "pseudo" end
-    if name == "window.drag" then                       return "movewindow" end
-    if name == "window.resize" then                     return "resizewindow" end
-    if name == "exit" then                              return "exit" end
-    if name == "workspace.toggle_special" then          return "togglespecialworkspace " .. tostring(a1 or "") end
+    if name == "exec_cmd" then                 return "hl.dsp.exec_cmd(" .. q(a1 or "") .. ")" end
+    if name == "window.close" then             return "hl.dsp.window.close()"                  end
+    if name == "window.pseudo" then            return "hl.dsp.window.pseudo()"                 end
+    if name == "window.drag" then              return "hl.dsp.window.drag()"                   end
+    if name == "window.resize" then            return "hl.dsp.window.resize()"                 end
+    if name == "exit" then                     return "hl.dsp.exit()"                          end
+    if name == "workspace.toggle_special" then return "hl.dsp.workspace.toggle_special(" .. q(a1 or "") .. ")" end
 
     if name == "focus" and type(a1) == "table" then
-        if a1.direction then return "movefocus " .. a1.direction end
-        if a1.workspace then return "workspace " .. tostring(a1.workspace) end
+        if a1.direction then return "hl.dsp.focus({direction=" .. q(a1.direction) .. "})"      end
+        if a1.workspace then return "hl.dsp.focus({workspace=" .. wsval(a1.workspace) .. "})"  end
     end
     if name == "window.move" and type(a1) == "table" and a1.workspace then
-        return "movetoworkspace " .. tostring(a1.workspace)
+        return "hl.dsp.window.move({workspace=" .. wsval(a1.workspace) .. "})"
     end
 
-    return name
+    return ""
 end
 
 local function inspect(d)
