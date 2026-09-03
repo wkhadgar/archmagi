@@ -1,0 +1,12 @@
+-- MONITORS
+-- See https://wiki.hypr.land/Configuring/Basics/Monitors/
+--
+-- Fallback: "use whatever's connected at its preferred mode" — Hyprland will
+-- auto-arrange and use native resolution for each plugged output. Replace
+-- with explicit per-monitor rules after first login via:
+--
+--     archmagi install monitors
+--
+-- which writes the live hyprctl monitor state into this file.
+
+hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })

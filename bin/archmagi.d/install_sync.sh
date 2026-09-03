@@ -6,7 +6,7 @@
 # @return 0 if excluded, 1 otherwise.
 _install_sync_excluded() {
     case "$1" in
-        etc/hostname|etc/hosts|hypr/hyprlock.conf|hypr/hyprland/monit.conf) return 0 ;;
+        etc/hostname|etc/hosts|hypr/hyprlock.conf|hypr/hyprland/monit.lua) return 0 ;;
         nvim/lazy-lock.json) return 0 ;;
         *.tmpl) return 0 ;;
     esac

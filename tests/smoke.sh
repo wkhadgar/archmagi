@@ -28,6 +28,13 @@ for f in "$ARCHMAGI" "$LIB"/*.sh; do
     fi
 done
 
+for f in "$LIB"/*.lua hypr/hyprland.lua hypr/hyprland/*.lua hypr/hyprland/*.lua.tmpl; do
+    [[ -f "$f" ]] || continue
+    if luac -p "$f" 2>/dev/null; then pass "syntax: $f"
+    else                              fail "syntax: $f"
+    fi
+done
+
 # group.sh -> expected function names (space-separated)
 declare -A expected=(
     [fetch]="cmd_fetch _status_body _status_logo_lines"

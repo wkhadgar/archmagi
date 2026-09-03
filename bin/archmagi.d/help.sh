@@ -24,7 +24,7 @@ ${BOLD}${RED}MAGI SYSTEM${RESET} ${MUTED}// COMMAND INTERFACE${RESET}
     ${AMBER}redeploy${RESET}                   re-apply configs + hostname templates from /etc/archmagi/profile (post-pull)
     ${AMBER}boot${RESET}                       install NERV bootloader theme (auto-regens wallpaper if missing)
     ${AMBER}wallpaper${RESET} [${MUTED}WxH${RESET}]            render boot-background.png at given or auto-detected resolution
-    ${AMBER}monitors${RESET}                   regenerate monit.conf from live hyprctl state
+    ${AMBER}monitors${RESET}                   regenerate monit.lua from live hyprctl state
     ${AMBER}sync${RESET}                       diff-based pull from live system to repo (skips templated files)
 EOF
     _ppd_available && \

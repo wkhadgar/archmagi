@@ -29,7 +29,7 @@ test_banner "UNIT TESTS"
 assert_zero    "sync_excluded: etc/hostname"             _install_sync_excluded etc/hostname
 assert_zero    "sync_excluded: etc/hosts"                _install_sync_excluded etc/hosts
 assert_zero    "sync_excluded: hypr/hyprlock.conf"       _install_sync_excluded hypr/hyprlock.conf
-assert_zero    "sync_excluded: hypr/hyprland/monit.conf" _install_sync_excluded hypr/hyprland/monit.conf
+assert_zero    "sync_excluded: hypr/hyprland/monit.lua"  _install_sync_excluded hypr/hyprland/monit.lua
 assert_zero    "sync_excluded: nvim/lazy-lock.json"      _install_sync_excluded nvim/lazy-lock.json
 assert_zero    "sync_excluded: any .tmpl"                _install_sync_excluded etc/hostname.tmpl
 assert_nonzero "sync_excluded: not bin/archmagi"         _install_sync_excluded bin/archmagi
