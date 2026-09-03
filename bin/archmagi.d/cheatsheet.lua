@@ -104,7 +104,9 @@ local function prettify(keys)
 
     if key == "slash" and mod:find("SHIFT") then
         key = "?"
-        mod = mod:gsub("%s*SHIFT%s*", " "):gsub("^%s+", ""):gsub("%s+$", "")
+        -- Strip "SHIFT" and the surrounding "+" so "SUPER + SHIFT" -> "SUPER".
+        mod = mod:gsub("%s*%+%s*SHIFT", ""):gsub("SHIFT%s*%+%s*", "")
+        mod = mod:gsub("^%s+", ""):gsub("%s+$", "")
     elseif key == "slash"   then key = "/"
     elseif key == "left"    then key = "<-"
     elseif key == "right"   then key = "->"

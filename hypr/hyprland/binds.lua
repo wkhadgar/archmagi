@@ -9,18 +9,18 @@ local fileManager = "kitty -e yazi"
 local mainMod     = "SUPER"
 
 hl.bind("ALT + C",                     hl.dsp.window.close())
-hl.bind(mainMod .. " SHIFT + M",       hl.dsp.exit())
+hl.bind(mainMod .. " + SHIFT + M",     hl.dsp.exit())
 hl.bind(mainMod .. " + B",             hl.dsp.exec_cmd("~/.local/bin/archmagi restart waybar"))
 hl.bind(mainMod .. " + T",             hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + E",             hl.dsp.exec_cmd(fileManager))
-hl.bind(mainMod .. " SHIFT + E",
+hl.bind(mainMod .. " + SHIFT + E",
     hl.dsp.exec_cmd("kitty -e bash -c 'd=$(ls -td /run/media/$USER/*/ 2>/dev/null | head -1); cd \"${d:-$HOME}\" && yazi'"),
     { desc = "yazi at most-recent USB mount (falls back to $HOME)" })
 hl.bind(mainMod .. " + SUPER_L",       hl.dsp.exec_cmd("pkill rofi || rofi -show-icons -show drun"))
 hl.bind(mainMod .. " + L",             hl.dsp.exec_cmd("~/.local/bin/archmagi lock"))
 hl.bind(mainMod .. " + V",             hl.dsp.exec_cmd("cliphist list | rofi -dmenu -sync | cliphist decode | wl-copy"))
 hl.bind(mainMod .. " + N",             hl.dsp.exec_cmd("swaync-client -t"))
-hl.bind(mainMod .. " SHIFT + slash",   hl.dsp.exec_cmd("~/.local/bin/archmagi cheatsheet"))
+hl.bind(mainMod .. " + SHIFT + slash", hl.dsp.exec_cmd("~/.local/bin/archmagi cheatsheet"))
 hl.bind(mainMod .. " + F",
     hl.dsp.exec_cmd("~/.local/bin/archmagi hud"),
     { desc = "archmagi hud — live fetch panel" })
@@ -28,7 +28,7 @@ hl.bind(mainMod .. " + F",
 -- Screenshot binds
 hl.bind("PRINT",                       hl.dsp.exec_cmd("hyprshot -z -m output -o ~/images/screenshots"))
 hl.bind(mainMod .. " + PRINT",         hl.dsp.exec_cmd("hyprshot -z -m window -o ~/images/screenshots"))
-hl.bind(mainMod .. " SHIFT + PRINT",   hl.dsp.exec_cmd("hyprshot -z -m region -o ~/images/screenshots"))
+hl.bind(mainMod .. " + SHIFT + PRINT", hl.dsp.exec_cmd("hyprshot -z -m region -o ~/images/screenshots"))
 
 hl.bind(mainMod .. " + P",             hl.dsp.window.pseudo())   -- dwindle
 
@@ -42,14 +42,14 @@ hl.bind(mainMod .. " + down",          hl.dsp.focus({ direction = "down"  }))
 for i = 1, 10 do
     local key = i % 10   -- 10 maps to key "0"
     hl.bind(mainMod .. " + "       .. key, hl.dsp.focus({ workspace = i }))
-    hl.bind(mainMod .. " SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
+    hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
 
 hl.bind(mainMod .. " + S",             hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " SHIFT + S",       hl.dsp.window.move({ workspace = "special:magic" }))
+hl.bind(mainMod .. " + SHIFT + S",     hl.dsp.window.move({ workspace = "special:magic" }))
 
-hl.bind(mainMod .. " CTRL + right",    hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mainMod .. " CTRL + left",     hl.dsp.focus({ workspace = "e-1" }))
+hl.bind(mainMod .. " + CTRL + right",  hl.dsp.focus({ workspace = "e+1" }))
+hl.bind(mainMod .. " + CTRL + left",   hl.dsp.focus({ workspace = "e-1" }))
 
 -- Move/resize windows with mainMod + LMB/RMB and dragging
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
