@@ -3,14 +3,18 @@
 -- row per bind — with workspace-1..10 loop entries skipped, key names
 -- prettified, and the ~/.local/bin/ prefix stripped from exec commands.
 --
--- Usage: lua cheatsheet.lua <binds.lua path>
--- Output: one line per bind, meant to be piped into rofi -dmenu.
+-- Usage: lua cheatsheet.lua <binds.lua path> [--with-dispatch]
+-- Output (default):        DISPLAY per line
+-- Output (--with-dispatch): DISPLAY <TAB> HYPRCTL_ARG per line — the second
+--                          column is a `hyprctl dispatch` argument string that
+--                          fires the bind's action.
 
 local binds_file = arg[1]
 if not binds_file then
     io.stderr:write("cheatsheet.lua: missing binds file path\n")
     os.exit(1)
 end
+local with_dispatch = arg[2] == "--with-dispatch"
 
 local recorded = {}
 
@@ -52,6 +56,34 @@ local function strip_localbin(s)
     if s:sub(1, #home_prefix)  == home_prefix  then return s:sub(#home_prefix  + 1) end
     if s:sub(1, #tilde_prefix) == tilde_prefix then return s:sub(#tilde_prefix + 1) end
     return s
+end
+
+-- Map a captured dispatcher record to a `hyprctl dispatch` argument string
+-- (the raw form Hyprland expects, e.g. "exec kitty", "movefocus l", "workspace 5").
+-- Returns "" if the dispatcher is unrecognised (row still displays; firing it
+-- becomes a no-op).
+local function to_dispatch(d)
+    if type(d) ~= "table" or not d.__dispatcher then return "" end
+    local name = d.__dispatcher:gsub("^dsp%.", "")
+    local a1   = d.args[1]
+
+    if name == "exec_cmd" then                          return "exec " .. tostring(a1 or "") end
+    if name == "window.close" then                      return "killactive" end
+    if name == "window.pseudo" then                     return "pseudo" end
+    if name == "window.drag" then                       return "movewindow" end
+    if name == "window.resize" then                     return "resizewindow" end
+    if name == "exit" then                              return "exit" end
+    if name == "workspace.toggle_special" then          return "togglespecialworkspace " .. tostring(a1 or "") end
+
+    if name == "focus" and type(a1) == "table" then
+        if a1.direction then return "movefocus " .. a1.direction end
+        if a1.workspace then return "workspace " .. tostring(a1.workspace) end
+    end
+    if name == "window.move" and type(a1) == "table" and a1.workspace then
+        return "movetoworkspace " .. tostring(a1.workspace)
+    end
+
+    return name
 end
 
 local function inspect(d)
@@ -122,7 +154,12 @@ end
 
 for _, b in ipairs(recorded) do
     if not should_skip(b) then
-        local desc = (b.opts and b.opts.desc) or inspect(b.dispatcher)
-        print(string.format("%-25s ->  %s", prettify(b.keys), desc))
+        local desc    = (b.opts and b.opts.desc) or inspect(b.dispatcher)
+        local display = string.format("%-25s ->  %s", prettify(b.keys), desc)
+        if with_dispatch then
+            print(display .. "\t" .. to_dispatch(b.dispatcher))
+        else
+            print(display)
+        end
     end
 end
