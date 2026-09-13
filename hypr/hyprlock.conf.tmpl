@@ -268,6 +268,17 @@ label {
   valign = bottom
 }
 
+label {
+  monitor =
+  text = cmd[update:30000] echo "BATT // $(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1)% ($(~/.local/bin/archmagi battery eta))"
+  color = rgba(ffbf00dd)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = 48, 36
+  halign = left
+  valign = bottom
+}
+
 # ── BOTTOM RIGHT: GOD'S IN HIS HEAVEN ──────────────
 label {
   monitor =

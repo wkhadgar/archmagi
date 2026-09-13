@@ -40,6 +40,45 @@ _archmagi_hostname() {
     printf '%s' "${h%%.*}"
 }
 
+# Format battery time-remaining as `HHhMMm`. Prints:
+#   `HHhMMm` when discharging (time to empty) or charging (time to full)
+#   `FULL`   when the battery is Full
+#   nothing  when no battery, unknown status, or draw is unavailable
+# Supports both energy_/power_ (uWh, uW) and charge_/current_ (uAh, uA)
+# sysfs conventions so it works across laptop firmware variants.
+_battery_eta() {
+    local bat
+    for bat in /sys/class/power_supply/BAT*; do
+        [[ -r "$bat/capacity" ]] && break
+    done
+    [[ -r "$bat/capacity" ]] || return 0
+
+    local status
+    [[ -r "$bat/status" ]] && status=$(<"$bat/status") || return 0
+
+    local now full draw
+    if [[ -r "$bat/energy_now" && -r "$bat/power_now" && -r "$bat/energy_full" ]]; then
+        now=$(<"$bat/energy_now"); full=$(<"$bat/energy_full"); draw=$(<"$bat/power_now")
+    elif [[ -r "$bat/charge_now" && -r "$bat/current_now" && -r "$bat/charge_full" ]]; then
+        now=$(<"$bat/charge_now"); full=$(<"$bat/charge_full"); draw=$(<"$bat/current_now")
+    else
+        return 0
+    fi
+
+    local remaining
+    case "$status" in
+        Discharging) remaining=$now ;;
+        Charging)    remaining=$(( full - now )) ;;
+        Full)        echo "FULL"; return 0 ;;
+        *)           return 0 ;;
+    esac
+
+    (( draw > 0 )) || return 0
+
+    local total_minutes=$(( remaining * 60 / draw ))
+    printf '%02dh%02dm\n' $(( total_minutes / 60 )) $(( total_minutes % 60 ))
+}
+
 # True when power-profiles-daemon is installed AND its daemon is reachable
 # (the D-Bus call succeeds). Used to gate the profile UI surface so it appears
 # on any host running PPD, regardless of laptop/desktop profile.

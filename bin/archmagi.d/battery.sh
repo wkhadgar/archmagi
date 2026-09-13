@@ -88,40 +88,5 @@ _battery_watch() {
     done
 }
 
-# Print "H:MM" for battery time remaining (discharge) or time to full (charge),
-# or "--:--" when the battery is Full, or empty when no battery / draw is
-# unavailable. Supports both energy_/power_ (uWh, uW) and charge_/current_
-# (uAh, uA) sysfs conventions. Meant to be invoked from the hyprlock ACTIVE
-# TIME REMAINING widget on a 60s update.
-_battery_eta() {
-    local bat
-    for bat in /sys/class/power_supply/BAT*; do
-        [[ -r "$bat/capacity" ]] && break
-    done
-    [[ -r "$bat/capacity" ]] || return 0
-
-    local status
-    [[ -r "$bat/status" ]] && status=$(<"$bat/status") || return 0
-
-    local now full draw
-    if [[ -r "$bat/energy_now" && -r "$bat/power_now" && -r "$bat/energy_full" ]]; then
-        now=$(<"$bat/energy_now"); full=$(<"$bat/energy_full"); draw=$(<"$bat/power_now")
-    elif [[ -r "$bat/charge_now" && -r "$bat/current_now" && -r "$bat/charge_full" ]]; then
-        now=$(<"$bat/charge_now"); full=$(<"$bat/charge_full"); draw=$(<"$bat/current_now")
-    else
-        return 0
-    fi
-
-    local remaining
-    case "$status" in
-        Discharging) remaining=$now ;;
-        Charging)    remaining=$(( full - now )) ;;
-        Full)        echo "--:--"; return 0 ;;
-        *)           return 0 ;;
-    esac
-
-    (( draw > 0 )) || return 0
-
-    local total_minutes=$(( remaining * 60 / draw ))
-    printf '%d:%02d\n' $(( total_minutes / 60 )) $(( total_minutes % 60 ))
-}
+# _battery_eta lives in lib.sh so fetch, the hyprlock widget, and this
+# module all share one implementation.
