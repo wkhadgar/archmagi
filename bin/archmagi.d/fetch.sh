@@ -289,8 +289,9 @@ _status_battery() {
         Discharging) arrow="${AMBER}↓${RESET}" ;;
     esac
     [[ -r "$bat/power_now" ]] && pow_uw=$(<"$bat/power_now")
-    local meter
+    local meter eta
     meter=$(_status_meter "$cap" high_good)
+    eta=$(_battery_eta)
     if [[ -n "${pow_uw:-}" && "$pow_uw" -gt 0 ]]; then
         local watts
         watts=$(awk "BEGIN{printf \"%.1f\", $pow_uw/1000000}")
@@ -298,6 +299,7 @@ _status_battery() {
     else
         printf '%s' "$meter"
     fi
+    [[ -n "$eta" ]] && printf '  %s' "$eta"
 }
 
 _status_display() {
@@ -328,8 +330,7 @@ cmd_fetch() {
     # (logo left, status right). Atomic flush so the HUD watch-loop always
     # sees a complete frame even when tailscale/lspci are slow.
     local hostname
-    hostname=$(uname -n)
-    hostname=${hostname%%.*}
+    hostname=$(_archmagi_hostname)
 
     local out
     out=$({
@@ -445,8 +446,7 @@ _status_body_power() {
 
 _status_body() {
     local hostname
-    hostname=$(uname -n)
-    hostname=${hostname%%.*}
+    hostname=$(_archmagi_hostname)
     local bar="${RED}▌${RESET}"
     local sep="${MUTED}//${RESET}"
 

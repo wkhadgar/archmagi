@@ -19,12 +19,13 @@ ${BOLD}${RED}MAGI SYSTEM${RESET} ${MUTED}// COMMAND INTERFACE${RESET}
   ${AMBER}lock${RESET}                         hyprlock
   ${AMBER}reboot${RESET} | ${AMBER}exit${RESET} | ${AMBER}shutdown${RESET}     confirm + hyprshutdown-chained power action
   ${AMBER}restart${RESET} <${AMBER}waybar${RESET}|${AMBER}xdph${RESET}>        kill + relaunch a desktop service
+  ${AMBER}battery${RESET} [${AMBER}check${RESET}|${AMBER}watch${RESET}]         low-battery notifications; ${AMBER}watch${RESET} loops (autostarted)
   ${AMBER}install${RESET} <${MUTED}sub${RESET}>                tactical deployment:
     ${AMBER}bootstrap${RESET}                  full install: detect, prompt, configs, templates, packages, wallpaper, boot (run from repo)
     ${AMBER}redeploy${RESET}                   re-apply configs + hostname templates from /etc/archmagi/profile (post-pull)
     ${AMBER}boot${RESET}                       install NERV bootloader theme (auto-regens wallpaper if missing)
     ${AMBER}wallpaper${RESET} [${MUTED}WxH${RESET}]            render boot-background.png at given or auto-detected resolution
-    ${AMBER}monitors${RESET}                   regenerate monit.conf from live hyprctl state
+    ${AMBER}monitors${RESET}                   regenerate monit.lua from live hyprctl state
     ${AMBER}sync${RESET}                       diff-based pull from live system to repo (skips templated files)
 EOF
     _ppd_available && \

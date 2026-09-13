@@ -44,7 +44,7 @@ After install, `archmagi` lives at `~/.local/bin/archmagi` (a thin dispatcher) w
 - `archmagi tmux <attach|list|switch|detach|kill>`: tmux session control (default session name `MAGI`); `switch` uses fzf to pick
 - `archmagi lock` / `reboot` / `exit` / `shutdown`: power actions, gated by the MAGI consensus dialog. The exit/reboot/shutdown trio chain through `hyprshutdown` so apps close cleanly before the system command fires.
 - `archmagi restart <waybar|xdph>`: kill + relaunch a desktop service
-- `archmagi install <bootstrap|redeploy|boot|wallpaper|monitors|sync>`: bootstrap a fresh host, re-apply configs + templates after a pull, (re)apply the NERV bootloader theme, (re)render the boot wallpaper, regenerate `monit.conf` from live hyprctl state, or diff-based pull changes from the live system back into the repo
+- `archmagi install <bootstrap|redeploy|boot|wallpaper|monitors|sync>`: bootstrap a fresh host, re-apply configs + templates after a pull, (re)apply the NERV bootloader theme, (re)render the boot wallpaper, regenerate `monit.lua` from live hyprctl state, or diff-based pull changes from the live system back into the repo
 
 The boot wallpaper at `/usr/share/nerv/boot-background.png` is rendered at bootstrap from the host's auto-detected resolution (hyprctl when up, `/sys/class/drm/*/modes` otherwise, `1920x1080` fallback). It's read by both GRUB and limine. Re-render at any time:
 
@@ -87,7 +87,7 @@ The CI workflow (`.github/workflows/pattern.yml`) runs both scripts on every pus
 
 ## Sync back (if anything changed)
 
-`archmagi install sync` walks the live -> repo file map, shows a unified diff per drift, and prompts `[y/N/q]` per file. Templated files (`etc/hostname`, `etc/hosts`, `hypr/hyprlock.conf`, `hypr/hyprland/monit.conf`, and any `*.tmpl`) are skipped; those flow the other direction.
+`archmagi install sync` walks the live -> repo file map, shows a unified diff per drift, and prompts `[y/N/q]` per file. Templated files (`etc/hostname`, `etc/hosts`, `hypr/hyprlock.conf`, `hypr/hyprland/monit.lua`, and any `*.tmpl`) are skipped; those flow the other direction.
 
 ```bash
 cd dotfiles
@@ -103,6 +103,6 @@ git push
 ## Post-install
 
 - Enable greetd: `sudo systemctl enable greetd`
-- Check monitor names with `hyprctl monitors | grep Monitor`, then update **both** `hypr/hyprland/monit.conf` (resolution/position/scale that Hyprland actually uses) and `hypr/hyprpaper.conf` (wallpaper bindings per monitor)
+- Check monitor names with `hyprctl monitors | grep Monitor`, then update **both** `hypr/hyprland/monit.lua` (resolution/position/scale that Hyprland actually uses) and `hypr/hyprpaper.conf` (wallpaper bindings per monitor)
 - The boot wallpaper is rendered at bootstrap from the host's auto-detected resolution; override with `archmagi install wallpaper <WxH>` then `archmagi install boot` if the detected value is wrong
 - `atuin` must remain the last line of `.zshrc`

@@ -1,5 +1,5 @@
 # `archmagi install monitors`: snapshot the live hyprctl monitor topology
-# into ~/.config/hypr/hyprland/monit.conf, prompting per monitor for its scale.
+# into ~/.config/hypr/hyprland/monit.lua, prompting per monitor for its scale.
 # Re-run after attaching or removing displays.
 
 # Detect live monitors, prompt for each scale, preview, confirm, then write.
@@ -32,7 +32,7 @@ _install_monitors() {
         echo
         printf "  %s ${AMBER}%s${RESET}  %sx%s\n" "$bar" "$name" "$w" "$h"
         _monitors_prompt_scale "$scale"
-        lines+=("monitor=$name,${w}x${h},auto,$PROMPT_SCALE")
+        lines+=("hl.monitor({ output = \"$name\", mode = \"${w}x${h}\", position = \"auto\", scale = $PROMPT_SCALE })")
     done
 
     printf "\n  %s ${BOLD}PREVIEW${RESET}\n" "$bar"
@@ -41,7 +41,7 @@ _install_monitors() {
         printf "  %s   %s\n" "$bar" "$line"
     done
 
-    local dest="$HOME/.config/hypr/hyprland/monit.conf"
+    local dest="$HOME/.config/hypr/hyprland/monit.lua"
     printf "\n  %s write to ${AMBER}%s${RESET}? [y/N] " "$bar" "$dest"
     local ans
     read -r ans
@@ -54,12 +54,9 @@ _install_monitors() {
     local tmp
     tmp=$(mktemp)
     {
-        printf '\n'
-        printf '################\n'
-        printf '### MONITORS ###\n'
-        printf '################\n'
-        printf '\n'
-        printf '# See https://wiki.hyprland.org/Configuring/Monitors/\n'
+        printf -- '-- MONITORS\n'
+        printf -- '-- See https://wiki.hypr.land/Configuring/Basics/Monitors/\n'
+        printf -- '\n'
         for line in "${lines[@]}"; do
             printf '%s\n' "$line"
         done

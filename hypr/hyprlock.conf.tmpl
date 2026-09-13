@@ -200,6 +200,29 @@ label {
   valign = top
 }
 
+# TOP RIGHT: ACTIVE TIME REMAINING (battery ETA)
+label {
+  monitor =
+  text = ACTIVE TIME REMAINING
+  color = rgba(666666cc)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = -48, -160
+  halign = right
+  valign = top
+}
+
+label {
+  monitor =
+  text = cmd[update:60000] ~/.local/bin/archmagi battery eta
+  color = rgba(ffbf00ff)
+  font_size = 32
+  font_family = JetBrains Mono Bold
+  position = -48, -180
+  halign = right
+  valign = top
+}
+
 # ── BOTTOM LEFT: SYSTEM STATS ───────────────────────
 label {
   monitor =
@@ -241,6 +264,17 @@ label {
   font_size = 10
   font_family = JetBrains Mono
   position = 48, 52
+  halign = left
+  valign = bottom
+}
+
+label {
+  monitor =
+  text = cmd[update:30000] echo "BATT // $(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1)% ($(~/.local/bin/archmagi battery eta))"
+  color = rgba(ffbf00dd)
+  font_size = 10
+  font_family = JetBrains Mono
+  position = 48, 36
   halign = left
   valign = bottom
 }

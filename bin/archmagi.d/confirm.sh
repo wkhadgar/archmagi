@@ -10,8 +10,7 @@ cmd_confirm() {
     fi
 
     local self
-    self=$(uname -n)
-    self=${self%%.*}      # strip domain if FQDN
+    self=$(_archmagi_hostname)
     self=${self^^}
 
     local others=() node
