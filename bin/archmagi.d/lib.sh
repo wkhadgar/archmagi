@@ -27,6 +27,19 @@ if [[ -r /etc/archmagi/profile ]]; then
     unset _k _v
 fi
 
+# Short hostname. Prefers `/etc/archmagi/profile` when bootstrap has run,
+# then `/etc/hostname` (canonical on Arch), and finally falls back to
+# `uname -n`. Truncates FQDN to the short label so callers get `balthasar-2`
+# rather than `balthasar-2.localdomain`. On hosts where DHCP or similar has
+# set the kernel hostname to an IP, this still yields the right name.
+_archmagi_hostname() {
+    local h=""
+    [[ -n "$ARCHMAGI_HOSTNAME" ]] && h=$ARCHMAGI_HOSTNAME
+    [[ -z "$h" && -r /etc/hostname ]] && h=$(</etc/hostname)
+    [[ -z "$h" ]] && h=$(uname -n)
+    printf '%s' "${h%%.*}"
+}
+
 # True when power-profiles-daemon is installed AND its daemon is reachable
 # (the D-Bus call succeeds). Used to gate the profile UI surface so it appears
 # on any host running PPD, regardless of laptop/desktop profile.

@@ -62,7 +62,6 @@ power-profiles-daemon
 ppp
 pulsemixer
 python-gobject
-python-pywal
 qemu-system-arm
 rlwrap
 rofi

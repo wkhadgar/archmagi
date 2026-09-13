@@ -40,7 +40,7 @@ _install_bootstrap() {
     _install_prompt_profile_role "$prof_hint" || return 1
     profile=$PROMPT_PROFILE
 
-    current_host=$(uname -n); current_host=${current_host%%.*}
+    current_host=$(_archmagi_hostname)
     _install_prompt_hostname "$current_host" || return 1
     hostname=$PROMPT_HOSTNAME
 

@@ -328,8 +328,7 @@ cmd_fetch() {
     # (logo left, status right). Atomic flush so the HUD watch-loop always
     # sees a complete frame even when tailscale/lspci are slow.
     local hostname
-    hostname=$(uname -n)
-    hostname=${hostname%%.*}
+    hostname=$(_archmagi_hostname)
 
     local out
     out=$({
@@ -445,8 +444,7 @@ _status_body_power() {
 
 _status_body() {
     local hostname
-    hostname=$(uname -n)
-    hostname=${hostname%%.*}
+    hostname=$(_archmagi_hostname)
     local bar="${RED}▌${RESET}"
     local sep="${MUTED}//${RESET}"
 
