@@ -1,8 +1,10 @@
-# archmagi battery: low-battery notifications via notify-send.
-# One-shot `check` reads /sys/class/power_supply/BAT*, decides whether the
-# current capacity crossed a warning band, and fires a notification if so.
-# `watch` is a background loop for the Hyprland autostart. Both are silent
-# no-ops on machines without a battery.
+# archmagi battery: low-battery notifications via notify-send, plus the two
+# text widgets the lockscreen draws.
+# One-shot `check` reads the battery sysfs device, decides whether the current
+# capacity crossed a warning band, and fires a notification if so. `watch` is a
+# background loop for the Hyprland autostart. `runtime` and `summary` render the
+# lockscreen widgets. Every subcommand is a silent no-op on a machine without a
+# battery, except `runtime`, which reports unbounded runtime there.
 
 # Warning thresholds (percent, descending). A band re-fires only if capacity
 # drops into a stricter band or if the state file was cleared by a charge cycle.
@@ -10,14 +12,23 @@ BATTERY_BAND_LOW=20
 BATTERY_BAND_CRITICAL=10
 BATTERY_BAND_EMERGENCY=5
 
+# Rendered whenever the host draws from wall power and its uptime is therefore
+# not bounded by a charge level, the way an Evangelion on the umbilical cable
+# has no activation time limit.
+BATTERY_RUNTIME_UNBOUNDED='∞ // UMBILICAL'
+
 # Dispatcher.
-# @param 1  subcommand: "check" (default), "watch", or "eta"
+# @param 1  subcommand: "check" (default), "watch", "runtime", or "summary"
 cmd_battery() {
     case "${1:-check}" in
-        check) _battery_check ;;
-        watch) _battery_watch ;;
-        eta)   _battery_eta   ;;
-        *)     echo "archmagi battery: subcommand 'check', 'watch', or 'eta'" >&2; return 1 ;;
+        check)   _battery_check   ;;
+        watch)   _battery_watch   ;;
+        runtime) _battery_runtime ;;
+        summary) _battery_summary ;;
+        *)
+            echo "archmagi battery: subcommand 'check', 'watch', 'runtime', or 'summary'" >&2
+            return 1
+            ;;
     esac
 }
 
@@ -27,10 +38,7 @@ cmd_battery() {
 # next drop below a threshold notifies again.
 _battery_check() {
     local bat
-    for bat in /sys/class/power_supply/BAT*; do
-        [[ -r "$bat/capacity" ]] && break
-    done
-    [[ -r "$bat/capacity" ]] || return 0
+    bat=$(_battery_device) || return 0
 
     local cap status
     cap=$(<"$bat/capacity")
@@ -80,13 +88,70 @@ _battery_check() {
     printf '%s' "$band" > "$state_file"
 }
 
-# Poll _battery_check every 60s. Meant to be autostarted from start.lua.
+# Poll _battery_check every 60s. Meant to be autostarted from start.lua, which
+# runs on every host, so a battery-less one returns instead of polling a no-op
+# forever.
 _battery_watch() {
+    _battery_device >/dev/null || return 0
+
     while true; do
         _battery_check
         sleep 60
     done
 }
 
-# _battery_eta lives in lib.sh so fetch, the hyprlock widget, and this
-# module all share one implementation.
+# Lockscreen top-right value: how long the host can keep running unattended.
+# Wall power imposes no bound, so print BATTERY_RUNTIME_UNBOUNDED for a host
+# with no battery at all and for a laptop that is charging, full, or holding at
+# a charge threshold. A discharging laptop prints its drain ETA.
+# @param 1  battery sysfs dir; defaults to the first device _battery_device finds
+_battery_runtime() {
+    local bat=${1:-} status
+
+    [[ -n "$bat" ]] || bat=$(_battery_device)
+
+    # No battery: the host runs on wall power, so its uptime is not bounded by
+    # a charge level. An absent device leaves $bat empty and fails this check.
+    [[ -r "$bat/capacity" ]] || {
+        printf '%s\n' "$BATTERY_RUNTIME_UNBOUNDED"
+        return 0
+    }
+
+    status=Unknown
+    [[ -r "$bat/status" ]] && status=$(<"$bat/status")
+
+    case "$status" in
+        Charging|Full|"Not charging")
+            printf '%s\n' "$BATTERY_RUNTIME_UNBOUNDED"
+            return 0
+            ;;
+    esac
+
+    _battery_eta "$bat"
+}
+
+# Lockscreen bottom-left row: `BATT // 42% (01h23m)` while draining and
+# `BATT // 80% (∞ // UMBILICAL)` on wall power, so it reads the same as the
+# top-right widget. Drops the parenthesised half to `BATT // 42%` when the
+# firmware exposes no usable figure, and prints nothing on a host with no
+# battery, which leaves the hyprlock label empty so it is never drawn.
+# @param 1  battery sysfs dir; defaults to the first device _battery_device finds
+_battery_summary() {
+    local bat=${1:-} cap runtime
+
+    [[ -n "$bat" ]] || bat=$(_battery_device)
+    [[ -r "$bat/capacity" ]] || return 0
+
+    cap=$(<"$bat/capacity")
+    runtime=$(_battery_runtime "$bat")
+
+    if [[ -n "$runtime" ]]; then
+        printf 'BATT // %s%% (%s)\n' "$cap" "$runtime"
+    else
+        printf 'BATT // %s%%\n' "$cap"
+    fi
+}
+
+# _battery_device and _battery_eta live in lib.sh so fetch and this module
+# share one device lookup and one ETA implementation. fetch calls _battery_eta
+# directly, so its BATTERY row keeps the raw time-to-full while charging.

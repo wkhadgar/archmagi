@@ -214,7 +214,7 @@ label {
 
 label {
   monitor =
-  text = cmd[update:60000] ~/.local/bin/archmagi battery eta
+  text = cmd[update:60000] ~/.local/bin/archmagi battery runtime
   color = rgba(ffbf00ff)
   font_size = 32
   font_family = JetBrains Mono Bold
@@ -270,7 +270,7 @@ label {
 
 label {
   monitor =
-  text = cmd[update:30000] echo "BATT // $(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1)% ($(~/.local/bin/archmagi battery eta))"
+  text = cmd[update:30000] ~/.local/bin/archmagi battery summary
   color = rgba(ffbf00dd)
   font_size = 10
   font_family = JetBrains Mono

@@ -19,7 +19,8 @@ ${BOLD}${RED}MAGI SYSTEM${RESET} ${MUTED}// COMMAND INTERFACE${RESET}
   ${AMBER}lock${RESET}                         hyprlock
   ${AMBER}reboot${RESET} | ${AMBER}exit${RESET} | ${AMBER}shutdown${RESET}     confirm + hyprshutdown-chained power action
   ${AMBER}restart${RESET} <${AMBER}waybar${RESET}|${AMBER}xdph${RESET}>        kill + relaunch a desktop service
-  ${AMBER}battery${RESET} [${AMBER}check${RESET}|${AMBER}watch${RESET}]         low-battery notifications; ${AMBER}watch${RESET} loops (autostarted)
+  ${AMBER}battery${RESET} [${AMBER}check${RESET}|${AMBER}watch${RESET}]        low-battery notifications; ${AMBER}watch${RESET} loops (autostarted)
+  ${AMBER}battery${RESET} [${AMBER}runtime${RESET}|${AMBER}summary${RESET}]    lockscreen widgets; unbounded on wall power
   ${AMBER}install${RESET} <${MUTED}sub${RESET}>                tactical deployment:
     ${AMBER}bootstrap${RESET}                  full install: detect, prompt, configs, templates, packages, wallpaper, boot (run from repo)
     ${AMBER}redeploy${RESET}                   re-apply configs + hostname templates from /etc/archmagi/profile (post-pull)

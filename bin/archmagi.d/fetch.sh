@@ -275,12 +275,9 @@ _status_protocol() {
 }
 
 _status_battery() {
-    # First BAT* device with a readable capacity. Handles BAT0, BAT1, dual batteries.
     local bat
-    for bat in /sys/class/power_supply/BAT*; do
-        [[ -r "$bat/capacity" ]] && break
-    done
-    [[ -r "$bat/capacity" ]] || return
+    bat=$(_battery_device) || return
+
     local cap status pow_uw arrow=""
     cap=$(<"$bat/capacity")
     [[ -r "$bat/status" ]] && status=$(<"$bat/status")
@@ -291,7 +288,7 @@ _status_battery() {
     [[ -r "$bat/power_now" ]] && pow_uw=$(<"$bat/power_now")
     local meter eta
     meter=$(_status_meter "$cap" high_good)
-    eta=$(_battery_eta)
+    eta=$(_battery_eta "$bat")
     if [[ -n "${pow_uw:-}" && "$pow_uw" -gt 0 ]]; then
         local watts
         watts=$(awk "BEGIN{printf \"%.1f\", $pow_uw/1000000}")

@@ -40,17 +40,33 @@ _archmagi_hostname() {
     printf '%s' "${h%%.*}"
 }
 
+# Print the sysfs path of the first battery with a readable capacity. Handles
+# BAT0, BAT1 and dual-battery laptops. Returns non-zero on a host with no
+# battery at all, so a caller can gate an entire surface on the exit code
+# instead of repeating the glob.
+_battery_device() {
+    local bat
+    for bat in /sys/class/power_supply/BAT*; do
+        [[ -r "$bat/capacity" ]] || continue
+        printf '%s' "$bat"
+        return 0
+    done
+    return 1
+}
+
 # Format battery time-remaining as `HHhMMm`. Prints:
 #   `HHhMMm` when discharging (time to empty) or charging (time to full)
 #   `FULL`   when the battery is Full
 #   nothing  when no battery, unknown status, or draw is unavailable
 # Supports both energy_/power_ (uWh, uW) and charge_/current_ (uAh, uA)
 # sysfs conventions so it works across laptop firmware variants.
+# @param 1  battery sysfs dir; defaults to the first device _battery_device finds
 _battery_eta() {
-    local bat
-    for bat in /sys/class/power_supply/BAT*; do
-        [[ -r "$bat/capacity" ]] && break
-    done
+    local bat=${1:-}
+
+    # A host with no battery leaves $bat empty, which the readability check
+    # below rejects along with a caller-supplied path that is not a battery.
+    [[ -n "$bat" ]] || bat=$(_battery_device)
     [[ -r "$bat/capacity" ]] || return 0
 
     local status
