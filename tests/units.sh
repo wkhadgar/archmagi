@@ -57,6 +57,7 @@ assert_eq "substitute: special chars in value"  "$(<"$tmp_out")" 'host=balt/has\
 printf '__HOSTNAME__' > "$tmp_in"
 _install_substitute "$tmp_in" "$tmp_out" HOSTNAME=melchior-1
 assert_eq "substitute: hyphenated value"        "$(<"$tmp_out")" "melchior-1"
+assert_eq "substitute: output is world-readable" "$(stat -c %a "$tmp_out")" "644"
 
 # _issue_node_row: marks only the local host, no trailing padding
 assert_match   "issue_node_row: marks local host" "$(_issue_node_row melchior-1)" $' MELCHIOR-1$'

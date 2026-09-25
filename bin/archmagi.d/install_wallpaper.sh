@@ -65,7 +65,6 @@ _install_wallpaper() {
         -alpha off -depth 8 -type TrueColor \
         "$tmp" || { printf "  %s magick failed\n" "$BAR" >&2; return 1; }
 
-    sudo mkdir -p "$(dirname "$dest")"        || return 1
-    sudo mv -f "$tmp" "$dest"                 || { printf "  %s failed to install %s\n" "$BAR" "$dest" >&2; return 1; }
+    sudo install -D -m 644 -o root -g root "$tmp" "$dest" || { printf "  %s failed to install %s\n" "$BAR" "$dest" >&2; return 1; }
     printf "  %s wrote ${AMBER}%s${RESET} at ${AMBER}%s${RESET}\n" "$BAR" "$dest" "$res"
 }
