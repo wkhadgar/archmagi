@@ -1,8 +1,4 @@
--- KEYBINDINGS
--- Variables local to this file — expand via string concat in binds.
--- A `desc = ...` field on the bind options table is what `archmagi cheatsheet`
--- reads for the human-facing description; without it, the parser falls back
--- to the raw dispatcher call.
+-- `desc` on the options table overrides the cheatsheet text.
 
 local terminal    = "kitty"
 local fileManager = "kitty -e yazi"

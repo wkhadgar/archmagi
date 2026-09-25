@@ -1,9 +1,6 @@
-# archmagi fetch: NERV-themed terminal overview.
-# Each field gatherer returns empty when its source is missing; cmd_fetch
-# skips empty rows so the same code runs across desktop/laptop/server.
+# Gatherers return empty when their source is missing; empty rows are skipped
+# so the same code runs on laptop, desktop, and server.
 
-# Unmatched globs expand to nothing so for-loops over /sys/* don't iterate
-# once on the literal pattern when no device is present.
 shopt -s nullglob
 
 _status_row() {
@@ -17,7 +14,7 @@ _status_sep() {
     printf "  %s %s─────────────────────────────────%s\n" "$1" "$MUTED" "$RESET"
 }
 
-# 8 logo lines, each padded to 38 visible cells so the status column lines up.
+# Each line is padded to 38 visible cells so the status column lines up.
 _status_logo_lines() {
     local host=${1:-?}
     local n=${host^^}
@@ -34,8 +31,7 @@ _status_logo_lines() {
     printf '%s%s%*s%s\n' "$AMBER" "$node" "$pad" "" "$RESET"
 }
 
-# Threshold color for a percent. mode=high_bad (CPU/MEM/DISK/LOAD) or
-# high_good (BATTERY where low is alarming).
+# high_good inverts the thresholds (battery: low is the alarm).
 _status_meter_color() {
     local pct=$1 mode=${2:-high_bad}
     if [[ "$mode" == "high_good" ]]; then
@@ -51,7 +47,6 @@ _status_meter_color() {
     fi
 }
 
-# Render an 8-wide filled/empty block bar colored by threshold.
 _status_bar() {
     local pct=$1 mode=${2:-high_bad} width=8
     (( pct > 100 )) && pct=100
@@ -99,7 +94,7 @@ _status_cpu_model() {
 }
 
 _status_cpu_pct() {
-    # Instantaneous: two /proc/stat samples 100ms apart, percent of the delta.
+    # Two /proc/stat samples 100ms apart.
     local _ user1 _nice1 sys1 idle1 user2 _nice2 sys2 idle2 u1 t1 u2 t2 du dt
     read -r _ user1 _nice1 sys1 idle1 _ < /proc/stat
     sleep 0.1
@@ -124,9 +119,8 @@ _status_load_pct() {
 _status_cpu_temp() {
     local h name input label raw
 
-    # AMD k10temp / Intel coretemp / zenpower / ARM cpu_thermal expose the CPU
-    # die temp under hwmon; thermal_zone often only lists peripherals (wifi,
-    # battery) so it can't be trusted as a fallback by index.
+    # hwmon first: thermal_zone often lists only peripherals (wifi, battery),
+    # so it can't be trusted by index.
     for h in /sys/class/hwmon/hwmon*; do
         [[ -r "$h/name" ]] || continue
         name=$(<"$h/name")
@@ -135,8 +129,7 @@ _status_cpu_temp() {
             *) continue ;;
         esac
 
-        # Prefer a labeled sensor (Tctl/Tdie on AMD, "Package id 0" on Intel)
-        # over a raw temp1_input which can be a per-core or per-CCD readout.
+        # temp1_input may be a single core or CCD; prefer the package sensor.
         raw=
         for input in "$h"/temp*_input; do
             [[ -r "$input" ]] || continue
@@ -150,8 +143,7 @@ _status_cpu_temp() {
         [[ -n "$raw" ]] && (( raw > 0 )) && { echo "$((raw/1000))°C"; return; }
     done
 
-    # ARM SBC / embedded fallback. Tighten the type match so wifi/battery
-    # zones don't get picked up.
+    # ARM / embedded fallback.
     local z type
     for z in /sys/class/thermal/thermal_zone*; do
         [[ -r "$z/type" && -r "$z/temp" ]] || continue
@@ -172,9 +164,7 @@ _status_gpu() {
         | paste -sd' / '
 }
 
-# Joint nvidia-smi query: utilization,temperature as "U,T".
-# Cached per process so _status_gpu_pct + _status_gpu_temp share one fork.
-# Empty when nvidia-smi is missing or its query produced nothing.
+# One nvidia-smi fork shared by _status_gpu_pct and _status_gpu_temp.
 _NVIDIA_SMI_CACHE=""
 _status_nvidia_query() {
     [[ -n "$_NVIDIA_SMI_CACHE" ]] && return 0
@@ -188,7 +178,6 @@ _status_gpu_pct() {
         local v=${_NVIDIA_SMI_CACHE%%,*}
         [[ "$v" =~ ^[0-9]+$ ]] && { echo "$v"; return; }
     fi
-    # AMD (amdgpu sysfs).
     local f v
     for f in /sys/class/drm/card*/device/gpu_busy_percent; do
         [[ -r "$f" ]] || continue
@@ -202,7 +191,6 @@ _status_gpu_temp() {
         local v=${_NVIDIA_SMI_CACHE##*,}
         [[ "$v" =~ ^[0-9]+$ ]] && { echo "${v}°C"; return; }
     fi
-    # AMD hwmon under the card device.
     local f raw
     for f in /sys/class/drm/card*/device/hwmon/hwmon*/temp1_input; do
         [[ -r "$f" ]] || continue
@@ -215,13 +203,10 @@ _status_mem() { free -h | awk '/^Mem/{print $3" / "$2}'; }
 
 _status_load() { awk '{print $1", "$2", "$3}' /proc/loadavg; }
 
-# One DISK row per real, on-disk filesystem (ext4/btrfs/xfs/f2fs/ntfs/exfat).
-# Skips virtual mounts and the ESP (vfat). Appends the mountpoint suffix only
-# when more than one row is rendered, so single-disk hosts stay clean.
+# vfat is excluded so the ESP never shows up. Mountpoint only when >1 disk.
 _status_body_disks() {
     local bar=$1 sep=$2
     command -v findmnt >/dev/null || {
-        # Fallback: root mount only via df.
         local pct size avail
         pct=$(df / | awk 'NR==2{printf "%d", $3*100/$2}')
         read -r size avail < <(df -h / | awk 'NR==2{print $2" "$4}')
@@ -323,9 +308,8 @@ _status_display() {
 }
 
 cmd_fetch() {
-    # Frame is built in a subshell then printed in one shot: two columns
-    # (logo left, status right). Atomic flush so the HUD watch-loop always
-    # sees a complete frame even when tailscale/lspci are slow.
+    # Buffered and flushed at once so the HUD loop never paints a half frame
+    # while tailscale or lspci are slow.
     local hostname
     hostname=$(_archmagi_hostname)
 
@@ -427,8 +411,7 @@ _status_body_compute() {
     _status_row "$bar" "$sep" "LOAD" "$(_status_meter "${load_pct:-0}")  $load_raw"
 }
 
-# Emits its own leading separator only if at least one field is present, so
-# server profiles (no PPD, no battery, no Hyprland) don't leave a trailing rule.
+# Separator only when a field exists, so servers don't get a dangling rule.
 _status_body_power() {
     local bar=$1 sep=$2 proto batt disp
     proto=$(_status_protocol)

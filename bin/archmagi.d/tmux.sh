@@ -1,13 +1,10 @@
-# archmagi tmux: tmux session control wrapper.
-
 _tmux_attach() {
     local session="${1:-MAGI}"
     if [[ -n "$TMUX" ]]; then
-        # Inside tmux: create detached if missing, then switch (never nest).
+        # Inside tmux: create detached if missing, then switch. Never nest.
         tmux has-session -t "$session" 2>/dev/null || tmux new-session -d -s "$session"
         tmux switch-client -t "$session"
     else
-        # -A attaches when the session exists, creates it otherwise.
         tmux new-session -A -s "$session"
     fi
 }

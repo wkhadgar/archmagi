@@ -1,12 +1,6 @@
-# Template substitution for `archmagi install bootstrap`.
-
-# Substitute __KEY__ placeholders in a template, write the result atomically.
-# Substitution uses bash string replacement so values with special characters
-# survive without escaping. Writes go through sudo when dest is under /etc,
-# /usr, or /boot.
-# @param 1 source template path
-# @param 2 destination path
-# @param 3+ KEY=value substitution pairs
+# _install_substitute TEMPLATE DEST KEY=value ...
+# Bash string replacement (so values with special characters survive without
+# escaping), atomic write, sudo when dest is under /etc, /usr, or /boot.
 _install_substitute() {
     local tmpl=$1 dest=$2; shift 2
     [[ -r "$tmpl" ]] || { echo "template missing: $tmpl" >&2; return 1; }
@@ -24,7 +18,7 @@ _install_substitute() {
     tmp=$(mktemp) || return 1
     trap 'rm -f "$tmp"' RETURN
 
-    # Always write a terminating newline (matters for /etc/hostname, /etc/hosts).
+    # Terminating newline matters for /etc/hostname, /etc/hosts.
     printf '%s\n' "$content" > "$tmp" || return 1
 
     local dest_dir=${dest%/*} prefix=""

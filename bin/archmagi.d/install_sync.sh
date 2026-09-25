@@ -1,9 +1,3 @@
-# `archmagi install sync`: diff-based pull from live system back into the repo.
-# Skips files that bootstrap owns via templates (their .tmpl is the source) and
-# gitignored, churn-prone artifacts like lazy.nvim's lock file.
-
-# Skip templated outputs (one-way: repo -> live) and gitignored churn.
-# @return 0 if excluded, 1 otherwise.
 _install_sync_excluded() {
     case "$1" in
         etc/hostname|etc/hosts|hypr/hyprlock.conf|hypr/hyprland/monit.lua) return 0 ;;
@@ -13,11 +7,7 @@ _install_sync_excluded() {
     return 1
 }
 
-# Compare one live file to its repo counterpart; prompt to overwrite if they differ.
-# @param 1 absolute live path
-# @param 2 repo-relative destination path
-# @param 3 absolute repo root
-# @return 0 normal, 2 if user quit (caller should propagate)
+# Returns 2 if the user picked `q` at the prompt so the caller can bail early.
 _install_sync_file() {
     local live=$1 repo_rel=$2 abs_repo=$3
     local repo_file="$abs_repo/$repo_rel"
@@ -49,11 +39,6 @@ _install_sync_file() {
     esac
 }
 
-# Recursively prompt on every file under live_root vs repo_root.
-# @param 1 absolute live tree root
-# @param 2 repo-relative tree root
-# @param 3 absolute repo root
-# @return 0 normal, 2 if user quit
 _install_sync_tree() {
     local live_root=$1 repo_rel_root=$2 abs_repo=$3
     [[ -d "$live_root" ]] || return 0
@@ -65,7 +50,6 @@ _install_sync_tree() {
     done < <(find "$live_root" -type f 2>/dev/null)
 }
 
-# Walk every live -> repo pair, prompting per drifted file.
 _install_sync() {
     local repo
     repo=$(_install_find_repo) || return 1

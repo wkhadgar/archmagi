@@ -1,16 +1,5 @@
 #!/bin/bash
-# tests/smoke.sh: sanity check for archmagi.
-#
-# Runs against the in-repo bin/archmagi + bin/archmagi.d/ (does not require deployment
-# to ~/.local/bin). Three test classes:
-#   1. bash syntax-check every shipped script
-#   2. source each archmagi.d/<group>.sh and assert its cmd_<group> is defined
-#   3. invoke the safe-to-call commands end-to-end and check output shape
-#
-# Destructive commands (reboot/shutdown/install/restart/confirm) are only
-# checked at the "is the function defined?" level; never invoked.
-#
-# Exit code: 0 if all tests pass, 1 otherwise.
+# Destructive commands are only checked for definition, never invoked.
 
 set -u
 cd "$(dirname "$(readlink -f "$0")")/.."

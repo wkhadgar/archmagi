@@ -1,9 +1,4 @@
-# Package installation for `archmagi install bootstrap`.
-
-# Install pacman packages, plus AUR via paru when present.
-# -Syu (not -S): partial upgrades break Arch, so refresh and upgrade together.
-# --noconfirm: the bootstrap prompt already gathered consent.
-# @param 1 absolute path to the archmagi repo root
+# -Syu (not -S): partial upgrades break Arch.
 _install_packages() {
     local repo=$1
 

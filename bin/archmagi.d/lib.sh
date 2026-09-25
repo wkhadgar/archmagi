@@ -1,6 +1,3 @@
-# archmagi: shared palette, constants, and cross-group helpers.
-# Sourced unconditionally by bin/archmagi before any command-group library.
-
 RED=$'\033[38;2;204;0;0m'
 AMBER=$'\033[38;2;255;191;0m'
 BLUE=$'\033[38;2;90;212;230m'
@@ -11,8 +8,7 @@ RESET=$'\033[0m'
 
 MAGI_NODES=(casper-3 balthasar-2 melchior-1)
 
-# Persisted host facts from `archmagi install bootstrap`. Empty when the host
-# hasn't been bootstrapped yet.
+# Facts persisted by `archmagi install bootstrap`.
 ARCHMAGI_PROFILE=""
 ARCHMAGI_HOSTNAME=""
 ARCHMAGI_BOOTLOADER=""
@@ -27,11 +23,8 @@ if [[ -r /etc/archmagi/profile ]]; then
     unset _k _v
 fi
 
-# Short hostname. Prefers `/etc/archmagi/profile` when bootstrap has run,
-# then `/etc/hostname` (canonical on Arch), and finally falls back to
-# `uname -n`. Truncates FQDN to the short label so callers get `balthasar-2`
-# rather than `balthasar-2.localdomain`. On hosts where DHCP or similar has
-# set the kernel hostname to an IP, this still yields the right name.
+# Priority order matters: DHCP can set the kernel hostname to an IP, so
+# `uname -n` is the last resort.
 _archmagi_hostname() {
     local h=""
     [[ -n "$ARCHMAGI_HOSTNAME" ]] && h=$ARCHMAGI_HOSTNAME
@@ -40,10 +33,8 @@ _archmagi_hostname() {
     printf '%s' "${h%%.*}"
 }
 
-# Print the sysfs path of the first battery with a readable capacity. Handles
-# BAT0, BAT1 and dual-battery laptops. Returns non-zero on a host with no
-# battery at all, so a caller can gate an entire surface on the exit code
-# instead of repeating the glob.
+# Non-zero exit on a battery-less host so callers can gate a whole surface
+# on it instead of repeating the glob.
 _battery_device() {
     local bat
     for bat in /sys/class/power_supply/BAT*; do
@@ -54,18 +45,12 @@ _battery_device() {
     return 1
 }
 
-# Format battery time-remaining as `HHhMMm`. Prints:
-#   `HHhMMm` when discharging (time to empty) or charging (time to full)
-#   `FULL`   when the battery is Full
-#   nothing  when no battery, unknown status, or draw is unavailable
-# Supports both energy_/power_ (uWh, uW) and charge_/current_ (uAh, uA)
-# sysfs conventions so it works across laptop firmware variants.
-# @param 1  battery sysfs dir; defaults to the first device _battery_device finds
+# HHhMMm when discharging or charging, `FULL` when full, empty otherwise.
+# Accepts either energy_/power_ (uWh, uW) or charge_/current_ (uAh, uA)
+# so it works across firmware variants.
 _battery_eta() {
     local bat=${1:-}
 
-    # A host with no battery leaves $bat empty, which the readability check
-    # below rejects along with a caller-supplied path that is not a battery.
     [[ -n "$bat" ]] || bat=$(_battery_device)
     [[ -r "$bat/capacity" ]] || return 0
 
@@ -95,17 +80,13 @@ _battery_eta() {
     printf '%02dh%02dm\n' $(( total_minutes / 60 )) $(( total_minutes % 60 ))
 }
 
-# True when power-profiles-daemon is installed AND its daemon is reachable
-# (the D-Bus call succeeds). Used to gate the profile UI surface so it appears
-# on any host running PPD, regardless of laptop/desktop profile.
 _ppd_available() {
     command -v powerprofilesctl >/dev/null && powerprofilesctl get >/dev/null 2>&1
 }
 
 # UNKNOWN means the host isn't in `tailscale status` output at all (vs offline).
-# $_TAILNET_STATUS_CACHE holds the full `tailscale status` output for the
-# duration of this process; one fork per archmagi invocation regardless of
-# how many MAGI nodes are queried.
+# The cache holds `tailscale status` for the process lifetime; one fork per
+# archmagi invocation regardless of how many MAGI nodes are queried.
 _TAILNET_STATUS_CACHE=""
 _tailnet_state() {
     local host="$1"
@@ -118,15 +99,12 @@ _tailnet_state() {
     fi
 }
 
-# Cache path for the (slow) pacman + AUR update counts.
 _pending_counts_cache() {
     local dir="${XDG_CACHE_HOME:-$HOME/.cache}/archmagi"
     mkdir -p "$dir" 2>/dev/null
     echo "$dir/updates"
 }
 
-# Synchronously fetch fresh counts and atomically replace the cache file.
-# Returns 0 on success, non-zero (with $tmp removed) if the write/move failed.
 _pending_counts_fetch() {
     local out=$1 p a tmp
     p=$(checkupdates 2>/dev/null | wc -l)
@@ -139,9 +117,9 @@ _pending_counts_fetch() {
     return 1
 }
 
-# Stale-while-revalidate: callers always get an instant answer once the cache
-# exists. The first-ever call per host pays the full fetch cost. Output is
-# always "INT INT\n" — falls back to "0 0" when the fetch fails.
+# Stale-while-revalidate: cached read is instant, a fresh fetch runs in the
+# background whenever the cache is older than TTL. First-ever call per host
+# pays the full fetch cost. Output is always "INT INT\n" (fallback "0 0").
 _pending_counts() {
     local cache ttl=300 age
     cache=$(_pending_counts_cache)

@@ -1,6 +1,3 @@
-# archmagi update: interactive paru -Syu (run) + waybar update count (check).
-# Subcommands: run (default), check [-j]
-
 cmd_update() {
     case "${1:-run}" in
         run)   shift 2>/dev/null; _update_run "$@" ;;
@@ -56,7 +53,6 @@ _update_run() {
         return 0
     fi
 
-    # Threat level scales with batch size; CRITICAL_UPDATE_AMOUNT (45) is the red line.
     local threat threat_color
     if   ((total >= 45)); then threat="PATTERN RED";   threat_color="$RED"
     elif ((total >= 16)); then threat="PATTERN BLUE";  threat_color="$BLUE"

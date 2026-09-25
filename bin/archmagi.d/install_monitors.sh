@@ -1,10 +1,3 @@
-# `archmagi install monitors`: snapshot the live hyprctl monitor topology
-# into ~/.config/hypr/hyprland/monit.lua, prompting per monitor for its scale.
-# Re-run after attaching or removing displays.
-
-# Detect live monitors, prompt for each scale, preview, confirm, then write.
-# Requires Hyprland to be running and jq for JSON parsing.
-# @return 0 on success or user-cancel at the final confirm, 1 on hard failure
 _install_monitors() {
     local bar="${RED}▌${RESET}"
 
@@ -69,10 +62,6 @@ _install_monitors() {
     printf "  %s reload Hyprland: ${AMBER}hyprctl reload${RESET}\n" "$bar"
 }
 
-# Read a scale (number, optionally fractional) with a default; re-prompts on
-# invalid input. Empty input keeps the default.
-# @param 1 default scale shown in the prompt
-# @return chosen scale in PROMPT_SCALE (global)
 _monitors_prompt_scale() {
     local default=$1 input
     PROMPT_SCALE=""
@@ -88,11 +77,7 @@ _monitors_prompt_scale() {
     done
 }
 
-# Strip trailing zeros from a scale string while preserving the integer part:
-# 1.00 -> 1, 1.50 -> 1.5, 1.33 -> 1.33, 10 -> 10 (only digits after the dot
-# are touched).
-# @param 1 raw scale (e.g. from jq)
-# @stdout cleaned scale
+# 1.00 -> 1, 1.50 -> 1.5, 10 -> 10. Only touches digits after the dot.
 _monitors_clean_scale() {
     printf '%s' "$1" | sed -E 's/(\..*[1-9])0+$/\1/; s/\.0+$//'
 }

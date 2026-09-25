@@ -1,7 +1,3 @@
-# Bootloader theme application for `archmagi install boot`.
-
-# Apply the NERV theme to the detected bootloader. GRUB wins ties.
-# Auto-renders the wallpaper PNG if missing so standalone re-runs work.
 _install_boot() {
     [[ -f /usr/share/nerv/boot-background.png ]] || _install_wallpaper || return 1
 
@@ -12,8 +8,8 @@ _install_boot() {
     esac
 }
 
-# Apply the NERV GRUB theme. Idempotent: only re-runs grub-mkconfig if a key
-# actually changed. Requires png.mod preload for the PNG background.
+# Idempotent: only re-runs grub-mkconfig if a key actually changed.
+# The png preload is required to render the PNG theme background.
 _boot_grub() {
     local theme=/usr/share/grub/themes/nerv/theme.txt
     local config=/etc/default/grub
@@ -51,9 +47,8 @@ _boot_grub() {
     fi
 }
 
-# Apply the NERV limine theme. Stages the wallpaper to the ESP (boot reads
-# only its own partition) and rewrites a sentinel-bounded block at the top of
-# limine.conf so general directives sit before the first `/`-entry.
+# Wallpaper must go on the ESP: limine only reads its own partition.
+# The sentinel block goes before the first `/`-entry so directives are in scope.
 _boot_limine() {
     local config
     for candidate in /boot/limine.conf /boot/limine.cfg /etc/limine.conf; do
@@ -81,7 +76,6 @@ EOF
     tmp=$(mktemp)
     trap 'rm -f "$tmp"' RETURN
 
-    # Subshell pipefail catches sed/awk failures before $tmp gets copied over $config.
     ( set -o pipefail
       sudo sed '/^# >>> magi boot/,/^# <<< magi boot/d' "$config" \
           | awk -v b="$block" '

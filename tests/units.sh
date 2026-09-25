@@ -1,13 +1,5 @@
 #!/bin/bash
-# tests/units.sh: behavioral assertions on pure helpers (no system mutations).
-#
-# Complements tests/smoke.sh:
-#   smoke.sh covers syntax + function-defined + end-to-end safe invocations.
-#   units.sh covers algorithmic helpers with deterministic input/output:
-#     _install_substitute, _install_sync_excluded, _status_meter_color,
-#     _monitors_clean_scale, _install_find_repo, _wallpaper_detect_resolution,
-#     _status_meter, _ppd_available, _battery_eta, _battery_runtime,
-#     _battery_summary.
+# Deterministic assertions on pure helpers. No system mutations.
 
 set -u
 cd "$(dirname "$(readlink -f "$0")")/.."
@@ -76,11 +68,7 @@ assert_match "meter 50 high_bad: contains 50%"  "$(_status_meter 50  high_bad)" 
 assert_match "meter 0:           contains 0%"   "$(_status_meter 0   high_bad)" '0%'
 assert_match "meter 100:         contains 100%" "$(_status_meter 100 high_bad)" '100%'
 
-# Battery helpers run against fake sysfs devices so the assertions hold on a
-# laptop and a desktop alike. Both firmware conventions are covered:
-# energy_/power_ (uWh, uW) and charge_/current_ (uAh, uA).
-# @param 1  device dir
-# @param 2+ attribute=value pairs
+# Fake sysfs device so battery tests pass on laptops and desktops alike.
 fake_battery() {
     local dir=$1; shift
     local kv
@@ -131,8 +119,7 @@ assert_eq "runtime: not charging is unbounded"  "$(_battery_runtime "$bat_root/h
 assert_eq "runtime: discharging is the ETA"   "$(_battery_runtime "$bat_root/draining")" "02h00m"
 assert_eq "runtime: unknown status is blank"  "$(_battery_runtime "$bat_root/unknown")"  ""
 
-# _battery_summary: whole lockscreen row, nothing at all without a battery.
-# On wall power the row carries the same motto as the top-right widget.
+# _battery_summary
 assert_eq "summary: capacity and ETA"    "$(_battery_summary "$bat_root/draining")" "BATT // 42% (02h00m)"
 assert_eq "summary: charging is motto"   "$(_battery_summary "$bat_root/charging")" "BATT // 50% ($BATTERY_RUNTIME_UNBOUNDED)"
 assert_eq "summary: full is motto"       "$(_battery_summary "$bat_root/full")"     "BATT // 100% ($BATTERY_RUNTIME_UNBOUNDED)"

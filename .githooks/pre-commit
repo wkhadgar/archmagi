@@ -1,11 +1,5 @@
 #!/bin/bash
-# .githooks/pre-commit
-#
-# Runs tests/smoke.sh and tests/units.sh when any archmagi-related file is
-# staged. Other commits pass through instantly. Enable with:
-#     git config core.hooksPath .githooks
-#
-# Bypass for one commit with:  git commit --no-verify
+# Enable with: git config core.hooksPath .githooks
 
 repo_root=$(git rev-parse --show-toplevel) || exit 0
 cd "$repo_root" || exit 0

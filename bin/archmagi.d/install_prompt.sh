@@ -1,10 +1,6 @@
-# Interactive TTY prompts used by `archmagi install bootstrap`.
-# Prompts write their UI to stdout; the chosen value is read from a
-# well-known global variable.
+# Prompts write UI to stdout and store the chosen value in a PROMPT_* global,
+# so `$()` capture never swallows the UI into a captured pipe.
 
-# Pick a hostname from a MAGI_NODES picklist or enter a custom one.
-# @param 1 current hostname (used as the empty-input default; optional)
-# @return chosen hostname in PROMPT_HOSTNAME (global)
 _install_prompt_hostname() {
     local current=${1:-} bar="${RED}▌${RESET}"
     local i n=${#MAGI_NODES[@]} choice host
@@ -37,9 +33,6 @@ _install_prompt_hostname() {
     fi
 }
 
-# Pick laptop / desktop / server, defaulting to the detected hint.
-# @param 1 default hint (laptop|desktop|server)
-# @return chosen role in PROMPT_PROFILE (global)
 _install_prompt_profile_role() {
     local hint=${1:-desktop} bar="${RED}▌${RESET}"
     local choice
@@ -60,11 +53,6 @@ _install_prompt_profile_role() {
     esac
 }
 
-# Show a review table of the detected/decided values; ask for final go-ahead.
-# @param 1 profile
-# @param 2 hostname
-# @param 3 bootloader
-# @return 0 if user confirms with Y/empty, 1 if N
 _install_prompt_confirm() {
     local profile=$1 hostname=$2 bootloader=$3
     local bar="${RED}▌${RESET}" sep="${MUTED}//${RESET}"

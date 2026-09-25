@@ -1,5 +1,3 @@
-# archmagi help: top-level usage with all command groups.
-
 cmd_help() {
     cat <<EOF
 ${BOLD}${RED}MAGI SYSTEM${RESET} ${MUTED}// COMMAND INTERFACE${RESET}

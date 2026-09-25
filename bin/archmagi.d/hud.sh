@@ -1,10 +1,6 @@
-# archmagi hud: toggle a floating live status panel.
-# Spawns a kitty window of class `archmagi-hud` running an `archmagi fetch`
-# loop. Hypr window rules (winwo.lua) pin it floating/centered/borderless.
-# Toggle-close by killing the kitty PID reported by `hyprctl clients`;
-# Hyprland's 0.56 Lua dispatcher API doesn't accept an address selector
-# from outside its own Lua context, so `hyprctl dispatch` can't target
-# a specific window reliably.
+# Toggle-close via kill(pid): Hyprland 0.56's Lua dispatcher API doesn't take
+# an address selector from outside its own Lua context, so `hyprctl dispatch`
+# can't target a specific window reliably.
 
 cmd_hud() {
     local pids pid

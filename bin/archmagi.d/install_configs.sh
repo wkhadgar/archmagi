@@ -1,9 +1,3 @@
-# Generic config deployment for `archmagi install bootstrap`.
-
-# Copy every shipped config from the repo into its live destination.
-# Host-specific files are handled by the template phase.
-# Strips `.tmpl` files from live destinations so only rendered files remain.
-# @param 1 absolute path to the archmagi repo root
 _install_configs() {
     local repo=$1
 
@@ -23,10 +17,9 @@ _install_configs() {
     cp -r "$repo"/swaync/. ~/.config/swaync/             || return 1
 
     mkdir -p ~/.local/bin/archmagi.d                     || return 1
-    # `install` unlinks the destination first, so the running dispatcher
-    # keeps reading from its still-open inode while the path is repointed
-    # to a fresh one. Plain cp would truncate-and-rewrite in place, which
-    # corrupts an in-flight archmagi mid-execution.
+    # `install` unlinks first, so a running archmagi keeps executing from its
+    # already-open inode while the path is repointed to a fresh one. Plain cp
+    # would truncate-and-rewrite in place and corrupt a mid-flight run.
     install -m 755 "$repo/bin/archmagi" ~/.local/bin/archmagi || return 1
     cp -r "$repo"/bin/archmagi.d/. ~/.local/bin/archmagi.d/   || return 1
 
@@ -39,8 +32,6 @@ _install_configs() {
     return 0
 }
 
-# Locate the archmagi repo root by looking for a known template.
-# @return absolute repo path on stdout, non-zero on failure
 _install_find_repo() {
     if [[ -f "$PWD/etc/hostname.tmpl" ]]; then
         echo "$PWD"

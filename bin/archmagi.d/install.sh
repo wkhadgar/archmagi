@@ -1,5 +1,3 @@
-# archmagi install: bootstrap, boot theme, monitor refresh, sync back.
-
 source "$ARCHMAGI_LIB/install_detect.sh"
 source "$ARCHMAGI_LIB/install_prompt.sh"
 source "$ARCHMAGI_LIB/install_template.sh"
@@ -22,10 +20,6 @@ cmd_install() {
     esac
 }
 
-# Run the full bootstrap chain on a fresh host.
-# Order: detect -> prompt -> persist -> configs -> templates -> packages -> wallpaper -> boot.
-# Configs land before packages so a ctrl-C during pacman still leaves a
-# working dotfile install; wallpaper waits for imagemagick from packages.
 _install_bootstrap() {
     local bar="${RED}▌${RESET}" sep="${MUTED}//${RESET}"
 
@@ -57,6 +51,8 @@ _install_bootstrap() {
     } | sudo tee /etc/archmagi/profile >/dev/null
     printf "  %s wrote ${AMBER}/etc/archmagi/profile${RESET}\n" "$bar"
 
+    # Configs land before packages so a ctrl-C during pacman still leaves a
+    # working dotfile install.
     _install_configs "$repo"
     printf "  %s deployed generic configs from ${AMBER}%s${RESET}\n" "$bar" "$repo"
 
@@ -70,6 +66,7 @@ _install_bootstrap() {
     }
     printf "  %s pacman -S --needed completed\n" "$bar"
 
+    # Wallpaper needs imagemagick from packages.
     _install_wallpaper
     _install_boot
 
@@ -77,11 +74,6 @@ _install_bootstrap() {
     printf "  %s ${BOLD}MAGI BOOTSTRAP COMPLETE${RESET} %s reboot to see NERV chrome\n" "$bar" "$sep"
 }
 
-# Re-deploy configs + re-render hostname-bound templates from the persisted
-# /etc/archmagi/profile. No prompts, no packages, no boot theme. The post-pull
-# path for an already-bootstrapped host. Warns first when handmade live edits
-# would be clobbered; user picks whether to proceed.
-# Skips monit.lua.tmpl because the live monit.lua is owned by `install monitors`.
 _install_redeploy() {
     local bar="${RED}▌${RESET}"
     local repo
@@ -115,12 +107,6 @@ _install_redeploy() {
     printf "  %s redeployed configs from ${AMBER}%s${RESET}\n" "$bar" "$repo"
 }
 
-# Walk the managed live<->repo trees and echo the repo-relative path of every
-# live file whose content differs from its repo counterpart. Files that appear
-# only live (not yet added to repo) are ignored; the redeploy would preserve
-# them anyway. Templated files (per _install_sync_excluded) are skipped
-# because they flow only outward.
-# @param 1 absolute repo root
 _install_drift_scan() {
     local repo=$1
     local trees=(
@@ -147,9 +133,8 @@ _install_drift_scan() {
     done
 }
 
-# Render the three hostname-bound templates (hostname, hosts, hyprlock identity).
-# Shared by bootstrap and redeploy; monit.lua.tmpl is intentionally excluded
-# because the live monit.lua is owned by `archmagi install monitors`.
+# monit.lua.tmpl is intentionally skipped: the live monit.lua is owned by
+# `archmagi install monitors`.
 _install_hostname_templates() {
     local repo=$1 hostname=$2 hostname_upper=${2^^}
     _install_substitute "$repo/etc/hostname.tmpl"       /etc/hostname                      HOSTNAME="$hostname"

@@ -1,24 +1,11 @@
-# archmagi battery: low-battery notifications via notify-send, plus the two
-# text widgets the lockscreen draws.
-# One-shot `check` reads the battery sysfs device, decides whether the current
-# capacity crossed a warning band, and fires a notification if so. `watch` is a
-# background loop for the Hyprland autostart. `runtime` and `summary` render the
-# lockscreen widgets. Every subcommand is a silent no-op on a machine without a
-# battery, except `runtime`, which reports unbounded runtime there.
-
-# Warning thresholds (percent, descending). A band re-fires only if capacity
-# drops into a stricter band or if the state file was cleared by a charge cycle.
 BATTERY_BAND_LOW=20
 BATTERY_BAND_CRITICAL=10
 BATTERY_BAND_EMERGENCY=5
 
-# Rendered whenever the host draws from wall power and its uptime is therefore
-# not bounded by a charge level, the way an Evangelion on the umbilical cable
-# has no activation time limit.
+# Uptime on wall power isn't bounded by a charge level. Matches the umbilical
+# cable freeing an Eva from its activation-time limit.
 BATTERY_RUNTIME_UNBOUNDED='∞ // UMBILICAL'
 
-# Dispatcher.
-# @param 1  subcommand: "check" (default), "watch", "runtime", or "summary"
 cmd_battery() {
     case "${1:-check}" in
         check)   _battery_check   ;;
@@ -32,10 +19,8 @@ cmd_battery() {
     esac
 }
 
-# Read the first BAT* device with a readable capacity. If capacity is at or
-# below a threshold and Hyprland's notify daemon hasn't seen this band yet,
-# fire notify-send and record the band. Charging clears the record so the
-# next drop below a threshold notifies again.
+# Fire notify-send when capacity first drops into a threshold band while
+# discharging. Charging clears the state so a later drop notifies again.
 _battery_check() {
     local bat
     bat=$(_battery_device) || return 0
@@ -88,9 +73,8 @@ _battery_check() {
     printf '%s' "$band" > "$state_file"
 }
 
-# Poll _battery_check every 60s. Meant to be autostarted from start.lua, which
-# runs on every host, so a battery-less one returns instead of polling a no-op
-# forever.
+# start.lua runs this on every host; return early on desktops instead of
+# polling a no-op forever.
 _battery_watch() {
     _battery_device >/dev/null || return 0
 
@@ -100,18 +84,11 @@ _battery_watch() {
     done
 }
 
-# Lockscreen top-right value: how long the host can keep running unattended.
-# Wall power imposes no bound, so print BATTERY_RUNTIME_UNBOUNDED for a host
-# with no battery at all and for a laptop that is charging, full, or holding at
-# a charge threshold. A discharging laptop prints its drain ETA.
-# @param 1  battery sysfs dir; defaults to the first device _battery_device finds
 _battery_runtime() {
     local bat=${1:-} status
 
     [[ -n "$bat" ]] || bat=$(_battery_device)
 
-    # No battery: the host runs on wall power, so its uptime is not bounded by
-    # a charge level. An absent device leaves $bat empty and fails this check.
     [[ -r "$bat/capacity" ]] || {
         printf '%s\n' "$BATTERY_RUNTIME_UNBOUNDED"
         return 0
@@ -130,12 +107,8 @@ _battery_runtime() {
     _battery_eta "$bat"
 }
 
-# Lockscreen bottom-left row: `BATT // 42% (01h23m)` while draining and
-# `BATT // 80% (∞ // UMBILICAL)` on wall power, so it reads the same as the
-# top-right widget. Drops the parenthesised half to `BATT // 42%` when the
-# firmware exposes no usable figure, and prints nothing on a host with no
-# battery, which leaves the hyprlock label empty so it is never drawn.
-# @param 1  battery sysfs dir; defaults to the first device _battery_device finds
+# `BATT // 42% (01h23m)` while draining, `BATT // 80% (∞ // UMBILICAL)` on
+# wall power. Empty output on a battery-less host so hyprlock draws nothing.
 _battery_summary() {
     local bat=${1:-} cap runtime
 
@@ -151,7 +124,3 @@ _battery_summary() {
         printf 'BATT // %s%%\n' "$cap"
     fi
 }
-
-# _battery_device and _battery_eta live in lib.sh so fetch and this module
-# share one device lookup and one ETA implementation. fetch calls _battery_eta
-# directly, so its BATTERY row keeps the raw time-to-full while charging.

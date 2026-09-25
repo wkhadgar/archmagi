@@ -1,5 +1,3 @@
-# archmagi restart <waybar|xdph>: kill + relaunch a desktop service detached.
-
 _restart_waybar() {
     killall waybar 2>/dev/null
     setsid waybar >/dev/null 2>&1 < /dev/null &

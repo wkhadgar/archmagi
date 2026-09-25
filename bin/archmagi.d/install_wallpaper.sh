@@ -1,13 +1,10 @@
-# Render /usr/share/nerv/boot-background.png: the shared boot wallpaper for
-# the NERV GRUB theme and limine.
+# Render /usr/share/nerv/boot-background.png, shared by the GRUB and limine
+# NERV themes.
 
-# Unmatched globs expand to nothing so the DRM detection loop doesn't iterate
-# once on the literal pattern when no card is present.
+# nullglob so the DRM loop below never iterates on the literal pattern.
 shopt -s nullglob
 
-# Pick the largest connected monitor's resolution.
-# Order: hyprctl (Hyprland up) -> /sys/class/drm/*/modes -> 1920x1080.
-# @return WxH on stdout
+# Detection order: hyprctl (when Hyprland is up) -> /sys/class/drm -> 1920x1080.
 _wallpaper_detect_resolution() {
     if command -v hyprctl >/dev/null; then
         local res
@@ -38,9 +35,6 @@ _wallpaper_detect_resolution() {
     echo "1920x1080"
 }
 
-# Render the boot wallpaper at the given (or auto-detected) resolution.
-# Writes /usr/share/nerv/boot-background.png as root.
-# @param 1 optional WxH override
 _install_wallpaper() {
     local bar="${RED}▌${RESET}"
     local res=${1:-}

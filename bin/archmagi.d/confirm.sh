@@ -1,5 +1,5 @@
-# archmagi confirm: rofi 3-node consensus dialog. User vote alone gates the action;
-# the other two MAGI always vote YES (theater). Do NOT randomize.
+# User vote alone gates the action; the other two MAGI always vote YES.
+# Do NOT randomize.
 
 cmd_confirm() {
     local msg="${1:?usage: archmagi confirm <MESSAGE>}"

@@ -1,7 +1,3 @@
-# archmagi profile: power-profiles-daemon wrapper with a NERV-themed rofi picker.
-# Host-specific to laptops with PPD installed; balthasar's flavor commit adds
-# this and the matching waybar battery `on-click` binding.
-
 _profile_center() {
     local text="$1" width="$2"
     local len=${#text}

@@ -1,13 +1,6 @@
--- Parser for archmagi cheatsheet: loads a Hyprland Lua binds file with a stubbed
--- `hl` API that records only hl.bind(...) calls, then emits one "KEYS -> DESC"
--- row per bind — with workspace-1..10 loop entries skipped, key names
--- prettified, and the ~/.local/bin/ prefix stripped from exec commands.
---
--- Usage: lua cheatsheet.lua <binds.lua path> [--with-dispatch]
--- Output (default):        DISPLAY per line
--- Output (--with-dispatch): DISPLAY <TAB> HYPRCTL_ARG per line — the second
---                          column is a `hyprctl dispatch` argument string that
---                          fires the bind's action.
+-- Usage: lua cheatsheet.lua <binds.lua> [--with-dispatch]
+-- Default emits DISPLAY per line; --with-dispatch emits
+-- DISPLAY <TAB> HYPRCTL_ARG so the shell can fire the picked bind.
 
 local binds_file = arg[1]
 if not binds_file then
@@ -18,8 +11,8 @@ local with_dispatch = arg[2] == "--with-dispatch"
 
 local recorded = {}
 
--- Namespace proxy: every nested access returns another proxy, and calling any
--- terminal produces a { __dispatcher, args } record we can pretty-print later.
+-- Every access below hl.dsp returns another proxy so nested calls like
+-- hl.dsp.window.close() resolve without a real Hyprland context.
 local function nsProxy(prefix)
     return setmetatable({}, {
         __index = function(_, k)
@@ -33,7 +26,7 @@ end
 
 hl = { dsp = nsProxy("dsp") }
 
--- Any hl.<something>(...) other than hl.bind is a no-op. hl.bind captures.
+-- hl.bind captures; every other hl.* call is a no-op.
 setmetatable(hl, {
     __index = function(_, k)
         return function(...)
@@ -47,8 +40,6 @@ setmetatable(hl, {
 
 dofile(binds_file)
 
--- ---- Rendering ----
-
 local home_prefix  = os.getenv("HOME") .. "/.local/bin/"
 local tilde_prefix = "~/.local/bin/"
 
@@ -58,24 +49,19 @@ local function strip_localbin(s)
     return s
 end
 
--- Lua-quote a string value for embedding in a dispatch expression
--- (escapes backslashes and double quotes; other chars are passed through
--- unchanged so `$USER` etc. survive to the shell that runs exec_cmd).
+-- Only escapes backslashes and double quotes; `$USER` etc. survive to the
+-- shell that runs exec_cmd.
 local function q(s)
     return '"' .. tostring(s):gsub('\\', '\\\\'):gsub('"', '\\"') .. '"'
 end
 
--- Render a workspace selector as either a Lua number or quoted string, so
--- both `focus({workspace=5})` and `focus({workspace="e+1"})` come out right.
 local function wsval(v)
     if type(v) == "number" then return tostring(v) end
     return q(v)
 end
 
--- Map a captured dispatcher record to a Lua expression string that
--- `hyprctl dispatch` will evaluate (Hyprland 0.56+ wraps the arg as
--- `return hl.dispatch(<arg>)`). Returns "" if the dispatcher is
--- unrecognised (row still displays; firing it becomes a silent no-op).
+-- Lua expression for `hyprctl dispatch` (Hyprland 0.56+ wraps arg as
+-- `return hl.dispatch(<arg>)`). Empty string = row is unfirable.
 local function to_dispatch(d)
     if type(d) ~= "table" or not d.__dispatcher then return "" end
     local name = d.__dispatcher:gsub("^dsp%.", "")
@@ -124,8 +110,8 @@ local function inspect(d)
     return name
 end
 
+-- Drop the workspace-1..10 loop-generated binds; they'd flood the rofi list.
 local function should_skip(b)
-    -- Filter workspace-N and movetoworkspace-N loop-generated binds (N in 1..10).
     if type(b.dispatcher) ~= "table" then return false end
     local d  = b.dispatcher.__dispatcher
     local a1 = b.dispatcher.args[1]
@@ -137,7 +123,6 @@ local function should_skip(b)
 end
 
 local function prettify(keys)
-    -- Split on last " + " to separate mods from key.
     local last_plus = keys:find(" %+ [^ +]*$")
     local mod, key
     if last_plus then
@@ -150,7 +135,7 @@ local function prettify(keys)
 
     if key == "slash" and mod:find("SHIFT") then
         key = "?"
-        -- Strip "SHIFT" and the surrounding "+" so "SUPER + SHIFT" -> "SUPER".
+        -- "SUPER + SHIFT" -> "SUPER"
         mod = mod:gsub("%s*%+%s*SHIFT", ""):gsub("SHIFT%s*%+%s*", "")
         mod = mod:gsub("^%s+", ""):gsub("%s+$", "")
     elseif key == "slash"   then key = "/"

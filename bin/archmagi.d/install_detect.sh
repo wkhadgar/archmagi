@@ -1,7 +1,4 @@
-# Hardware/state detection helpers used by `archmagi install bootstrap`.
-
-# Detect host profile by hardware features.
-# @return laptop | desktop | server  (server = no battery AND no connected display)
+# laptop | desktop | server. Server = no battery AND no connected display.
 _install_detect_profile() {
     if compgen -G "/sys/class/power_supply/BAT*" >/dev/null; then
         echo laptop
@@ -14,8 +11,7 @@ _install_detect_profile() {
     fi
 }
 
-# Detect installed bootloader by config file presence.
-# @return grub | limine | unknown
+# grub | limine | unknown.
 _install_detect_bootloader() {
     if [[ -f /etc/default/grub ]] && command -v grub-mkconfig >/dev/null; then
         echo grub
@@ -25,4 +21,3 @@ _install_detect_bootloader() {
         echo unknown
     fi
 }
-
