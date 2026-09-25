@@ -60,54 +60,49 @@ local function wsval(v)
     return q(v)
 end
 
--- Lua expression for `hyprctl dispatch` (Hyprland 0.56+ wraps arg as
--- `return hl.dispatch(<arg>)`). Empty string = row is unfirable.
-local function to_dispatch(d)
-    if type(d) ~= "table" or not d.__dispatcher then return "" end
-    local name = d.__dispatcher:gsub("^dsp%.", "")
-    local a1   = d.args[1]
-
-    if name == "exec_cmd" then                 return "hl.dsp.exec_cmd(" .. q(a1 or "") .. ")" end
-    if name == "window.close" then             return "hl.dsp.window.close()"                  end
-    if name == "window.pseudo" then            return "hl.dsp.window.pseudo()"                 end
-    if name == "window.drag" then              return "hl.dsp.window.drag()"                   end
-    if name == "window.resize" then            return "hl.dsp.window.resize()"                 end
-    if name == "exit" then                     return "hl.dsp.exit()"                          end
-    if name == "workspace.toggle_special" then return "hl.dsp.workspace.toggle_special(" .. q(a1 or "") .. ")" end
-
-    if name == "focus" and type(a1) == "table" then
-        if a1.direction then return "hl.dsp.focus({direction=" .. q(a1.direction) .. "})"      end
-        if a1.workspace then return "hl.dsp.focus({workspace=" .. wsval(a1.workspace) .. "})"  end
-    end
-    if name == "window.move" and type(a1) == "table" and a1.workspace then
-        return "hl.dsp.window.move({workspace=" .. wsval(a1.workspace) .. "})"
-    end
-
-    return ""
+-- name -> function(first_arg) returning (display text, dispatch expression).
+-- The expression is what `hyprctl dispatch` evaluates (Hyprland 0.56+ wraps
+-- it as `return hl.dispatch(<arg>)`); empty means the row can't be fired.
+local function plain(display, expr)
+    return function() return display, expr end
 end
 
-local function inspect(d)
-    if type(d) ~= "table" or not d.__dispatcher then return tostring(d) end
+local DISPATCHERS = {
+    exec_cmd = function(a)
+        return strip_localbin(tostring(a or "")), "hl.dsp.exec_cmd(" .. q(a or "") .. ")"
+    end,
+    ["window.close"]  = plain("killactive",   "hl.dsp.window.close()"),
+    ["window.pseudo"] = plain("pseudo",       "hl.dsp.window.pseudo()"),
+    ["window.drag"]   = plain("movewindow",   "hl.dsp.window.drag()"),
+    ["window.resize"] = plain("resizewindow", "hl.dsp.window.resize()"),
+    exit              = plain("exit",         "hl.dsp.exit()"),
+    ["workspace.toggle_special"] = function(a)
+        return "togglespecialworkspace " .. tostring(a or ""),
+               "hl.dsp.workspace.toggle_special(" .. q(a or "") .. ")"
+    end,
+    focus = function(a)
+        if type(a) == "table" and a.direction then
+            return "movefocus " .. a.direction, "hl.dsp.focus({direction=" .. q(a.direction) .. "})"
+        end
+        if type(a) == "table" and a.workspace then
+            return "workspace " .. tostring(a.workspace), "hl.dsp.focus({workspace=" .. wsval(a.workspace) .. "})"
+        end
+        return "focus", ""
+    end,
+    ["window.move"] = function(a)
+        if type(a) == "table" and a.workspace then
+            return "movetoworkspace " .. tostring(a.workspace), "hl.dsp.window.move({workspace=" .. wsval(a.workspace) .. "})"
+        end
+        return "window.move", ""
+    end,
+}
+
+local function describe(d)
+    if type(d) ~= "table" or not d.__dispatcher then return tostring(d), "" end
     local name = d.__dispatcher:gsub("^dsp%.", "")
-    local a1   = d.args[1]
-
-    if name == "exec_cmd" then                          return strip_localbin(tostring(a1 or "")) end
-    if name == "window.close" then                      return "killactive"                       end
-    if name == "window.pseudo" then                     return "pseudo"                           end
-    if name == "window.drag" then                       return "movewindow"                       end
-    if name == "window.resize" then                     return "resizewindow"                     end
-    if name == "exit" then                              return "exit"                             end
-    if name == "workspace.toggle_special" then          return "togglespecialworkspace " .. tostring(a1 or "") end
-
-    if name == "focus" and type(a1) == "table" then
-        if a1.direction then return "movefocus " .. a1.direction end
-        if a1.workspace then return "workspace " .. tostring(a1.workspace) end
-    end
-    if name == "window.move" and type(a1) == "table" and a1.workspace then
-        return "movetoworkspace " .. tostring(a1.workspace)
-    end
-
-    return name
+    local f = DISPATCHERS[name]
+    if f then return f(d.args[1]) end
+    return name, ""
 end
 
 -- Drop the workspace-1..10 loop-generated binds; they'd flood the rofi list.
@@ -153,10 +148,10 @@ end
 
 for _, b in ipairs(recorded) do
     if not should_skip(b) then
-        local desc    = (b.opts and b.opts.desc) or inspect(b.dispatcher)
-        local display = string.format("%-25s ->  %s", prettify(b.keys), desc)
+        local shown, expr = describe(b.dispatcher)
+        local display = string.format("%-25s ->  %s", prettify(b.keys), (b.opts and b.opts.desc) or shown)
         if with_dispatch then
-            print(display .. "\t" .. to_dispatch(b.dispatcher))
+            print(display .. "\t" .. expr)
         else
             print(display)
         end
