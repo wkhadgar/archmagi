@@ -1,6 +1,5 @@
 animation = fade, 1, 4, linear
 
-# BACKGROUND
 background {
   monitor =
   path = screenshot
@@ -8,7 +7,6 @@ background {
   blur_passes = 2
 }
 
-# ── CENTER: NERV LABEL ──────────────────────────────
 label {
   monitor =
   text = [ __HOSTNAME_UPPER__ ]
@@ -31,7 +29,6 @@ label {
   valign = center
 }
 
-# ── CENTER: CLOCK ───────────────────────────────────
 label {
   monitor =
   text = cmd[update:1000] echo "$(date +"%H:%M")"
@@ -43,7 +40,6 @@ label {
   valign = center
 }
 
-# ── CENTER: DATE ────────────────────────────────────
 label {
   monitor =
   text = cmd[update:60000] echo "$(date +"%A // %d %B %Y" | tr '[:lower:]' '[:upper:]')"
@@ -55,7 +51,6 @@ label {
   valign = center
 }
 
-# ── CENTER: INPUT FIELD ─────────────────────────────
 input-field {
   monitor =
   size = 300, 44
@@ -88,7 +83,6 @@ label {
   valign = center
 }
 
-# ── TOP LEFT: MAGI NODE STATUS ──────────────────────
 label {
   monitor =
   text = MAGI SYSTEM // UNIT-01
@@ -155,7 +149,6 @@ label {
   valign = top
 }
 
-# ── TOP RIGHT: THREAT LEVEL ─────────────────────────
 label {
   monitor =
   text = THREAT LEVEL
@@ -200,7 +193,6 @@ label {
   valign = top
 }
 
-# TOP RIGHT: ACTIVE TIME REMAINING (battery ETA)
 label {
   monitor =
   text = ACTIVE TIME REMAINING
@@ -223,7 +215,6 @@ label {
   valign = top
 }
 
-# ── BOTTOM LEFT: SYSTEM STATS ───────────────────────
 label {
   monitor =
   text = cmd[update:5000] echo "CPU  // $(grep 'cpu ' /proc/stat | awk '{u=$2+$4; t=$2+$4+$5; print int((u-pu)/(t-pt)*100)"%"}' pu=0 pt=0)"
@@ -279,7 +270,6 @@ label {
   valign = bottom
 }
 
-# ── BOTTOM RIGHT: GOD'S IN HIS HEAVEN ──────────────
 label {
   monitor =
   text = GOD'S IN HIS HEAVEN.

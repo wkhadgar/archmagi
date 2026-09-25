@@ -21,26 +21,26 @@
     "return-type": "json",
     "format": "{icon} {alt}",
     "format-icons": [
-      "<span color='#ffffff'>󰚰</span>", // 1. Branco (Normal)
-      "<span color='#e8f5e9'>󰚰</span>", // 2. Verde Muito Claro (Situação Estável)
-      "<span color='#c8e6c9'>󰚰</span>", // 3. Verde Pálido (Leve Alteração)
-      "<span color='#a5d6a7'>󰚰</span>", // 4. Verde Suave (Primeiro Nível de Atenção)
-      "<span color='#81c784'>󰚰</span>", // 5. Verde (Atenção)
-      "<span color='#bbdefb'>󰚰</span>", // 6. Azul Muito Claro (Informativo)
-      "<span color='#90caf9'>󰚰</span>", // 7. Azul Pálido (Monitoramento Leve)
-      "<span color='#64b5f6'>󰚰</span>", // 8. Azul Claro (Monitoramento Ativo)
-      "<span color='#42a5f5'>󰚰</span>", // 9. Azul (Alerta Baixo)
-      "<span color='#fff9c4'>󰚰</span>", // 10. Amarelo Pálido (Aviso Preliminar)
-      "<span color='#fff59d'>󰚰</span>", // 11. Amarelo Claro (Aviso)
-      "<span color='#fff176'>󰚰</span>", // 12. Amarelo (Alerta Moderado)
-      "<span color='#ffee58'>󰚰</span>", // 13. Amarelo Intenso (Alerta Elevado)
-      "<span color='#ffd54f'>󰚰</span>", // 14. Dourado (Cuidado)
-      "<span color='#ffb74d'>󰚰</span>", // 15. Laranja Claro (Perigo Iminente)
-      "<span color='#ff9800'>󰚰</span>", // 16. Laranja (Perigo)
-      "<span color='#f4511e'>󰚰</span>", // 17. Laranja Escuro (Perigo Alto)
-      "<span color='#e53935'>󰚰</span>", // 18. Vermelho (Risco Alto)
-      "<span color='#c62828'>󰚰</span>", // 19. Vermelho Escuro (Risco Crítico)
-      "<span color='#b71c1c'>󰚰</span>"  // 20. Bordô (Situação Crítica)
+      "<span color='#ffffff'>󰚰</span>",
+      "<span color='#e8f5e9'>󰚰</span>",
+      "<span color='#c8e6c9'>󰚰</span>",
+      "<span color='#a5d6a7'>󰚰</span>",
+      "<span color='#81c784'>󰚰</span>",
+      "<span color='#bbdefb'>󰚰</span>",
+      "<span color='#90caf9'>󰚰</span>",
+      "<span color='#64b5f6'>󰚰</span>",
+      "<span color='#42a5f5'>󰚰</span>",
+      "<span color='#fff9c4'>󰚰</span>",
+      "<span color='#fff59d'>󰚰</span>",
+      "<span color='#fff176'>󰚰</span>",
+      "<span color='#ffee58'>󰚰</span>",
+      "<span color='#ffd54f'>󰚰</span>",
+      "<span color='#ffb74d'>󰚰</span>",
+      "<span color='#ff9800'>󰚰</span>",
+      "<span color='#f4511e'>󰚰</span>",
+      "<span color='#e53935'>󰚰</span>",
+      "<span color='#c62828'>󰚰</span>",
+      "<span color='#b71c1c'>󰚰</span>"
     ],
     "interval": 3600,
     "on-click": "kitty -e ~/.local/bin/archmagi update; ~/.local/bin/archmagi restart waybar",

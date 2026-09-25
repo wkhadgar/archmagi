@@ -2,8 +2,7 @@ BATTERY_BAND_LOW=20
 BATTERY_BAND_CRITICAL=10
 BATTERY_BAND_EMERGENCY=5
 
-# Uptime on wall power isn't bounded by a charge level. Matches the umbilical
-# cable freeing an Eva from its activation-time limit.
+# Shown on wall power, where runtime has no bound.
 BATTERY_RUNTIME_UNBOUNDED='∞ // UMBILICAL'
 
 cmd_battery() {

@@ -1,61 +1,36 @@
-# MAGI System Theme
-# NERV HQ // Geofront Terminal
-
-# Main background — empty for terminal transparency
+# Empty main_bg keeps the terminal's transparency.
 theme[main_bg]=""
-
-# Main text color
 theme[main_fg]="#eeeeee"
-
-# Title color for boxes
 theme[title]="#cc0000"
-
-# Highlight color for keyboard shortcuts
 theme[hi_fg]="#ffbf00"
-
-# Background color of selected item in processes box
 theme[selected_bg]="#2a0000"
-
-# Foreground color of selected item in processes box
 theme[selected_fg]="#ffbf00"
-
-# Color of inactive/disabled text
 theme[inactive_fg]="#444444"
-
-# Misc colors for processes box
 theme[proc_misc]="#cc0000"
 
-# Box outline colors — all red
 theme[cpu_box]="#cc0000"
 theme[mem_box]="#cc0000"
 theme[net_box]="#cc0000"
 theme[proc_box]="#cc0000"
-
-# Box divider line and small box titles
 theme[div_line]="#330000"
 
-# Temperature graph colors — green to amber to red
 theme[temp_start]="#7bd88f"
 theme[temp_mid]="#ffbf00"
 theme[temp_end]="#ff4444"
 
-# CPU graph colors — dark red to bright red
 theme[cpu_start]="#550000"
 theme[cpu_mid]="#cc0000"
 theme[cpu_end]="#ff4444"
 
-# Memory/disks graph colors — dark amber to bright amber
 theme[mem_start]="#332200"
 theme[mem_mid]="#ffbf00"
 theme[mem_end]="#ffdc80"
 
-# Network upload graph
 theme[net_box]="#cc0000"
 theme[upload_start]="#330000"
 theme[upload_mid]="#cc0000"
 theme[upload_end]="#ff4444"
 
-# Network download graph
 theme[download_start]="#332200"
 theme[download_mid]="#ffbf00"
 theme[download_end]="#ffdc80"
