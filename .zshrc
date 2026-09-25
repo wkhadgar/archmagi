@@ -24,7 +24,7 @@ function _nerv_precmd {
 
   # ssh
   local ssh_seg=""
-  [[ -n $SSH_CONNECTION ]] && ssh_seg="%F{#ff4444}󱎤󱎤󰫵%f "
+  [[ -n $SSH_CONNECTION ]] && ssh_seg="%B%F{#ff4444}SSH%f%b "
 
   # git
   local git_seg=""
