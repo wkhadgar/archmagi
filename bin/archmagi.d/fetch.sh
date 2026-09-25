@@ -4,14 +4,11 @@
 shopt -s nullglob
 
 _status_row() {
-    local bar="$1" sep="$2" label="$3" value="$4"
-    local padded
-    printf -v padded "%-10s" "$label"
-    printf "  %s %s%s%s %s %s\n" "$bar" "$RED" "$padded" "$RESET" "$sep" "$value"
+    printf "  %s %s%-10s%s %s %s\n" "$BAR" "$RED" "$1" "$RESET" "$SEP" "$2"
 }
 
 _status_sep() {
-    printf "  %s %s─────────────────────────────────%s\n" "$1" "$MUTED" "$RESET"
+    printf "  %s %s─────────────────────────────────%s\n" "$BAR" "$MUTED" "$RESET"
 }
 
 # Each line is padded to 38 visible cells so the status column lines up.
@@ -205,12 +202,11 @@ _status_load() { awk '{print $1", "$2", "$3}' /proc/loadavg; }
 
 # vfat is excluded so the ESP never shows up. Mountpoint only when >1 disk.
 _status_body_disks() {
-    local bar=$1 sep=$2
     command -v findmnt >/dev/null || {
         local pct size avail
         pct=$(df / | awk 'NR==2{printf "%d", $3*100/$2}')
         read -r size avail < <(df -h / | awk 'NR==2{print $2" "$4}')
-        _status_row "$bar" "$sep" "DISK" "$(_status_meter "${pct:-0}")  $avail free of $size"
+        _status_row "DISK" "$(_status_meter "${pct:-0}")  $avail free of $size"
         return
     }
 
@@ -230,7 +226,7 @@ _status_body_disks() {
         IFS='|' read -r target size avail pct <<<"$row"
         value="$(_status_meter "$pct")  $avail free of $size"
         (( multi )) && value+=" · $target"
-        _status_row "$bar" "$sep" "DISK" "$value"
+        _status_row "DISK" "$value"
     done
 }
 
@@ -338,18 +334,18 @@ cmd_fetch() {
 }
 
 _status_body_system() {
-    local bar=$1 sep=$2 v
-    v=$(_status_os);       [[ -n "$v" ]] && _status_row "$bar" "$sep" "OS"       "$v"
-    v=$(_status_kernel);   [[ -n "$v" ]] && _status_row "$bar" "$sep" "KERNEL"   "$v"
-    v=$(_status_hyprland); [[ -n "$v" ]] && _status_row "$bar" "$sep" "HYPRLAND" "$v"
-    v=$(_status_shell);    [[ -n "$v" ]] && _status_row "$bar" "$sep" "SHELL"    "$v"
+    local v
+    v=$(_status_os);       [[ -n "$v" ]] && _status_row "OS"       "$v"
+    v=$(_status_kernel);   [[ -n "$v" ]] && _status_row "KERNEL"   "$v"
+    v=$(_status_hyprland); [[ -n "$v" ]] && _status_row "HYPRLAND" "$v"
+    v=$(_status_shell);    [[ -n "$v" ]] && _status_row "SHELL"    "$v"
     v=$(uptime -p | sed 's/^up //')
-    _status_row "$bar" "$sep" "UPTIME" "$v"
+    _status_row "UPTIME" "$v"
 }
 
 _status_body_network() {
-    local bar=$1 sep=$2 v node state color
-    printf "  %s %sTAILNET%s    %s\n" "$bar" "$RED" "$RESET" "$sep"
+    local v node state color
+    printf "  %s %sTAILNET%s    %s\n" "$BAR" "$RED" "$RESET" "$SEP"
     for node in "${MAGI_NODES[@]}"; do
         state=$(_tailnet_state "$node")
         case "$state" in
@@ -357,10 +353,10 @@ _status_body_network() {
             OFFLINE) color="$RED" ;;
             *)       color="$MUTED" ;;
         esac
-        printf "  %s    %-14s %s[%s]%s\n" "$bar" "${node^^}" "$color" "$state" "$RESET"
+        printf "  %s    %-14s %s[%s]%s\n" "$BAR" "${node^^}" "$color" "$state" "$RESET"
     done
-    v=$(_status_lan);       [[ -n "$v" ]] && _status_row "$bar" "$sep" "LAN"       "$v"
-    v=$(_status_tailscale); [[ -n "$v" ]] && _status_row "$bar" "$sep" "TAILSCALE" "$v"
+    v=$(_status_lan);       [[ -n "$v" ]] && _status_row "LAN"       "$v"
+    v=$(_status_tailscale); [[ -n "$v" ]] && _status_row "TAILSCALE" "$v"
 
     local pacman aur total updates
     read -r pacman aur < <(_pending_counts)
@@ -370,12 +366,10 @@ _status_body_network() {
     else
         updates="${MUTED}network up to date${RESET}"
     fi
-    _status_row "$bar" "$sep" "UPDATES" "$updates"
+    _status_row "UPDATES" "$updates"
 }
 
 _status_body_compute() {
-    local bar=$1 sep=$2
-
     local cpu_pct cpu_temp cpu_model cpu_line
     cpu_pct=$(_status_cpu_pct)
     cpu_temp=$(_status_cpu_temp)
@@ -383,7 +377,7 @@ _status_body_compute() {
     cpu_line="$(_status_meter "${cpu_pct:-0}")"
     [[ -n "$cpu_model" ]] && cpu_line+="  $cpu_model"
     [[ -n "$cpu_temp"  ]] && cpu_line+=" · $cpu_temp"
-    _status_row "$bar" "$sep" "CPU" "$cpu_line"
+    _status_row "CPU" "$cpu_line"
 
     local gpu_pct gpu_temp gpu_model gpu_line
     gpu_pct=$(_status_gpu_pct)
@@ -393,50 +387,47 @@ _status_body_compute() {
         gpu_line="$(_status_meter "$gpu_pct")"
         [[ -n "$gpu_model" ]] && gpu_line+="  $gpu_model"
         [[ -n "$gpu_temp"  ]] && gpu_line+=" · $gpu_temp"
-        _status_row "$bar" "$sep" "GPU" "$gpu_line"
+        _status_row "GPU" "$gpu_line"
     elif [[ -n "$gpu_model" ]]; then
         gpu_line="$gpu_model"
         [[ -n "$gpu_temp" ]] && gpu_line+=" · $gpu_temp"
-        _status_row "$bar" "$sep" "GPU" "$gpu_line"
+        _status_row "GPU" "$gpu_line"
     fi
 
     local mem_pct mem_h
     mem_pct=$(_status_mem_pct); mem_h=$(_status_mem)
-    _status_row "$bar" "$sep" "MEM" "$(_status_meter "${mem_pct:-0}")  $mem_h"
+    _status_row "MEM" "$(_status_meter "${mem_pct:-0}")  $mem_h"
 
-    _status_body_disks "$bar" "$sep"
+    _status_body_disks
 
     local load_pct load_raw
     load_pct=$(_status_load_pct); load_raw=$(_status_load)
-    _status_row "$bar" "$sep" "LOAD" "$(_status_meter "${load_pct:-0}")  $load_raw"
+    _status_row "LOAD" "$(_status_meter "${load_pct:-0}")  $load_raw"
 }
 
 # Separator only when a field exists, so servers don't get a dangling rule.
 _status_body_power() {
-    local bar=$1 sep=$2 proto batt disp
+    local proto batt disp
     proto=$(_status_protocol)
     batt=$(_status_battery)
     disp=$(_status_display)
     [[ -z "$proto" && -z "$batt" && -z "$disp" ]] && return
-    _status_sep "$bar"
-    [[ -n "$proto" ]] && _status_row "$bar" "$sep" "PROTOCOL" "$proto"
-    [[ -n "$batt"  ]] && _status_row "$bar" "$sep" "BATTERY"  "$batt"
-    [[ -n "$disp"  ]] && _status_row "$bar" "$sep" "DISPLAY"  "$disp"
+    _status_sep
+    [[ -n "$proto" ]] && _status_row "PROTOCOL" "$proto"
+    [[ -n "$batt"  ]] && _status_row "BATTERY"  "$batt"
+    [[ -n "$disp"  ]] && _status_row "DISPLAY"  "$disp"
 }
 
 _status_body() {
     local hostname
     hostname=$(_archmagi_hostname)
-    local bar="${RED}▌${RESET}"
-    local sep="${MUTED}//${RESET}"
-
     printf "  %s %s%sMAGI SYSTEM%s %s %s%s%s\n" \
-        "$bar" "$BOLD" "$RED" "$RESET" "$sep" "$AMBER" "${hostname^^}" "$RESET"
-    _status_sep    "$bar"
-    _status_body_system  "$bar" "$sep"
-    _status_sep    "$bar"
-    _status_body_network "$bar" "$sep"
-    _status_sep    "$bar"
-    _status_body_compute "$bar" "$sep"
-    _status_body_power   "$bar" "$sep"
+        "$BAR" "$BOLD" "$RED" "$RESET" "$SEP" "$AMBER" "${hostname^^}" "$RESET"
+    _status_sep
+    _status_body_system
+    _status_sep
+    _status_body_network
+    _status_sep
+    _status_body_compute
+    _status_body_power
 }

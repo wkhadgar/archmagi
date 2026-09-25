@@ -36,19 +36,17 @@ _update_check() {
 }
 
 _update_run() {
-    local bar="${RED}▌${RESET}"
-    local sep="${MUTED}//${RESET}"
 
     local pacman aur
     read -r pacman aur < <(_pending_counts)
     local total=$((pacman + aur))
 
     echo
-    printf "  %s %s%sMAGI SYSTEM%s %s ${AMBER}PROTOCOL SYNC${RESET}\n" "$bar" "$BOLD" "$RED" "$RESET" "$sep"
-    printf "  %s ${MUTED}---------------------------------${RESET}\n" "$bar"
+    printf "  %s %s%sMAGI SYSTEM%s %s ${AMBER}PROTOCOL SYNC${RESET}\n" "$BAR" "$BOLD" "$RED" "$RESET" "$SEP"
+    printf "  %s ${MUTED}---------------------------------${RESET}\n" "$BAR"
 
     if ((total == 0)); then
-        printf "  %s network up to date: ${GREEN}PATTERN GREEN${RESET}\n\n" "$bar"
+        printf "  %s network up to date: ${GREEN}PATTERN GREEN${RESET}\n\n" "$BAR"
         notify-send "MAGI SYSTEM UPDATE STATUS" $'\nMAGI NETWORK IS UP TO DATE'
         return 0
     fi
@@ -59,29 +57,29 @@ _update_run() {
     else                       threat="PATTERN AMBER"; threat_color="$AMBER"
     fi
 
-    printf "  %s ${RED}PACMAN${RESET}       %s ${AMBER}%s${RESET} pending\n" "$bar" "$sep" "$pacman"
-    printf "  %s ${RED}AUR${RESET}          %s ${AMBER}%s${RESET} pending\n" "$bar" "$sep" "$aur"
-    printf "  %s ${RED}THREAT LEVEL${RESET} %s ${threat_color}${threat}${RESET}\n" "$bar" "$sep"
+    printf "  %s ${RED}PACMAN${RESET}       %s ${AMBER}%s${RESET} pending\n" "$BAR" "$SEP" "$pacman"
+    printf "  %s ${RED}AUR${RESET}          %s ${AMBER}%s${RESET} pending\n" "$BAR" "$SEP" "$aur"
+    printf "  %s ${RED}THREAT LEVEL${RESET} %s ${threat_color}${threat}${RESET}\n" "$BAR" "$SEP"
     echo
 
     if ((pacman > 0)); then
-        printf "  %s ${MUTED}pacman protocols:${RESET}\n" "$bar"
+        printf "  %s ${MUTED}pacman protocols:${RESET}\n" "$BAR"
         checkupdates 2>/dev/null | sed "s/^/        /"
         echo
     fi
     if ((aur > 0)); then
-        printf "  %s ${MUTED}AUR protocols:${RESET}\n" "$bar"
+        printf "  %s ${MUTED}AUR protocols:${RESET}\n" "$BAR"
         paru -Qua 2>/dev/null | sed "s/^/        /"
         echo
     fi
 
-    printf "  %s ${BOLD}${AMBER}ACCEPT MAGI UPDATES?${RESET} [${AMBER}Y${RESET}/n] " "$bar"
+    printf "  %s ${BOLD}${AMBER}ACCEPT MAGI UPDATES?${RESET} [${AMBER}Y${RESET}/n] " "$BAR"
     local answer; read -r answer
 
     local notif
     case "$answer" in
         [nN]*)
-            printf "  %s ${RED}SYNC ABORTED${RESET}\n\n" "$bar"
+            printf "  %s ${RED}SYNC ABORTED${RESET}\n\n" "$BAR"
             notif="ABORTED UPDATES"
             sleep 1
             ;;
@@ -92,10 +90,10 @@ _update_run() {
             echo
             if ((rc == 0)); then
                 rm -f "$(_pending_counts_cache)" 2>/dev/null
-                printf "  %s ${BOLD}SYNC COMPLETE${RESET}: ${GREEN}PATTERN GREEN${RESET}\n\n" "$bar"
+                printf "  %s ${BOLD}SYNC COMPLETE${RESET}: ${GREEN}PATTERN GREEN${RESET}\n\n" "$BAR"
                 notif="MAGI PROTOCOLS UPDATED"
             else
-                printf "  %s ${BOLD}${RED}SYNC FAILED${RESET} (rc=$rc)\n\n" "$bar"
+                printf "  %s ${BOLD}${RED}SYNC FAILED${RESET} (rc=$rc)\n\n" "$BAR"
                 notif="ERROR $rc"
             fi
             sleep 3

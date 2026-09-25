@@ -77,10 +77,9 @@ cmd_profile() {
         if [[ -n "$WAYLAND_DISPLAY" || -n "$DISPLAY" ]]; then
             target=$(_profile_pick "$current") || return 0
         else
-            local sep="${MUTED}//${RESET}"
             echo
-            printf "  %sACTIVE PROTOCOL%s   %s %s%s%s\n" "$RED" "$RESET" "$sep" "$AMBER" "$current" "$RESET"
-            printf "  %sAVAILABLE%s         %s %s\n"     "$RED" "$RESET" "$sep" "${PROFILES[*]}"
+            printf "  %sACTIVE PROTOCOL%s   %s %s%s%s\n" "$RED" "$RESET" "$SEP" "$AMBER" "$current" "$RESET"
+            printf "  %sAVAILABLE%s         %s %s\n"     "$RED" "$RESET" "$SEP" "${PROFILES[*]}"
             echo
             return 0
         fi

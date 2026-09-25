@@ -2,19 +2,19 @@
 # so `$()` capture never swallows the UI into a captured pipe.
 
 _install_prompt_hostname() {
-    local current=${1:-} bar="${RED}▌${RESET}"
+    local current=${1:-}
     local i n=${#MAGI_NODES[@]} choice host
     PROMPT_HOSTNAME=""
     echo
-    echo "  $bar ${BOLD}MAGI NODE${RESET}"
+    echo "  $BAR ${BOLD}MAGI NODE${RESET}"
     for ((i=0; i<n; i++)); do
-        printf "  %s   %d) %s\n" "$bar" "$((i+1))" "${MAGI_NODES[i]}"
+        printf "  %s   %d) %s\n" "$BAR" "$((i+1))" "${MAGI_NODES[i]}"
     done
-    printf "  %s   %d) custom\n" "$bar" "$((n+1))"
+    printf "  %s   %d) custom\n" "$BAR" "$((n+1))"
     if [[ -n "$current" ]]; then
-        printf "  %s pick [1-%d, default %s]: " "$bar" "$((n+1))" "$current"
+        printf "  %s pick [1-%d, default %s]: " "$BAR" "$((n+1))" "$current"
     else
-        printf "  %s pick [1-%d]: " "$bar" "$((n+1))"
+        printf "  %s pick [1-%d]: " "$BAR" "$((n+1))"
     fi
     read -r choice
     if [[ -z "$choice" && -n "$current" ]]; then
@@ -24,7 +24,7 @@ _install_prompt_hostname() {
     if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= n )); then
         PROMPT_HOSTNAME=${MAGI_NODES[choice-1]}
     elif [[ "$choice" =~ ^[0-9]+$ ]] && (( choice == n+1 )); then
-        printf "  %s hostname: " "$bar"
+        printf "  %s hostname: " "$BAR"
         read -r host
         [[ -z "$host" ]] && { echo "empty hostname" >&2; return 1; }
         PROMPT_HOSTNAME=$host
@@ -34,15 +34,15 @@ _install_prompt_hostname() {
 }
 
 _install_prompt_profile_role() {
-    local hint=${1:-desktop} bar="${RED}▌${RESET}"
+    local hint=${1:-desktop}
     local choice
     PROMPT_PROFILE=""
     echo
-    echo "  $bar ${BOLD}PROFILE${RESET}"
-    echo "  $bar   1) laptop"
-    echo "  $bar   2) desktop"
-    echo "  $bar   3) server"
-    printf "  %s pick [1-3, default %s]: " "$bar" "$hint"
+    echo "  $BAR ${BOLD}PROFILE${RESET}"
+    echo "  $BAR   1) laptop"
+    echo "  $BAR   2) desktop"
+    echo "  $BAR   3) server"
+    printf "  %s pick [1-3, default %s]: " "$BAR" "$hint"
     read -r choice
     if [[ -z "$choice" ]]; then PROMPT_PROFILE=$hint; return; fi
     case "$choice" in
@@ -55,13 +55,12 @@ _install_prompt_profile_role() {
 
 _install_prompt_confirm() {
     local profile=$1 hostname=$2 bootloader=$3
-    local bar="${RED}▌${RESET}" sep="${MUTED}//${RESET}"
     echo
-    echo "  $bar ${BOLD}REVIEW${RESET}"
-    printf "  %s   %sprofile%s    %s %s\n"    "$bar" "$RED" "$RESET" "$sep" "$profile"
-    printf "  %s   %shostname%s   %s %s\n"    "$bar" "$RED" "$RESET" "$sep" "$hostname"
-    printf "  %s   %sbootloader%s %s %s\n"    "$bar" "$RED" "$RESET" "$sep" "$bootloader"
-    printf "  %s ${AMBER}proceed?${RESET} [Y/n]: " "$bar"
+    echo "  $BAR ${BOLD}REVIEW${RESET}"
+    printf "  %s   %sprofile%s    %s %s\n"    "$BAR" "$RED" "$RESET" "$SEP" "$profile"
+    printf "  %s   %shostname%s   %s %s\n"    "$BAR" "$RED" "$RESET" "$SEP" "$hostname"
+    printf "  %s   %sbootloader%s %s %s\n"    "$BAR" "$RED" "$RESET" "$SEP" "$bootloader"
+    printf "  %s ${AMBER}proceed?${RESET} [Y/n]: " "$BAR"
     local answer
     read -r answer
     case "$answer" in

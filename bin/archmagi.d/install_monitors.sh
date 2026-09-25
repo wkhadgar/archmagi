@@ -1,16 +1,14 @@
 _install_monitors() {
-    local bar="${RED}▌${RESET}"
-
-    command -v hyprctl >/dev/null || { echo "  $bar hyprctl not found; is Hyprland running?" >&2; return 1; }
-    command -v jq      >/dev/null || { echo "  $bar jq not found (in requirements.pacman)"   >&2; return 1; }
+    command -v hyprctl >/dev/null || { echo "  $BAR hyprctl not found; is Hyprland running?" >&2; return 1; }
+    command -v jq      >/dev/null || { echo "  $BAR jq not found (in requirements.pacman)"   >&2; return 1; }
 
     local json
-    json=$(hyprctl monitors -j 2>/dev/null) || { echo "  $bar hyprctl monitors failed" >&2; return 1; }
+    json=$(hyprctl monitors -j 2>/dev/null) || { echo "  $BAR hyprctl monitors failed" >&2; return 1; }
     local count
     count=$(jq 'length' <<<"$json")
-    (( count > 0 )) || { echo "  $bar no monitors reported by hyprctl" >&2; return 1; }
+    (( count > 0 )) || { echo "  $BAR no monitors reported by hyprctl" >&2; return 1; }
 
-    printf "  %s ${BOLD}%d live monitor%s detected${RESET}\n" "$bar" "$count" \
+    printf "  %s ${BOLD}%d live monitor%s detected${RESET}\n" "$BAR" "$count" \
         "$( (( count != 1 )) && echo s)"
 
     local lines=()
@@ -23,25 +21,20 @@ _install_monitors() {
         scale=$(_monitors_clean_scale "$scale")
 
         echo
-        printf "  %s ${AMBER}%s${RESET}  %sx%s\n" "$bar" "$name" "$w" "$h"
+        printf "  %s ${AMBER}%s${RESET}  %sx%s\n" "$BAR" "$name" "$w" "$h"
         _monitors_prompt_scale "$scale"
         lines+=("hl.monitor({ output = \"$name\", mode = \"${w}x${h}\", position = \"auto\", scale = $PROMPT_SCALE })")
     done
 
-    printf "\n  %s ${BOLD}PREVIEW${RESET}\n" "$bar"
+    printf "\n  %s ${BOLD}PREVIEW${RESET}\n" "$BAR"
     local line
     for line in "${lines[@]}"; do
-        printf "  %s   %s\n" "$bar" "$line"
+        printf "  %s   %s\n" "$BAR" "$line"
     done
 
     local dest="$HOME/.config/hypr/hyprland/monit.lua"
-    printf "\n  %s write to ${AMBER}%s${RESET}? [y/N] " "$bar" "$dest"
-    local ans
-    read -r ans
-    case "$ans" in
-        [yY]*) ;;
-        *) printf "  %s aborted by user\n" "$bar"; return 0 ;;
-    esac
+    echo
+    _ask_yn "write to ${AMBER}${dest}${RESET}?" || { printf "  %s aborted by user\n" "$BAR"; return 0; }
 
     mkdir -p "$(dirname "$dest")"
     local tmp
@@ -58,8 +51,8 @@ _install_monitors() {
 
     local n=${#lines[@]} plural=""
     (( n != 1 )) && plural=s
-    printf "  %s wrote ${AMBER}%s${RESET} (%d monitor line%s)\n" "$bar" "$dest" "$n" "$plural"
-    printf "  %s reload Hyprland: ${AMBER}hyprctl reload${RESET}\n" "$bar"
+    printf "  %s wrote ${AMBER}%s${RESET} (%d monitor line%s)\n" "$BAR" "$dest" "$n" "$plural"
+    printf "  %s reload Hyprland: ${AMBER}hyprctl reload${RESET}\n" "$BAR"
 }
 
 _monitors_prompt_scale() {

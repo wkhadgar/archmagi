@@ -6,6 +6,17 @@ MUTED=$'\033[38;2;102;102;102m'
 BOLD=$'\033[1m'
 RESET=$'\033[0m'
 
+BAR="${RED}▌${RESET}"
+SEP="${MUTED}//${RESET}"
+
+# Returns 0 only on y/Y; anything else, including Enter, is no.
+_ask_yn() {
+    local ans
+    printf "  %s %s [y/N] " "$BAR" "$1"
+    read -r ans
+    [[ "$ans" == [yY]* ]]
+}
+
 MAGI_NODES=(casper-3 balthasar-2 melchior-1)
 
 # Facts persisted by `archmagi install bootstrap`.

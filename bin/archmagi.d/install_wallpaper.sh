@@ -36,15 +36,14 @@ _wallpaper_detect_resolution() {
 }
 
 _install_wallpaper() {
-    local bar="${RED}▌${RESET}"
     local res=${1:-}
     [[ -z "$res" ]] && res=$(_wallpaper_detect_resolution)
     [[ "$res" =~ ^[0-9]+x[0-9]+$ ]] || {
-        printf "  %s invalid resolution: %s (expected WxH)\n" "$bar" "$res" >&2; return 1
+        printf "  %s invalid resolution: %s (expected WxH)\n" "$BAR" "$res" >&2; return 1
     }
 
     command -v magick >/dev/null || {
-        printf "  %s imagemagick not installed (add to requirements.pacman or run bootstrap)\n" "$bar" >&2; return 1
+        printf "  %s imagemagick not installed (add to requirements.pacman or run bootstrap)\n" "$BAR" >&2; return 1
     }
 
     local jbm=/usr/share/fonts/TTF/JetBrainsMonoNerdFont-Regular.ttf
@@ -64,9 +63,9 @@ _install_wallpaper() {
           -font "$jbm"      -fill '#666666' -pointsize 16 -annotate +0+135 'CASPER  ·  BALTHASAR  ·  MELCHIOR' \
           -font "$jbm_bold" -fill '#cc0000' -pointsize 16 -annotate +0+90  '⚠  AUTHORIZED PERSONNEL ONLY  ⚠' \
         -alpha off -depth 8 -type TrueColor \
-        "$tmp" || { printf "  %s magick failed\n" "$bar" >&2; return 1; }
+        "$tmp" || { printf "  %s magick failed\n" "$BAR" >&2; return 1; }
 
     sudo mkdir -p "$(dirname "$dest")"        || return 1
-    sudo mv -f "$tmp" "$dest"                 || { printf "  %s failed to install %s\n" "$bar" "$dest" >&2; return 1; }
-    printf "  %s wrote ${AMBER}%s${RESET} at ${AMBER}%s${RESET}\n" "$bar" "$dest" "$res"
+    sudo mv -f "$tmp" "$dest"                 || { printf "  %s failed to install %s\n" "$BAR" "$dest" >&2; return 1; }
+    printf "  %s wrote ${AMBER}%s${RESET} at ${AMBER}%s${RESET}\n" "$BAR" "$dest" "$res"
 }

@@ -44,9 +44,7 @@ cmd_tmux() {
         kill|k)
             local session="${1:?usage: archmagi tmux kill <session>}"
             tmux has-session -t "$session" 2>/dev/null || { echo "archmagi: no such session: $session" >&2; return 1; }
-            printf '%skill session %s? [y/N]%s ' "$AMBER" "$session" "$RESET"
-            local ans; read -r ans
-            [[ "$ans" == [yY]* ]] || { echo "aborted"; return 1; }
+            _ask_yn "kill session ${AMBER}${session}${RESET}?" || { echo "aborted"; return 1; }
             tmux kill-session -t "$session"
             ;;
         *)
