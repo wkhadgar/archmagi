@@ -79,7 +79,8 @@ _install_bootstrap() {
 
 # Re-deploy configs + re-render hostname-bound templates from the persisted
 # /etc/archmagi/profile. No prompts, no packages, no boot theme. The post-pull
-# path for an already-bootstrapped host.
+# path for an already-bootstrapped host. Warns first when handmade live edits
+# would be clobbered; user picks whether to proceed.
 # Skips monit.lua.tmpl because the live monit.lua is owned by `install monitors`.
 _install_redeploy() {
     local bar="${RED}▌${RESET}"
@@ -90,9 +91,60 @@ _install_redeploy() {
         return 1
     }
 
+    local drift
+    drift=$(_install_drift_scan "$repo")
+    if [[ -n "$drift" ]]; then
+        local n=$(wc -l <<<"$drift")
+        local plural=""; (( n != 1 )) && plural=s
+        printf "\n  %s ${BOLD}%d local edit%s would be overwritten:${RESET}\n" "$bar" "$n" "$plural"
+        local f
+        while IFS= read -r f; do
+            printf "  %s   ${AMBER}%s${RESET}\n" "$bar" "$f"
+        done <<<"$drift"
+        printf "\n  %s proceed with redeploy? [y/N] " "$bar"
+        local ans
+        read -r ans
+        case "$ans" in
+            [yY]*) ;;
+            *) printf "  %s aborted by user\n" "$bar"; return 0 ;;
+        esac
+    fi
+
     _install_configs "$repo" || return 1
     _install_hostname_templates "$repo" "$ARCHMAGI_HOSTNAME" || return 1
     printf "  %s redeployed configs from ${AMBER}%s${RESET}\n" "$bar" "$repo"
+}
+
+# Walk the managed live<->repo trees and echo the repo-relative path of every
+# live file whose content differs from its repo counterpart. Files that appear
+# only live (not yet added to repo) are ignored; the redeploy would preserve
+# them anyway. Templated files (per _install_sync_excluded) are skipped
+# because they flow only outward.
+# @param 1 absolute repo root
+_install_drift_scan() {
+    local repo=$1
+    local trees=(
+        "$HOME/.config/hypr::hypr"
+        "$HOME/.config/waybar::waybar"
+        "$HOME/.config/rofi::rofi"
+        "$HOME/.config/nvim::nvim"
+        "$HOME/.config/kitty::kitty"
+        "$HOME/.config/tmux::tmux"
+        "$HOME/.config/btop::btop"
+        "$HOME/.config/swaync::swaync"
+    )
+    local pair live_root repo_rel_root live_file rel repo_file
+    for pair in "${trees[@]}"; do
+        live_root=${pair%%::*}; repo_rel_root=${pair##*::}
+        [[ -d "$live_root" ]] || continue
+        while IFS= read -r live_file; do
+            rel=${live_file#"$live_root/"}
+            _install_sync_excluded "$repo_rel_root/$rel" && continue
+            repo_file="$repo/$repo_rel_root/$rel"
+            [[ -f "$repo_file" ]] || continue
+            diff -q "$live_file" "$repo_file" >/dev/null 2>&1 || echo "$repo_rel_root/$rel"
+        done < <(find "$live_root" -type f 2>/dev/null)
+    done
 }
 
 # Render the three hostname-bound templates (hostname, hosts, hyprlock identity).
