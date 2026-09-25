@@ -51,11 +51,17 @@ _install_bootstrap() {
 
     # Configs land before packages so a ctrl-C during pacman still leaves a
     # working dotfile install.
-    _install_configs "$repo"
+    _install_configs "$repo" || {
+        echo "  $BAR config deploy failed; bootstrap aborted." >&2
+        return 1
+    }
     printf "  %s deployed generic configs from ${AMBER}%s${RESET}\n" "$BAR" "$repo"
 
-    _install_hostname_templates "$repo" "$hostname"
-    _install_substitute "$repo/hypr/hyprland/monit.lua.tmpl" "$HOME/.config/hypr/hyprland/monit.lua"
+    { _install_hostname_templates "$repo" "$hostname" &&
+      _install_substitute "$repo/hypr/hyprland/monit.lua.tmpl" "$HOME/.config/hypr/hyprland/monit.lua"; } || {
+        echo "  $BAR template render failed; bootstrap aborted." >&2
+        return 1
+    }
     printf "  %s wrote host-specific files from templates\n" "$BAR"
 
     _install_packages "$repo" || {
@@ -123,9 +129,9 @@ _install_drift_scan() {
 # `archmagi install monitors`.
 _install_hostname_templates() {
     local repo=$1 hostname=$2 hostname_upper=${2^^}
-    _install_substitute "$repo/etc/hostname.tmpl"       /etc/hostname                      HOSTNAME="$hostname"
-    _install_substitute "$repo/etc/hosts.tmpl"          /etc/hosts                         HOSTNAME="$hostname"
-    _install_substitute "$repo/etc/issue.tmpl"          /etc/issue                         MAGI_NODES="$(_issue_node_row "$hostname")"
+    _install_substitute "$repo/etc/hostname.tmpl"       /etc/hostname                      HOSTNAME="$hostname" &&
+    _install_substitute "$repo/etc/hosts.tmpl"          /etc/hosts                         HOSTNAME="$hostname" &&
+    _install_substitute "$repo/etc/issue.tmpl"          /etc/issue                         MAGI_NODES="$(_issue_node_row "$hostname")" &&
     _install_substitute "$repo/hypr/hyprlock.conf.tmpl" "$HOME/.config/hypr/hyprlock.conf" \
         HOSTNAME_UPPER="$hostname_upper" TAILNET_LABELS="$(_hyprlock_tailnet_labels)"
 }
