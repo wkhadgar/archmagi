@@ -125,8 +125,19 @@ _install_hostname_templates() {
     local repo=$1 hostname=$2 hostname_upper=${2^^}
     _install_substitute "$repo/etc/hostname.tmpl"       /etc/hostname                      HOSTNAME="$hostname"
     _install_substitute "$repo/etc/hosts.tmpl"          /etc/hosts                         HOSTNAME="$hostname"
+    _install_substitute "$repo/etc/issue.tmpl"          /etc/issue                         MAGI_NODES="$(_issue_node_row "$hostname")"
     _install_substitute "$repo/hypr/hyprlock.conf.tmpl" "$HOME/.config/hypr/hyprlock.conf" \
         HOSTNAME_UPPER="$hostname_upper" TAILNET_LABELS="$(_hyprlock_tailnet_labels)"
+}
+
+# Greeter node row: every MAGI node in 20-column cells, the local host marked.
+_issue_node_row() {
+    local node mark
+    for node in "${MAGI_NODES[@]}"; do
+        mark="  "
+        [[ "$node" == "$1" ]] && mark=$' '
+        printf '%s%-18s' "$mark" "${node^^}"
+    done | sed 's/ *$//'
 }
 
 # One hyprlock label per MAGI node, stacked 16px apart under the header.
