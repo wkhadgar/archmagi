@@ -19,6 +19,12 @@ _ask_yn() {
 
 MAGI_NODES=(casper-3 balthasar-2 melchior-1)
 
+declare -A PROFILE_NERV=(
+    [power-saver]="SYNAPSE LOW"
+    [balanced]="SYNAPSE NORM"
+    [performance]="SYNAPSE MAX"
+)
+
 # Facts persisted by `archmagi install bootstrap`.
 ARCHMAGI_PROFILE=""
 ARCHMAGI_HOSTNAME=""

@@ -12,19 +12,16 @@ _install_monitors() {
         "$( (( count != 1 )) && echo s)"
 
     local lines=()
-    local idx name w h scale
-    for ((idx=0; idx<count; idx++)); do
-        name=$(jq -r ".[$idx].name"   <<<"$json")
-        w=$(jq -r    ".[$idx].width"  <<<"$json")
-        h=$(jq -r    ".[$idx].height" <<<"$json")
-        scale=$(jq -r ".[$idx].scale" <<<"$json")
+    local name w h scale
+    # fd 3 keeps stdin free for the scale prompt inside the loop.
+    while IFS=$'\t' read -r -u 3 name w h scale; do
         scale=$(_monitors_clean_scale "$scale")
 
         echo
         printf "  %s ${AMBER}%s${RESET}  %sx%s\n" "$BAR" "$name" "$w" "$h"
         _monitors_prompt_scale "$scale"
         lines+=("hl.monitor({ output = \"$name\", mode = \"${w}x${h}\", position = \"auto\", scale = $PROMPT_SCALE })")
-    done
+    done 3< <(jq -r '.[] | [.name, .width, .height, .scale] | @tsv' <<<"$json")
 
     printf "\n  %s ${BOLD}PREVIEW${RESET}\n" "$BAR"
     local line

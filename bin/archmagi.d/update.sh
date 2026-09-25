@@ -1,3 +1,8 @@
+# Pending-update count at which the waybar meter maxes out and the threat
+# level turns red.
+UPDATE_CRITICAL=45
+UPDATE_WARN=16
+
 cmd_update() {
     case "${1:-run}" in
         run)   shift 2>/dev/null; _update_run "$@" ;;
@@ -7,11 +12,10 @@ cmd_update() {
 }
 
 _update_check() {
-    local critical=45
     local pacman aur
     read -r pacman aur < <(_pending_counts)
     local total=$((pacman + aur))
-    local percentage=$((100 * total / critical))
+    local percentage=$((100 * total / UPDATE_CRITICAL))
     ((percentage > 100)) && percentage=100
 
     local tooltip class alt text
@@ -52,9 +56,9 @@ _update_run() {
     fi
 
     local threat threat_color
-    if   ((total >= 45)); then threat="PATTERN RED";   threat_color="$RED"
-    elif ((total >= 16)); then threat="PATTERN BLUE";  threat_color="$BLUE"
-    else                       threat="PATTERN AMBER"; threat_color="$AMBER"
+    if   ((total >= UPDATE_CRITICAL)); then threat="PATTERN RED";   threat_color="$RED"
+    elif ((total >= UPDATE_WARN));     then threat="PATTERN BLUE";  threat_color="$BLUE"
+    else                                    threat="PATTERN AMBER"; threat_color="$AMBER"
     fi
 
     printf "  %s ${RED}PACMAN${RESET}       %s ${AMBER}%s${RESET} pending\n" "$BAR" "$SEP" "$pacman"

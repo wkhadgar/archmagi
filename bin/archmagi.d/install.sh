@@ -125,5 +125,26 @@ _install_hostname_templates() {
     local repo=$1 hostname=$2 hostname_upper=${2^^}
     _install_substitute "$repo/etc/hostname.tmpl"       /etc/hostname                      HOSTNAME="$hostname"
     _install_substitute "$repo/etc/hosts.tmpl"          /etc/hosts                         HOSTNAME="$hostname"
-    _install_substitute "$repo/hypr/hyprlock.conf.tmpl" "$HOME/.config/hypr/hyprlock.conf" HOSTNAME_UPPER="$hostname_upper"
+    _install_substitute "$repo/hypr/hyprlock.conf.tmpl" "$HOME/.config/hypr/hyprlock.conf" \
+        HOSTNAME_UPPER="$hostname_upper" TAILNET_LABELS="$(_hyprlock_tailnet_labels)"
+}
+
+# One hyprlock label per MAGI node, stacked 16px apart under the header.
+_hyprlock_tailnet_labels() {
+    local i
+    for i in "${!MAGI_NODES[@]}"; do
+        (( i > 0 )) && echo
+        cat <<EOF
+label {
+  monitor =
+  text = cmd[update:30000] ~/.local/bin/archmagi tailnet ${MAGI_NODES[i]}
+  color = rgba(bb0000aa)
+  font_size = 10
+  font_family = JetBrainsMono Nerd Font
+  position = 48, $(( -68 - 16 * i ))
+  halign = left
+  valign = top
+}
+EOF
+    done
 }

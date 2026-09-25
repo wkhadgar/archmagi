@@ -19,9 +19,9 @@ source "$LIB/battery.sh"
 
 test_banner "UNIT TESTS"
 
-# _install_sync_excluded
-assert_zero    "sync_excluded: etc/hostname"             _install_sync_excluded etc/hostname
-assert_zero    "sync_excluded: etc/hosts"                _install_sync_excluded etc/hosts
+# _install_sync_excluded: rendered-from-template files are derived, not listed
+repo=$PWD
+assert_zero    "sync_excluded: etc/hostname (has .tmpl)" _install_sync_excluded etc/hostname
 assert_zero    "sync_excluded: hypr/hyprlock.conf"       _install_sync_excluded hypr/hyprlock.conf
 assert_zero    "sync_excluded: hypr/hyprland/monit.lua"  _install_sync_excluded hypr/hyprland/monit.lua
 assert_zero    "sync_excluded: nvim/lazy-lock.json"      _install_sync_excluded nvim/lazy-lock.json

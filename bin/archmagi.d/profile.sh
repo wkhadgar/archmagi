@@ -20,12 +20,6 @@ declare -A PROFILE_DISPLAY=(
     [performance]="PERFORMANCE"
 )
 
-declare -A PROFILE_NERV=(
-    [power-saver]="SYNAPSE LOW"
-    [balanced]="SYNAPSE NORM"
-    [performance]="SYNAPSE MAX"
-)
-
 _profile_pick() {
     local current="$1"
 

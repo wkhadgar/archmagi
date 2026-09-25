@@ -40,15 +40,27 @@ _map_repo_files() {
     fi
 }
 
+# True for a template or a file rendered from one. Those reach the live system
+# only through the template phase, never by copy or sync.
+_map_templated() {
+    [[ "$1" == *.tmpl || -f "$repo/$1.tmpl" ]]
+}
+
 _configs_entry() {
-    local kind=$1 live=$2 rel=$3
+    local kind=$1 live=$2 rel=$3 f dst as=""
     case "$kind" in
-        root) sudo cp -r "$repo/$rel/." "$live/" ;;
-        tree) mkdir -p "$live" && cp -r "$repo/$rel/." "$live/" ;;
         file) mkdir -p "${live%/*}" && cp "$repo/$rel" "$live" ;;
         # `install` unlinks first, so a running archmagi keeps executing from
         # its open inode instead of reading a truncated-then-rewritten file.
         exe)  mkdir -p "${live%/*}" && install -m 755 "$repo/$rel" "$live" ;;
+        tree|root)
+            [[ "$kind" == root ]] && as=sudo
+            while IFS= read -r f; do
+                _map_templated "$f" && continue
+                dst="$live/${f#"$rel/"}"
+                $as mkdir -p "${dst%/*}" && $as cp "$repo/$f" "$dst" || return 1
+            done < <(_map_repo_files "$rel")
+            ;;
     esac
 }
 
@@ -57,11 +69,7 @@ _install_configs() {
     _map_each _configs_entry || return 1
 
     sudo chmod +x /usr/local/bin/start-greeter.sh || return 1
-    mkdir -p ~/images/screenshots                 || return 1
-
-    sudo find /etc -name '*.tmpl' -delete 2>/dev/null
-    find ~/.config -name '*.tmpl' -delete 2>/dev/null
-    return 0
+    mkdir -p ~/images/screenshots
 }
 
 _install_find_repo() {

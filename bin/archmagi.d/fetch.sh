@@ -240,14 +240,10 @@ _status_tailscale() {
 }
 
 _status_protocol() {
-    local p nerv=""
+    local p
     p=$(powerprofilesctl get 2>/dev/null) || return
     [[ -z "$p" ]] && return
-    case "$p" in
-        power-saver) nerv="SYNAPSE LOW" ;;
-        balanced)    nerv="SYNAPSE NORM" ;;
-        performance) nerv="SYNAPSE MAX" ;;
-    esac
+    local nerv=${PROFILE_NERV[$p]:-}
     if [[ -n "$nerv" ]]; then
         printf '%s · %s%s%s' "${p^^}" "$AMBER" "$nerv" "$RESET"
     else

@@ -1,10 +1,5 @@
 _install_sync_excluded() {
-    case "$1" in
-        etc/hostname|etc/hosts|hypr/hyprlock.conf|hypr/hyprland/monit.lua) return 0 ;;
-        nvim/lazy-lock.json) return 0 ;;
-        *.tmpl) return 0 ;;
-    esac
-    return 1
+    [[ "$1" == nvim/lazy-lock.json ]] || _map_templated "$1"
 }
 
 # Returns 2 if the user picked `q` at the prompt so the caller can bail early.
