@@ -130,6 +130,8 @@ _install_drift_scan() {
 _install_hostname_templates() {
     local repo=$1 hostname=$2 hostname_upper=${2^^}
     _install_substitute "$repo/etc/hostname.tmpl"       /etc/hostname                      HOSTNAME="$hostname" &&
+    # Apply it now; otherwise a DHCP or reverse-DNS name set earlier stays live.
+    sudo hostnamectl set-hostname "$hostname" &&
     _install_substitute "$repo/etc/hosts.tmpl"          /etc/hosts                         HOSTNAME="$hostname" &&
     _install_substitute "$repo/etc/issue.tmpl"          /etc/issue                         MAGI_NODES="$(_issue_node_row "$hostname")" &&
     _install_substitute "$repo/hypr/hyprlock.conf.tmpl" "$HOME/.config/hypr/hyprlock.conf" \
