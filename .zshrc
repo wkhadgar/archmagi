@@ -24,18 +24,19 @@ function _nerv_precmd {
 
   # ssh
   local ssh_seg=""
-  [[ -n $SSH_CONNECTION ]] && ssh_seg="%B%F{#ff4444}SSH%f%b "
+  [[ -n $SSH_CONNECTION ]] && ssh_seg="%F{#ff4444}[SSH]%f "
 
   # git
   local git_seg=""
   [[ -n $vcs_info_msg_0_ ]] && git_seg="%F{#cc0000}${vcs_info_msg_0_}%f "
 
-  # box color priority: root > ssh > dirty git > failed exit > venv > default
+  # box color: root, else the leftmost tag (venv, ssh), else dirty git, else default
   local bc="%F{#cc0000}"
-  [[ $VIRTUAL_ENV ]]        && bc="%F{#ffbf00}"
   [[ -n $vcs_info_msg_0_ && $(git status --short 2>/dev/null) ]] && bc="%F{#ff4444}"
-  [[ -n $SSH_CONNECTION ]]  && bc="%F{#ff4444}"
-  [[ $UID -eq 0 ]]          && bc="%F{#ff4444}"
+  if   [[ $VIRTUAL_ENV ]];       then bc="%F{#ffbf00}"
+  elif [[ -n $SSH_CONNECTION ]]; then bc="%F{#ff4444}"
+  fi
+  [[ $UID -eq 0 ]] && bc="%F{#ff4444}"
 
   # user
   local user_seg="%F{#cc0000}%n%f"
