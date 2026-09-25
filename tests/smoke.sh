@@ -26,7 +26,7 @@ done
 
 # group.sh -> expected function names (space-separated)
 declare -A expected=(
-    [fetch]="cmd_fetch _status_body _status_logo_lines"
+    [fetch]="cmd_fetch _fetch_lock _status_body _status_logo_lines"
     [tailnet]="cmd_tailnet"
     [update]="cmd_update _update_run _update_check"
     [confirm]="cmd_confirm"

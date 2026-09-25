@@ -217,7 +217,7 @@ label {
 
 label {
   monitor =
-  text = cmd[update:5000] echo "CPU  // $(grep 'cpu ' /proc/stat | awk '{u=$2+$4; t=$2+$4+$5; print int((u-pu)/(t-pt)*100)"%"}' pu=0 pt=0)"
+  text = cmd[update:5000] ~/.local/bin/archmagi fetch lock cpu
   color = rgba(ffbf00dd)
   font_size = 10
   font_family = JetBrains Mono
@@ -228,7 +228,7 @@ label {
 
 label {
   monitor =
-  text = cmd[update:5000] echo "MEM  // $(free -h | awk '/^Mem/{print $3"/"$2}')"
+  text = cmd[update:5000] ~/.local/bin/archmagi fetch lock mem
   color = rgba(ffbf00dd)
   font_size = 10
   font_family = JetBrains Mono
@@ -239,7 +239,7 @@ label {
 
 label {
   monitor =
-  text = cmd[update:60000] echo "DISK // $(df -h / | awk 'NR==2{print $4" free"}')"
+  text = cmd[update:60000] ~/.local/bin/archmagi fetch lock disk
   color = rgba(ffbf00dd)
   font_size = 10
   font_family = JetBrains Mono
@@ -250,7 +250,7 @@ label {
 
 label {
   monitor =
-  text = cmd[update:60000] echo "NET  // $(ip route get 1 | awk '{print $7;exit}' 2>/dev/null || echo 'offline')"
+  text = cmd[update:60000] ~/.local/bin/archmagi fetch lock net
   color = rgba(ffbf00dd)
   font_size = 10
   font_family = JetBrains Mono

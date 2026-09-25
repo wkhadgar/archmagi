@@ -303,7 +303,21 @@ _status_display() {
     '
 }
 
+# One-line readouts for the hyprlock bottom-left labels.
+_fetch_lock() {
+    local v
+    case "$1" in
+        cpu)  echo "CPU  // $(_status_cpu_pct)%" ;;
+        mem)  echo "MEM  // $(_status_mem)" ;;
+        disk) echo "DISK // $(df -h / | awk 'NR==2{print $4}') free" ;;
+        net)  v=$(_status_lan); echo "NET  // ${v:-offline}" ;;
+        *)    echo "archmagi fetch lock: field 'cpu', 'mem', 'disk', or 'net'" >&2; return 1 ;;
+    esac
+}
+
 cmd_fetch() {
+    [[ "$1" == lock ]] && { _fetch_lock "$2"; return; }
+
     # Buffered and flushed at once so the HUD loop never paints a half frame
     # while tailscale or lspci are slow.
     local hostname
