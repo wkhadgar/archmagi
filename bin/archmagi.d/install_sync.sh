@@ -22,12 +22,12 @@ _install_sync_file() {
     fi
 
     if [[ -e "$repo_file" ]]; then
-        printf "\n  ${RED}▌${RESET} ${BOLD}diff${RESET}   %s\n" "$repo_rel"
+        printf "\n  ${BAR} ${BOLD}diff${RESET}   %s\n" "$repo_rel"
         $sudo_cmd diff -u "$repo_file" "$live" | head -20
     else
-        printf "\n  ${RED}▌${RESET} ${BOLD}new${RESET}    %s\n" "$repo_rel"
+        printf "\n  ${BAR} ${BOLD}new${RESET}    %s\n" "$repo_rel"
     fi
-    printf "  ${RED}▌${RESET} pull live → repo? [y/N/q] "
+    printf "  ${BAR} pull live → repo? [y/N/q] "
     local ans; read -r ans
     case "$ans" in
         [yY]*)
@@ -37,55 +37,38 @@ _install_sync_file() {
             ;;
         [qQ]*) return 2 ;;
     esac
+    return 0
 }
 
+# File lists are read on fd 3 so the prompt's `read` still gets the terminal.
 _install_sync_tree() {
     local live_root=$1 repo_rel_root=$2 abs_repo=$3
     [[ -d "$live_root" ]] || return 0
-    local f rel
-    while IFS= read -r f; do
-        rel=${f#"$live_root/"}
-        _install_sync_file "$f" "$repo_rel_root/$rel" "$abs_repo"
-        (( $? == 2 )) && return 2
-    done < <(find "$live_root" -type f 2>/dev/null)
+    local f
+    while IFS= read -r -u 3 f; do
+        _install_sync_file "$f" "$repo_rel_root/${f#"$live_root/"}" "$abs_repo" || return 2
+    done 3< <(find "$live_root" -type f 2>/dev/null)
+}
+
+_sync_entry() {
+    local kind=$1 live=$2 rel=$3 f
+    case "$kind" in
+        file|exe) _install_sync_file "$live" "$rel" "$repo" ;;
+        tree)     _install_sync_tree "$live" "$rel" "$repo" ;;
+        root)
+            while IFS= read -r -u 3 f; do
+                _install_sync_file "$live/${f#"$rel/"}" "$f" "$repo" || return 2
+            done 3< <(_map_repo_files "$rel")
+            ;;
+    esac
 }
 
 _install_sync() {
     local repo
     repo=$(_install_find_repo) || return 1
-
-    local files=(
-        "/etc/greetd/config.toml::etc/greetd/config.toml"
-        "/etc/issue::etc/issue"
-        "/etc/pacman.d/hooks/95-limine-esp.hook::etc/pacman.d/hooks/95-limine-esp.hook"
-        "/usr/local/bin/start-greeter.sh::usr/local/bin/start-greeter.sh"
-        "$HOME/.zshrc::.zshrc"
-        "$HOME/.local/bin/archmagi::bin/archmagi"
-        "$HOME/wallpapers/nerv-wallpaper.png::wallpapers/nerv-wallpaper.png"
-    )
-    local trees=(
-        "$HOME/.config/hypr::hypr"
-        "$HOME/.config/waybar::waybar"
-        "$HOME/.config/rofi::rofi"
-        "$HOME/.config/nvim::nvim"
-        "$HOME/.config/kitty::kitty"
-        "$HOME/.config/tmux::tmux"
-        "$HOME/.config/btop::btop"
-        "$HOME/.config/swaync::swaync"
-        "$HOME/.local/bin/archmagi.d::bin/archmagi.d"
-    )
-
-    local pair live repo_rel
-    for pair in "${files[@]}"; do
-        live=${pair%%::*}; repo_rel=${pair##*::}
-        _install_sync_file "$live" "$repo_rel" "$repo"
-        (( $? == 2 )) && { echo "  ${RED}▌${RESET} sync aborted"; return 0; }
-    done
-    for pair in "${trees[@]}"; do
-        live=${pair%%::*}; repo_rel=${pair##*::}
-        _install_sync_tree "$live" "$repo_rel" "$repo"
-        (( $? == 2 )) && { echo "  ${RED}▌${RESET} sync aborted"; return 0; }
-    done
-
-    echo "  ${RED}▌${RESET} sync done"
+    if _map_each _sync_entry; then
+        echo "  ${BAR} sync done"
+    else
+        echo "  ${BAR} sync aborted"
+    fi
 }

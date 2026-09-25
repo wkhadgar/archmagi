@@ -21,8 +21,6 @@ cmd_install() {
 }
 
 _install_bootstrap() {
-    local bar="${RED}▌${RESET}" sep="${MUTED}//${RESET}"
-
     local repo
     repo=$(_install_find_repo) || return 1
 
@@ -39,7 +37,7 @@ _install_bootstrap() {
     hostname=$PROMPT_HOSTNAME
 
     _install_prompt_confirm "$profile" "$hostname" "$bootloader" || {
-        echo "  $bar aborted by user." >&2
+        echo "  $BAR aborted by user." >&2
         return 1
     }
 
@@ -49,37 +47,36 @@ _install_bootstrap() {
         printf 'hostname=%s\n' "$hostname"
         printf 'bootloader=%s\n' "$bootloader"
     } | sudo tee /etc/archmagi/profile >/dev/null
-    printf "  %s wrote ${AMBER}/etc/archmagi/profile${RESET}\n" "$bar"
+    printf "  %s wrote ${AMBER}/etc/archmagi/profile${RESET}\n" "$BAR"
 
     # Configs land before packages so a ctrl-C during pacman still leaves a
     # working dotfile install.
     _install_configs "$repo"
-    printf "  %s deployed generic configs from ${AMBER}%s${RESET}\n" "$bar" "$repo"
+    printf "  %s deployed generic configs from ${AMBER}%s${RESET}\n" "$BAR" "$repo"
 
     _install_hostname_templates "$repo" "$hostname"
     _install_substitute "$repo/hypr/hyprland/monit.lua.tmpl" "$HOME/.config/hypr/hyprland/monit.lua"
-    printf "  %s wrote host-specific files from templates\n" "$bar"
+    printf "  %s wrote host-specific files from templates\n" "$BAR"
 
     _install_packages "$repo" || {
-        echo "  $bar package install failed; bootstrap aborted." >&2
+        echo "  $BAR package install failed; bootstrap aborted." >&2
         return 1
     }
-    printf "  %s pacman -S --needed completed\n" "$bar"
+    printf "  %s pacman -S --needed completed\n" "$BAR"
 
     # Wallpaper needs imagemagick from packages.
     _install_wallpaper
     _install_boot
 
     echo
-    printf "  %s ${BOLD}MAGI BOOTSTRAP COMPLETE${RESET} %s reboot to see NERV chrome\n" "$bar" "$sep"
+    printf "  %s ${BOLD}MAGI BOOTSTRAP COMPLETE${RESET} %s reboot to see NERV chrome\n" "$BAR" "$SEP"
 }
 
 _install_redeploy() {
-    local bar="${RED}▌${RESET}"
     local repo
     repo=$(_install_find_repo) || return 1
     [[ -n "$ARCHMAGI_HOSTNAME" ]] || {
-        echo "  $bar /etc/archmagi/profile missing or invalid; run 'archmagi install bootstrap' first" >&2
+        echo "  $BAR /etc/archmagi/profile missing or invalid; run 'archmagi install bootstrap' first" >&2
         return 1
     }
 
@@ -88,49 +85,38 @@ _install_redeploy() {
     if [[ -n "$drift" ]]; then
         local n=$(wc -l <<<"$drift")
         local plural=""; (( n != 1 )) && plural=s
-        printf "\n  %s ${BOLD}%d local edit%s would be overwritten:${RESET}\n" "$bar" "$n" "$plural"
+        printf "\n  %s ${BOLD}%d local edit%s would be overwritten:${RESET}\n" "$BAR" "$n" "$plural"
         local f
         while IFS= read -r f; do
-            printf "  %s   ${AMBER}%s${RESET}\n" "$bar" "$f"
+            printf "  %s   ${AMBER}%s${RESET}\n" "$BAR" "$f"
         done <<<"$drift"
-        printf "\n  %s proceed with redeploy? [y/N] " "$bar"
-        local ans
-        read -r ans
-        case "$ans" in
-            [yY]*) ;;
-            *) printf "  %s aborted by user\n" "$bar"; return 0 ;;
-        esac
+        echo
+        _ask_yn "proceed with redeploy?" || { printf "  %s aborted by user\n" "$BAR"; return 0; }
     fi
 
     _install_configs "$repo" || return 1
     _install_hostname_templates "$repo" "$ARCHMAGI_HOSTNAME" || return 1
-    printf "  %s redeployed configs from ${AMBER}%s${RESET}\n" "$bar" "$repo"
+    printf "  %s redeployed configs from ${AMBER}%s${RESET}\n" "$BAR" "$repo"
+}
+
+# Prints repo paths whose live copy exists and differs, i.e. what a redeploy
+# would overwrite.
+_drift_entry() {
+    local kind=$1 live=$2 rel=$3 f l
+    while IFS= read -r f; do
+        _install_sync_excluded "$f" && continue
+        case "$kind" in
+            file|exe) l=$live ;;
+            *)        l="$live/${f#"$rel/"}" ;;
+        esac
+        [[ -r "$l" ]] || continue
+        diff -q "$l" "$repo/$f" >/dev/null 2>&1 || echo "$f"
+    done < <(_map_repo_files "$rel")
 }
 
 _install_drift_scan() {
     local repo=$1
-    local trees=(
-        "$HOME/.config/hypr::hypr"
-        "$HOME/.config/waybar::waybar"
-        "$HOME/.config/rofi::rofi"
-        "$HOME/.config/nvim::nvim"
-        "$HOME/.config/kitty::kitty"
-        "$HOME/.config/tmux::tmux"
-        "$HOME/.config/btop::btop"
-        "$HOME/.config/swaync::swaync"
-    )
-    local pair live_root repo_rel_root live_file rel repo_file
-    for pair in "${trees[@]}"; do
-        live_root=${pair%%::*}; repo_rel_root=${pair##*::}
-        [[ -d "$live_root" ]] || continue
-        while IFS= read -r live_file; do
-            rel=${live_file#"$live_root/"}
-            _install_sync_excluded "$repo_rel_root/$rel" && continue
-            repo_file="$repo/$repo_rel_root/$rel"
-            [[ -f "$repo_file" ]] || continue
-            diff -q "$live_file" "$repo_file" >/dev/null 2>&1 || echo "$repo_rel_root/$rel"
-        done < <(find "$live_root" -type f 2>/dev/null)
-    done
+    _map_each _drift_entry
 }
 
 # monit.lua.tmpl is intentionally skipped: the live monit.lua is owned by
