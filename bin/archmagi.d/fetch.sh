@@ -53,10 +53,8 @@ _status_bar() {
     local color
     color=$(_status_meter_color "$pct" "$mode")
     local f="" e=""
-    # Box-drawing lines: kitty draws these itself at full cell size, unlike
-    # ▰▱ which fall back to a font whose glyphs sit tiny on the baseline.
-    while (( filled-- > 0 )); do f+='━'; done
-    while (( empty-- > 0 )); do e+='─'; done
+    while (( filled-- > 0 )); do f+='▰'; done
+    while (( empty-- > 0 )); do e+='▱'; done
     printf '%s%s%s%s%s' "$color" "$f" "$MUTED" "$e" "$RESET"
 }
 
