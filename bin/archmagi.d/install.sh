@@ -130,13 +130,13 @@ _install_hostname_templates() {
         HOSTNAME_UPPER="$hostname_upper" TAILNET_LABELS="$(_hyprlock_tailnet_labels)"
 }
 
-# Greeter node row: every MAGI node in 20-column cells, the local host marked.
+# Greeter node row: every MAGI node in 19-column cells, the local host marked.
 _issue_node_row() {
     local node mark
     for node in "${MAGI_NODES[@]}"; do
         mark="  "
         [[ "$node" == "$1" ]] && mark=$' '
-        printf '%s%-18s' "$mark" "${node^^}"
+        printf '%s%-17s' "$mark" "${node^^}"
     done | sed 's/ *$//'
 }
 
