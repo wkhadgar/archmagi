@@ -86,8 +86,12 @@ _status_shell() {
     echo "$shell${ver:+ $ver}"
 }
 
+# Vendor noise is stripped so the row fits a half-width terminal:
+# "13th Gen Intel(R) Core(TM) i7-1360P" -> "Intel Core i7-1360P",
+# "AMD Ryzen 5 5600X 6-Core Processor" -> "AMD Ryzen 5 5600X".
 _status_cpu_model() {
-    awk -F: '/^model name/{gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2; exit}' /proc/cpuinfo
+    awk -F: '/^model name/{gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2; exit}' /proc/cpuinfo \
+        | sed -E 's/\((R|TM)\)//g; s/[0-9]+(st|nd|rd|th) Gen //; s/ [0-9]+-Core Processor//; s/ (Processor|CPU @.*| w\/ .*)$//; s/ +/ /g'
 }
 
 _status_cpu_pct() {
@@ -158,6 +162,7 @@ _status_gpu() {
     command -v lspci >/dev/null || return
     lspci 2>/dev/null | awk -F': ' '/VGA|3D|Display/ { print $2 }' \
         | sed -E 's/ \(rev .*\)$//; s/Corporation //; s/Advanced Micro Devices, Inc\. \[AMD\/ATI\]/AMD/' \
+        | sed -E 's/^([^ ]+) .*\[([^]]+)\]$/\1 \2/' \
         | paste -sd' / '
 }
 
