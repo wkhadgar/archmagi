@@ -17,6 +17,7 @@ ${BOLD}${RED}MAGI SYSTEM${RESET} ${MUTED}// COMMAND INTERFACE${RESET}
   ${AMBER}lock${RESET}                         hyprlock
   ${AMBER}reboot${RESET} | ${AMBER}exit${RESET} | ${AMBER}shutdown${RESET}     confirm + hyprshutdown-chained power action
   ${AMBER}restart${RESET} <${AMBER}waybar${RESET}|${AMBER}xdph${RESET}>        kill + relaunch a desktop service
+  ${AMBER}display${RESET} [${MUTED}mode${RESET}]               projection via rofi (Super+P), or set: mirror|extend|external|internal
   ${AMBER}battery${RESET} [${AMBER}check${RESET}|${AMBER}watch${RESET}]        low-battery notifications; ${AMBER}watch${RESET} loops (autostarted)
   ${AMBER}battery${RESET} [${AMBER}runtime${RESET}|${AMBER}summary${RESET}]    lockscreen widgets; unbounded on wall power
   ${AMBER}install${RESET} <${MUTED}sub${RESET}>                tactical deployment:

@@ -10,7 +10,7 @@ source "$ARCHMAGI_LIB/lib.sh"
 
 cmd="${1:-help}"; shift || true
 case "$cmd" in
-    fetch|tailnet|update|confirm|restart|install|cheatsheet|tmux|hud|battery)
+    fetch|tailnet|update|confirm|restart|install|cheatsheet|tmux|hud|battery|display)
         source "$ARCHMAGI_LIB/$cmd.sh"; "cmd_$cmd" "$@" ;;
     profile)
         _ppd_available || {

@@ -37,6 +37,7 @@ declare -A expected=(
     [tmux]="cmd_tmux _tmux_attach"
     [profile]="cmd_profile _profile_pick _profile_center"
     [hud]="cmd_hud"
+    [display]="cmd_display _display_outputs _display_apply _display_pick _display_fail"
     [help]="cmd_help"
     [battery]="cmd_battery _battery_check _battery_watch _battery_eta _battery_device _battery_runtime _battery_summary"
 )

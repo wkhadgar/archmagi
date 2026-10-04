@@ -26,7 +26,10 @@ hl.bind("PRINT",                       hl.dsp.exec_cmd("hyprshot -z -m output -o
 hl.bind(mainMod .. " + PRINT",         hl.dsp.exec_cmd("hyprshot -z -m window -o ~/images/screenshots"))
 hl.bind(mainMod .. " + SHIFT + PRINT", hl.dsp.exec_cmd("hyprshot -z -m region -o ~/images/screenshots"))
 
-hl.bind(mainMod .. " + P",             hl.dsp.window.pseudo())   -- dwindle
+hl.bind(mainMod .. " + P",
+    hl.dsp.exec_cmd("~/.local/bin/archmagi display"),
+    { desc = "projection: mirror / extend / external / internal" })
+hl.bind(mainMod .. " + SHIFT + P",     hl.dsp.window.pseudo())   -- dwindle
 
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left",          hl.dsp.focus({ direction = "left"  }))
