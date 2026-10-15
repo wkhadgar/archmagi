@@ -58,11 +58,14 @@ source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#660000"
 
 # aliases
-alias grep='grep --color=auto'
+alias am=archmagi
 alias cls=clear
+alias grep='grep --color=auto'
+alias lg=lazygit
 alias ls='ls --color=auto'
+alias mc='west build -t menuconfig'
 alias sa='source ~/.zshrc; echo "ZSH aliases sourced."'
-alias mconf='west build -t menuconfig'
+alias xo=xdg-open
 
 # keybinds
 bindkey "^[[H"  beginning-of-line
