@@ -18,7 +18,7 @@ _install_sync_file() {
 
     if [[ -e "$repo_file" ]]; then
         printf "\n  ${BAR} ${BOLD}diff${RESET}   %s\n" "$repo_rel"
-        $sudo_cmd diff --color=auto -u "$repo_file" "$live" | head -20
+        $sudo_cmd diff --color=always -u "$repo_file" "$live" | head -20
     else
         printf "\n  ${BAR} ${BOLD}new${RESET}    %s\n" "$repo_rel"
     fi
